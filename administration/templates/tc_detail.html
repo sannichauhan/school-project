@@ -1,0 +1,271 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Certificate - {{tc.student.name}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .certificate-container {
+            background: #fff;
+            width: 100%;
+            padding: 0px;
+            position: relative;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+  font-size: 32px;
+  margin: 0;
+  color: #2c3e50;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+        .header h2 {
+  font-size: 24px;
+  margin: 5px 0 10px 0;
+  color: #2b6cb0;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+        .header .tc-box {
+            border: 1px solid #444;
+            display: inline-block;
+            padding: 3px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+        .header img {
+  width: 120px;
+}
+        .meta-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+        .meta-left {
+            width: 50%;
+        }
+        .meta-right {
+            width: 50%;
+            text-align: right;
+        }
+        .handwritten-red {
+            color: #c2410c;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .form-line {
+            margin-bottom: 5px;
+            font-size: 14px;
+            text-align: justify;
+        }
+        .dotted-fill {
+            font-weight: bold;
+            color: #1e293b;
+            padding: 0 4px;
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+        }
+        .indented {
+            padding-left: 25px;
+        }
+        .footer-signatures {
+            margin-top: 80px;
+            display: flex;
+            justify-content: end;
+            align-items: flex-end;
+        }
+        .sig-box {
+            text-align: center;
+            width: 28%;
+            border-top: 1px solid #777;
+            padding-top: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        @page{
+            size:A4;
+            margin:5mm;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom:20px;
+        }
+        @media print{
+
+            .no-print{
+                display:none;
+            }
+
+            body{
+                margin:0;
+            }
+
+            .page{
+                gap:8px;
+            }
+
+            .card{
+                page-break-inside:avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+<div>
+<div class="toolbar no-print">
+
+    <a href="{% url 'tc-list' %}"
+       style="
+       text-decoration:none;
+       padding:10px 20px;
+       background:#6c757d;
+       color:white;
+       border-radius:5px;
+       ">
+       Back
+    </a>
+
+    <button onclick="window.print()"
+        style="
+        padding:10px 20px;
+        background:#28a745;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+        ">
+        Print / Save PDF
+    </button>
+
+</div>
+<div class="certificate-container">
+    
+    <div class="header">
+        <div>
+            <img src="/static/img/ncps-logo.jpeg" alt="logo" />
+        </div>
+        <div>
+        <h1>{{tc.student.choose_school}}</h1>
+        <h2>CHHAHUN, KUSHINAGAR (U.P)</h2>
+        <div class="tc-box">TRANSFER CERTIFICATE</div>
+        </div>
+    </div>
+
+    <div class="meta-section">
+        <div class="meta-left">
+            Udise Code <span style="text-decoration: underline;">{{ tc.udise_code }}</span>
+        </div>
+        <div class="meta-right">
+            S.R No.: <span class="dotted-fill">{{tc.sr_no}}</span>
+        </div>
+    </div>
+
+    <div class="form-line">
+        1. Name of Student <span class="dotted-fill" style="min-width: 554px;">{{ tc.student.name }}</span>
+    </div>
+
+    <div class="form-line">
+        2. Mother Name <span class="dotted-fill" style="min-width: 575px;">{{ tc.student.father_name }}</span>
+    </div>
+
+    <div class="form-line">
+        3. Father's / Guardian's Name <span class="dotted-fill" style="min-width: 490px;">{{ tc.student.mother_name }}</span>
+    </div>
+
+    <div class="form-line">
+        4. Date of Birth : (in figures) <span class="dotted-fill" style="min-width: 88px;">{{ tc.student.date_of_birth }}</span> (in words) <span class="dotted-fill" style="min-width: 340px;">{{ tc.student.date_of_birth|date_in_words }}</span>
+    </div>
+    <div class="form-line indented">
+        
+    </div>
+
+    <div class="form-line">
+        5. Nationality <span class="dotted-fill" style="min-width: 595px;">Indian</span>
+    </div>
+    <div class="form-line">
+        6. Address <span class="dotted-fill" style="min-width: 611px;">{{tc.student.permanent_address.address_line}}, {{tc.student.permanent_address.district}}, {{tc.student.permanent_address.pin_code}}, {{tc.student.permanent_address.state}}</span>
+        
+    </div>
+    <div class="form-line">
+        7. Category <span class="dotted-fill" style="min-width: 605px;">{{tc.student.category}}</span>        
+    </div>
+
+    <div class="form-line">
+        8. Date of first admission in the School with class <span class="dotted-fill" style="min-width: 180px;">{{tc.student.date_of_application}}</span>  <span class="dotted-fill" style="min-width: 181px;">{{tc.student.admission_class}}</span>
+    </div>
+
+    <div class="form-line">
+        9. Name of Previous School <span class="dotted-fill" style="min-width: 503px;">{{tc.student.last_institution}}</span> 
+    </div>
+
+    <div class="form-line">
+        10. Aadhaar Number <span class="dotted-fill" style="min-width: 545px;">{{tc.student.adhaar_number}}</span>
+    </div>
+
+    <div class="form-line">
+        11. APAR ID <span class="dotted-fill" style="min-width: 601px;">{{tc.apar_id}}</span>
+    </div>
+
+    <div class="form-line">
+        12. PEN <span class="dotted-fill" style="min-width: 624px;">{{tc.student.pen_number}}</span>
+    </div>  
+
+    <div class="form-line">
+        13. Total No. of working days in the academic session <span class="dotted-fill" style="min-width: 342px;">{{tc.total_working_days}}</span>
+    </div>
+
+    <div class="form-line">
+        14. Total No. of working days pupil present in the school <span class="dotted-fill" style="min-width: 329px;">{{tc.total_present_days}}</span>
+    </div>
+
+    <div class="form-line">
+        15. General Conduct <span class="dotted-fill" style="min-width: 546px;">Good</span>
+    </div>
+
+    <div class="form-line">
+        16. Date of application for certificate <span class="dotted-fill" style="min-width: 451px;">{{tc.created_at}}</span>
+    </div>
+
+    <div class="form-line">
+        17. Date of issue certificate <span class="dotted-fill" style="min-width: 506px;">{{tc.issue_date}}</span>
+    </div>
+
+    <div class="form-line">
+        18. Reasons for leaving the school <span class="dotted-fill" style="min-width: 460px;">{{tc.reason_for_leaving}}</span>
+    </div>
+
+    <div class="form-line">
+        19. Any other remarks <span class="dotted-fill" style="min-width: 537px;">{{tc.remarks}}</span>
+    </div>
+
+    <div class="footer-signatures">
+        <div class="sig-box">Principal</div>
+    </div>
+
+</div>
+</div>
+
+</body>
+</html>

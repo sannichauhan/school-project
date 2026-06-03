@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>{{ title }}</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+        }
+
+        .receipt{
+            width:700px;
+            margin:auto;
+            border:2px solid black;
+            padding:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        table, th, td{
+            border:1px solid black;
+        }
+
+        th, td{
+            padding:10px;
+        }
+
+        .signature{
+            margin-top:50px;
+            text-align:right;
+        }
+
+        @media print{
+
+            .print-btn{
+                display:none;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="receipt">
+
+    <h2 align="center">
+        SCHOOL FEE RECEIPT
+    </h2>
+
+    <p>
+        <strong>Receipt No:</strong>
+        {{ fee.receipt_no }}
+    </p>
+
+    <p>
+        <strong>Date:</strong>
+        {{ fee.date }}
+    </p>
+
+    <p>
+        <strong>Student Name:</strong>
+        {{ fee.student_name }}
+    </p>
+
+    <p>
+        <strong>Class:</strong>
+        {{ fee.student_class }}
+    </p>
+
+    <p>
+        <strong>Installment:</strong>
+        {{ fee.installment }}
+    </p>
+
+    <table>
+
+        <tr>
+
+            <th>
+                Fee Head
+            </th>
+
+            <th>
+                Amount
+            </th>
+
+        </tr>
+
+        {% for item in fee.items.all %}
+
+        <tr>
+
+            <td>
+                {{ item.fee_head }}
+            </td>
+
+            <td>
+                {{ item.amount }}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+        <tr>
+
+            <th>
+                Paid Amount
+            </th>
+
+            <th>
+                {{ fee.total_amount_received }}
+            </th>
+
+        </tr>
+        <tr>
+
+            <th>
+                Due Amount
+            </th>
+
+            <th>
+                {{ fee.get_total_due }}
+            </th>
+
+        </tr>
+
+    </table>
+
+    <p>
+        <strong>Remarks:</strong>
+        {{ fee.remarks }}
+    </p>
+
+    <div class="signature">
+
+        Signature
+
+    </div>
+
+    <br>
+
+    <button
+        onclick="window.print()"
+        class="print-btn"
+    >
+        Print
+    </button>
+
+</div>
+
+</body>
+</html>

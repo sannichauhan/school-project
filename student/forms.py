@@ -1,0 +1,88 @@
+from django import forms
+from .models import Student, Address, StudentClass, MarkSheet, StudentPromotion
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['address_line', 'district', 'pin_code', 'state', 'nationality']
+        widgets = {
+            'address_line': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Street, House No, Landmark'}),
+            'district': forms.TextInput(attrs={'class': 'form-control'}),
+            'pin_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '6-digit PIN'}),
+            'state': forms.TextInput(attrs={'class': 'form-control'}),
+            'nationality': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class StudentAllInOneForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        # We exclude the address fields because we handle them as separate form instances
+        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'admission_class': forms.Select(attrs={'class': 'select2'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'select2'}),
+            'religion': forms.Select(attrs={'class': 'select2'}),
+            'category': forms.Select(attrs={'class': 'select2'}),
+            'father_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'mother_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'contact_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'date_of_application': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),            
+            'adhaar_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'student_photo': forms.FileInput(attrs={'class': 'form-control-file'}),
+            'pen_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'choose_school': forms.Select(attrs={'class': 'select2'}),
+            'last_institution': forms.TextInput(attrs={'class': 'form-control'}),
+            'father_occupation': forms.TextInput(attrs={'class': 'form-control'}),
+            'mother_occupation': forms.TextInput(attrs={'class': 'form-control'}),
+            'session': forms.Select(attrs={'class': 'select2'}),
+        }
+        
+class StudentClassForm(forms.ModelForm):
+    class Meta:
+        model = StudentClass
+        fields = ['name', 'section']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'e.g. Class 10, Nursery, Grade 1'
+            }),
+            'section': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'e.g. A, B, Blue'
+            }),
+        }
+
+class MarkSheetForm(forms.ModelForm):
+
+    class Meta:
+        model = MarkSheet
+
+        fields = "__all__"
+
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-control'}),
+            'subject': forms.Select(attrs={'class': 'form-control'}),
+            'exam': forms.Select(attrs={'class': 'form-control'}),
+            'test_marks': forms.NumberInput(attrs={'class': 'form-control'}),
+            'written_marks': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+
+class StudentPromotionForm(forms.ModelForm):
+    class Meta:
+        model = StudentPromotion
+        fields = "__all__"
+
+
+class StudentPromotionForm(forms.ModelForm):
+    class Meta:
+        model = StudentPromotion
+        fields = [
+            'current_session',
+            'promote_session',
+            'promotion_from_class',
+            'promotion_to_class'
+        ]

@@ -1,0 +1,150 @@
+{% extends 'base2.html' %}
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
+
+               <!-- Add New Teacher Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Add New Teacher</h3>
+                            </div>
+                           <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" 
+                                data-toggle="dropdown" aria-expanded="false">...</a>
+        
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#"><i class="fas fa-times text-orange-red"></i>Close</a>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="POST" enctype="multipart/form-data" class="new-added-form">
+
+                        {% csrf_token %}
+
+                        <div class="row">
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>First Name *</label>
+                                {{ teacher_form.first_name }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Last Name *</label>
+                                {{ teacher_form.last_name }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Gender *</label>
+                                {{ teacher_form.gender }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Date Of Birth *</label>
+                                {{ teacher_form.date_of_birth }}
+                            </div>
+
+                            {% comment %} <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Blood Group *</label>
+                                {{ teacher_form.blood_group }}
+                            </div> {% endcomment %}
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Email *</label>
+                                {{ teacher_form.email }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Phone *</label>
+                                {{ teacher_form.phone_number }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Aadhaar Number *</label>
+                                {{ teacher_form.adhaar_number }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>PAN Number</label>
+                                {{ teacher_form.pan_number }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Designation *</label>
+                                {{ teacher_form.designation }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Joining Date *</label>
+                                {{ teacher_form.joining_date }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Qualification *</label>
+                                {{ teacher_form.qualification }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Experience Years *</label>
+                                {{ teacher_form.experience_years }}
+                            </div>
+
+                            <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                <label>Photo *</label>
+                                {{ teacher_form.photo }}
+                            </div>
+                            <!-- Address Fields -->
+                            <div class="col-xl-12">
+                                
+                            <div class="row">
+                            <div class="col-md-12 form-group">
+                            <div class="card mb-4">
+                                <div class="card-header bg-secondary text-white">
+                                Permanent Address
+                                </div>
+                                <div class="card-body">{{ address_form.as_p }}</div>
+                            </div>
+                            </div>
+                           
+                           
+                        </div>
+                            </div>
+                            
+
+                            <div class="col-12 form-group mg-t-8">
+                                <button type="submit"
+                                    class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark">
+                                    Save
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </form>
+                    </div>
+                </div>
+                <!-- Add New Teacher Area End Here -->
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}

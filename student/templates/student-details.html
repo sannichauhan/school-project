@@ -1,0 +1,128 @@
+{% extends 'base2.html' %} 
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
+
+               <!-- Student Details Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>About Me</h3>
+                            </div>
+                           
+                        </div>
+                        <div class="single-info-details">
+                            <div class="item-img">
+                                <img src="{{ students.student_photo.url }}" alt="student">
+                            </div>
+                            <div class="item-content">
+                                <div class="header-inline item-header">
+                                    <h3 class="text-dark-medium font-medium">{{ students.name|capfirst }}</h3>
+                                </div>
+                                
+                                <div class="info-table table-responsive">
+                                    <table class="table text-nowrap">
+                                        <tbody>
+                                                <tr>
+                                                    <td>Name:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.name|capfirst }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Gender:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.gender }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Father Name:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.father_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Father Occupation:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.father_occupation }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mother Name:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.mother_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mother Occupation:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.mother_occupation }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Date Of Birth:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.date_of_birth }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Religion:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.religion }}</td>
+                                                </tr>                                                
+                                            
+                                                <tr>
+                                                    <td>Admission Date:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.date_of_application }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Class:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.admission_class }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Section:</td>
+                                                    <td class="font-medium text-dark-medium">{{students.admission_class.section}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Roll:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.roll_number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Address:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.permanent_address }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Adhaar Number:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.adhaar_number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>PEN Number:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.pen_number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Conveyance facility:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.conveyance_facility }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Last institution:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.last_institution }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Phone:</td>
+                                                    <td class="font-medium text-dark-medium">{{ students.contact_number }}</td>
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Student Details Area End Here -->
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}

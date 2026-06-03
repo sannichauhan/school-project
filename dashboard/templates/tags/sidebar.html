@@ -1,0 +1,181 @@
+<div class="sidebar-main sidebar-menu-one sidebar-expand-md sidebar-color">
+               <div class="mobile-sidebar-header d-md-none">
+                    <div class="header-logo">
+                        <a href="index.html"><img src="img/logo1.png" alt="logo"></a>
+                    </div>
+               </div>
+                <div class="sidebar-menu-content">
+                    <ul class="nav nav-sidebar-menu sidebar-toggle-view">
+                        
+                        <li class="nav-item">
+                            <a href="/dashboard" class="nav-link"><i class="flaticon-dashboard"></i><span>Dashboard</span></a>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-classmates"></i><span>Students</span></a>
+                            <ul class="nav sub-group-menu">
+                                                              
+                                <li class="nav-item">
+                                    <a href="{% url 'student-register' %}" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Admission Form</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'student-list' %}" class="nav-link"><i class="fas fa-angle-right"></i>All
+                                        Students</a>
+                                </li>  
+                                <li class="nav-item">
+                                    <a href="{% url 'add-students-marks' %}" class="nav-link">
+                                        <i class="fas fa-angle-right"></i> Add Student Marks
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'all-student-marksheet' %}" class="nav-link">
+                                        <i class="fas fa-angle-right"></i> Student's Result
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'student-promotion' %}" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Student Promotion</a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'admit-card' %}" class="nav-link"><i class="flaticon-dashboard"></i><span>Admit Cards</span></a>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i
+                                    class="flaticon-multiple-users-silhouette"></i><span>Teachers</span></a>
+                            <ul class="nav sub-group-menu">
+                                 <li class="nav-item">
+                                    <a href="{% url 'add-teacher' %}" class="nav-link"><i class="fas fa-angle-right"></i>Add
+                                        Teacher</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'all-teacher' %}" class="nav-link"><i class="fas fa-angle-right"></i>All
+                                        Teachers</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Teacher Details</a>
+                                </li>
+                               
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Payment</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-couple"></i><span>Transfer Certificate</span></a>
+                            <ul class="nav sub-group-menu">
+                                 <li class="nav-item">
+                                    <a href="{% url 'tc-create' %}" class="nav-link"><i class="fas fa-angle-right"></i>Create
+                                        T C</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'tc-list' %}" class="nav-link"><i class="fas fa-angle-right"></i>List of
+                                        T C</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-couple"></i><span>Parents</span></a>
+                            <ul class="nav sub-group-menu">
+                                <li class="nav-item">
+                                    <a href="all-parents.html" class="nav-link"><i class="fas fa-angle-right"></i>All
+                                        Parents</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="parents-details.html" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Parents Details</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="add-parents.html" class="nav-link"><i class="fas fa-angle-right"></i>Add
+                                        Parent</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-books"></i><span>Library</span></a>
+                            <ul class="nav sub-group-menu">
+                                <li class="nav-item">
+                                    <a href="all-book.html" class="nav-link"><i class="fas fa-angle-right"></i>All
+                                        Book</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="add-book.html" class="nav-link"><i class="fas fa-angle-right"></i>Add New
+                                        Book</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-technological"></i><span>Acconunt</span></a>
+                            <ul class="nav sub-group-menu">
+                                <li class="nav-item">
+                                    <a href="all-fees.html" class="nav-link"><i class="fas fa-angle-right"></i>All Fees
+                                        Collection</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="all-expense.html" class="nav-link"><i
+                                            class="fas fa-angle-right"></i>Expenses</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="add-expense.html" class="nav-link"><i class="fas fa-angle-right"></i>Add
+                                        Expenses</a>
+                                </li>
+                            </ul>
+                        </li> 
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i
+                                    class="flaticon-maths-class-materials-cross-of-a-pencil-and-a-ruler"></i><span>Class</span></a>
+                            <ul class="nav sub-group-menu">
+                                <li class="nav-item">
+                                    <a href="{% url 'class-list' %}" class="nav-link"><i class="fas fa-angle-right"></i>Add New
+                                        Class</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="all-subject.html" class="nav-link"><i
+                                    class="flaticon-open-book"></i><span>Subject</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="class-routine.html" class="nav-link"><i class="flaticon-calendar"></i><span>Class
+                                    Routine</span></a>
+                        </li>
+                       
+                        <li class="nav-item sidebar-nav-item">
+                            <a href="#" class="nav-link"><i class="flaticon-shopping-list"></i><span>Attendence</span></a>
+                            <ul class="nav sub-group-menu">
+                                <li class="nav-item">
+                                    <a href="{% url "take_attendance" %}" class="nav-link"><i class="fas fa-angle-right"></i>Take Attendence</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url "attendance_report" %}" class="nav-link"><i class="fas fa-angle-right"></i>Attendence
+                                        Report</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="transport.html" class="nav-link"><i
+                                    class="flaticon-bus-side-view"></i><span>Transport</span></a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a href="notice-board.html" class="nav-link"><i
+                                    class="flaticon-script"></i><span>Notice</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="messaging.html" class="nav-link"><i
+                                    class="flaticon-chat"></i><span>Messeage</span></a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a href="account-settings.html" class="nav-link"><i
+                                    class="flaticon-settings"></i><span>Account</span></a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>

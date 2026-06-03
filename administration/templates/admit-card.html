@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Bulk Admit Card</title>
+
+    <style>
+
+        @page{
+            size:A4;
+            margin:5mm;
+        }
+
+        body{
+            font-family:Arial;
+            margin:0;
+            padding:0;
+        }
+
+        .toolbar{
+            text-align:center;
+            margin:20px;
+        }
+
+        .page{
+
+            display:grid;
+
+            grid-template-columns:1fr 1fr;
+
+            gap:10px;
+
+            max-width:205mm;
+
+            margin:auto;
+        }
+
+        .card{
+            margin-top:10px;
+
+            border:3px solid black;
+
+            padding:10px;
+
+            height:260px;
+
+            box-sizing:border-box;
+
+            position:relative;
+
+            overflow:hidden;
+        }
+
+        h2,h3,p{
+            text-align:center;
+            margin:2px;
+        }
+        .card h2 {
+            font-size: 16px;
+        }
+        .card h3 {
+            font-size: 14px;
+        }
+        .row {
+            margin-top: 10px;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .label {
+            font-weight: 300;
+            font-size: 12px;
+            line-height: 1;
+        }
+        .label b {
+            font-weight: 600;
+            font-size: 10px;
+            }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .footer{
+
+            position:absolute;
+
+            bottom:10px;
+
+            left:10px;
+
+            right:10px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            font-size:12px;
+        }
+
+        .section{
+            float:right;
+        }
+
+        .to-date{
+            margin-left:120px;
+        }
+
+        @media print{
+
+            .no-print{
+                display:none;
+            }
+
+            body{
+                margin:0;
+            }
+
+            .page{
+                gap:8px;
+            }
+
+            .card{
+                page-break-inside:avoid;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="toolbar no-print">
+
+    <a href="{% url 'all-student-marksheet' %}"
+       style="
+       text-decoration:none;
+       padding:10px 20px;
+       background:#6c757d;
+       color:white;
+       border-radius:5px;
+       ">
+       Back
+    </a>
+
+    <button onclick="window.print()"
+        style="
+        padding:10px 20px;
+        background:#28a745;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+        ">
+        Print / Save PDF
+    </button>
+
+</div>
+
+<div class="page">
+
+{% for admit_card in admit_cards %}
+
+<div class="card">
+
+    <h2>NAVCHETANA PUBLIC SCHOOL</h2>
+
+    <h3>CHHAHUN, KUSHINAGAR</h3>
+
+    <h3>ADMIT CARD</h3>
+
+    <p>
+        <b>Session:</b>
+        {{ admit_card.session }}
+    </p>
+
+    <p style="font-size: 14px;margin-top: 10px;">
+        {{ admit_card.exam_type }} Examination
+    </p>
+
+    <div class="row">
+        <span class="label">Student's Name: <b>{{ admit_card.student.name }}</b></span>
+    </div>
+
+    <div class="row">
+        <span class="label">Father's Name: <b>{{ admit_card.student.father_name }}</b></span>
+    </div>
+
+    <div class="row" style="display: flex;justify-content: space-between;">
+        <span class="label">Class: <b>{{ admit_card.student.admission_class.name }}</b></span>
+        <span class="section">
+            <span class="label">Section: <b>{{ admit_card.student.admission_class.section }}</b></span>
+        </span>
+    </div>
+
+    <div class="row" style="display: flex;justify-content: space-between;">
+        <span class="label">Exam Date: <b>{{ admit_card.exam_start_date }}</b></span>
+        <span class="to-date">
+            <span class="label">To: <b>{{ admit_card.exam_end_date }}</b></span>
+        </span>
+    </div>
+
+    <div class="footer">
+
+        <div>
+            <b>Class Teacher</b>
+        </div>
+
+        <div>
+            <b>Principal</b>
+        </div>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+{% extends 'base2.html' %} 
+
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
+
+               <!-- Student Table Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>About Me</h3>
+                            </div>
+                           <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" 
+                                data-toggle="dropdown" aria-expanded="false">...</a>
+        
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#"><i class="fas fa-times text-orange-red"></i>Close</a>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="single-info-details">
+                            <div class="item-img">
+                                <img src="{{ teachers.photo.url }}" alt="teacher">
+                            </div>
+                            <div class="item-content">
+                                <div class="header-inline item-header">
+                                    <h3 class="text-dark-medium font-medium">{{ teachers.first_name }} {{ teachers.last_name }}</h3>
+                                    <div class="header-elements">
+                                        <ul>
+                                            <li><a href="#"><i class="far fa-edit"></i></a></li>
+                                            <li><a href="#"><i class="fas fa-print"></i></a></li>
+                                            <li><a href="#"><i class="fas fa-download"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p>Dedicated and experienced teacher committed to creating a positive learning environment and helping students achieve academic success.</p>
+                                <div class="info-table table-responsive">
+                                    <table class="table text-nowrap">
+                                        <tbody>
+                                            <tr>
+                                                <td>Name:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.first_name }} {{ teachers.last_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Gender:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.gender }}</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td>Aadhaar Number:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.adhaar_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>PAN Number:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.pan_number }}</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td>Qualification :</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.qualification}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Designation  :</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.designation}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Experience Years:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.experience_years}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Subject:</td>
+                                                <td class="font-medium text-dark-medium">
+                                                    {% for assignment in teachers.subject_assignments.all %}
+
+                                                            {{ assignment.subject.name }}
+
+                                                            {% if not forloop.last %}
+                                                                ,
+                                                            {% endif %}
+
+                                                        {% empty %}
+
+                                                            N/A
+
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                           
+                                            <tr>
+                                                <td>Class:</td>
+                                                <td class="font-medium text-dark-medium">
+                                                    {% for assignment in teachers.subject_assignments.all %}
+
+                                                            {{ assignment.subject.student_class }}
+
+                                                            {% if not forloop.last %}
+                                                                ,
+                                                            {% endif %}
+
+                                                        {% empty %}
+
+                                                            N/A
+
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Address:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.address.address_line }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Phone:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.phone_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>E-mail:</td>
+                                                <td class="font-medium text-dark-medium">{{ teachers.email }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Student Table Area End Here -->                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}

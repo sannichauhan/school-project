@@ -1,0 +1,243 @@
+{% load report_tags %}
+
+<style>
+  .marksTop h2 {
+  font-size: 28px;
+  line-height: 1;
+}
+.marksTop h3 {
+  font-size: 20px;
+  line-height: 1;
+}
+    .marksTop {
+  margin-bottom: 20px;
+}
+
+.finalResults .remove-border,
+.finalResults .remove-border tr td {
+  border: none;
+}
+
+.finalResults .remove-border2,
+.finalResults .remove-border2 tr td {
+  border: none;
+}
+
+.finalResults .remove-border tr td {
+  padding: 2px 0px;
+}
+
+.marksTop h3,
+.marksTop h2 {
+  text-align: center;
+  margin: 5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #000;
+}
+
+.remark-table td {
+  height: 35px;
+}
+
+.signature-box {
+  height: 70px;
+}
+
+.finalResults table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.finalResults table,
+.finalResults th,
+.finalResults td {
+  border: 1px solid black;
+  color: #000;
+}
+
+.finalResults th,
+.finalResults td {
+  padding: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.finalResults .left {
+  text-align: left;
+}
+.marksheetDwld a {
+  text-align: center;
+  display: block;
+}
+.marksheetDwld {
+  margin-top: 20px;
+}
+    /* Standard styling for the screen */
+    .report-container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 30px;
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* 2. THE PRINT MAGIC */
+    @media print {
+        /* Hide everything except the report card */
+        body * {
+            visibility: hidden;
+        }
+        .report-container, .report-container * {
+            visibility: visible;
+        }
+        .report-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important; /* Remove screen borders for clean print */
+            box-shadow: none !important;
+        }
+        /* Hide the print button itself while printing */
+        .no-print {
+            display: none !important;
+        }
+        /* Ensure colors and borders show up in PDF */
+        table {
+            -webkit-print-color-adjust: exact;
+        }
+    }
+
+    /* Table styling for screen and print */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid black; padding: 6px; font-size: 14px; }
+    th { background-color: #f2f2f2; }
+
+    @page {
+    margin: 3.16mm 10.16mm 10.16mm 10.16mm;
+}
+</style>
+
+<div class="no-print" style="max-width: 1000px; margin: 20px auto; text-align: right;">
+    <a href="{% url 'all-student-marksheet' %}" class="btn-secondary" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px;">Back to List</a>
+    <button onclick="window.print()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        Print Report Card / Save as PDF
+    </button>
+</div>
+
+<div class="finalResults">    
+                <div class="container report-container">
+
+		<div class="marksTop">
+			<div>
+				<h2>Nav Chetana Public School</h2>
+				<h3>Chhahun Kushinagar (U.P)</h3>
+				<h3>Academic Session - 2025-26</h3>
+			</div>
+		</div>
+
+<!-- STUDENT INFO -->
+
+<table class="remove-border">
+
+	<tr>
+		<td class="left"><b>Student's Name:</b> {{ student.name }}</td>
+		<td class="left"><b>Class:</b> {{ student.admission_class.name }} {% if student.admission_class.section %}
+        {{ student.admission_class.section }}
+    {% endif %}</td>
+    <td rowspan="3" style="width:120px; text-align:right;">        
+        {% if student.student_photo %}
+            <img src="{{ student.student_photo.url }}" alt="Student Photo" style="width:86px;height:86px;object-fit:cover;border:1px solid #000;
+                ">
+        {% else %}
+            No Photo
+        {% endif %}
+
+    </td>
+	</tr>
+
+	<tr>
+		<td class="left"><b>Father's Name:</b> {{ student.father_name }}</td>
+		<td class="left"><b>Mother's Name:</b> {{ student.mother_name }}</td>
+	</tr>
+
+	<tr>
+		<td class="left"><b>Roll Number:</b> {{ student.id }}</td>
+		<td class="left"><b>Date of Birth:</b> {{ student.date_of_birth }}</td>
+	</tr>
+
+</table>
+
+
+<!-- MARKS TABLE -->
+
+<table>
+
+	<tr>
+		<th rowspan="2">Subject</th>
+		<th colspan="2">Max Marks</th>
+		{% for exam in exams %}
+            <th colspan="2">{{ exam.name }}</th>
+        {% endfor %}
+	</tr>
+
+	
+	 <tr>
+		<th>Test</th>
+		<th>Written</th>
+		{% for exam in exams %}
+            <th>Test</th>
+            <th>Written</th>
+        {% endfor %}
+	</tr>
+	{% for subject in subjects %}
+	<tr>
+		<td class="left">{{ subject.name }}</td>
+		<td>{{ subject.max_test_marks|default:"-" }}</td>
+		<td>{{ subject.max_written_marks|default:"-" }}</td>
+		{% for exam in exams %}
+            {% with exam_marks=report_matrix|get_dict_item:subject.id %}
+                {% with mark=exam_marks|get_dict_item:exam.id %}
+                    <td>{{ mark.test_marks|default:"-" }}</td>
+                    <td>{{ mark.written_marks|default:"-" }}</td>
+                {% endwith %}
+            {% endwith %}
+        {% endfor %}
+	</tr>	
+	{% endfor %}
+
+
+	<tr>
+		<th colspan="{{ total_exam_columns }}" style="text-align: right;">Grand Total</th>
+		<th colspan="2">{{ total_score }}/{{ max_marks }}</th>
+	</tr>
+
+	<tr>
+		<th colspan="{{ total_exam_columns }}" style="text-align: right;">Percentage</th>
+		<th colspan="2">{{ percentage }}%</th>
+	</tr>
+
+	<tr>
+		<th colspan="{{ total_exam_columns }}" style="text-align: right;">Grade</th>
+		<th colspan="2">{{ grade }}</th>
+	</tr>
+
+</table>
+
+
+
+
+
+<!-- SIGNATURE -->
+
+<div class="section">
+
+	<table class="remove-border2" style="margin-top:30px">
+		<tr class="signature-box">
+			<td>Signature of Parents</td>
+			<td>Signature of Class Teacher</td>
+			<td>Signature of Principal</td>
+		</tr>
+	</table>
+</div>
