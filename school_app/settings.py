@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "dashboard",
     "smart_selects",
     "administration",
-    # "custom_filters",
+    "frontend",
 ]
 
 REST_FRAMEWORK = {
@@ -94,6 +94,17 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'navcheta_ncps',
+#         'USER': 'navcheta_ncps',
+#         'PASSWORD': 'NPlk1IOZ7&vFT6z.',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 
 # Password validation

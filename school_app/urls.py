@@ -21,11 +21,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls),    
     path("students/", include("student.urls")),  # Include student app URLs
     path("teachers/", include("teacher.urls")),  # Include teacher app URLs
-    path('dashboard/', include("dashboard.urls") ), # Include dashboard app URLs
-    path('administration/', include("administration.urls"))  # Include administration app URLs    
+    path("dashboard/", include("dashboard.urls") ), # Include dashboard app URLs
+    path("administration/", include("administration.urls")),  # Include administration app URLs 
+    # path(" ", include("frontend.urls")), # for frontend   
 ]
 if settings.DEBUG:
     urlpatterns += static(
