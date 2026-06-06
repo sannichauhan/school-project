@@ -1,9 +1,10 @@
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.contrib import messages
-from .models import AdmitCard, FeeReceipt, TransferCertificate, Attendance
-from .forms import TransferCertificateForm
+from .models import AdmitCard, TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentFeeDue
+from .forms import TransferCertificateForm, AcademicFeeForm, FeeReceiptForm
 from student.models import StudentClass, Student
 
 def administration(request):
@@ -40,19 +41,7 @@ def admit_card_view(request):
 
 
 
-def fee_receipt_view(request, pk):
 
-    fee = FeeReceipt.objects.filter(pk=pk).get()
-    title = 'Fee Receipt' 
-
-    return render(
-        request,
-        'fee_receipt.html',
-        {
-            'fee': fee,
-            'title' : title
-        }
-    )
 
 def create_tc_view(request):
 
@@ -170,4 +159,110 @@ def attendance_report(request):
         request,
         'attendance_report.html',
         {'records': records}
+    )
+
+def academic_fee_create(request):
+
+    form = AcademicFeeForm(request.POST or None)
+
+    if form.is_valid():
+        form.save()
+        return redirect('academic-fee-list')
+
+    return render(
+        request,
+        'academic_fee_form.html',
+        {'form': form}
+    )
+
+def academic_fee_list(request):
+
+    new_fees = AcademicFee.objects.filter(
+        student_type='NEW'
+    )
+
+    old_fees = AcademicFee.objects.filter(
+        student_type='OLD'
+    )
+
+    context = {
+        'new_fees': new_fees,
+        'old_fees': old_fees,
+    }
+
+    return render(
+        request,
+        'academic_fee_list.html',
+        context
+    )
+
+def fee_receipt_create(request):
+
+    if request.method == 'POST':
+        form = FeeReceiptForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('fee_receipt_list')
+
+    else:
+        form = FeeReceiptForm()
+
+    return render(
+        request,
+        'fee_receipt_create.html',
+        {'form': form}
+    )
+
+
+def get_installment_amount(request):
+
+    fee_id = request.GET.get('fee_id')
+    installment = request.GET.get('installment')
+
+    amount = 0
+
+    try:
+        fee = AcademicFee.objects.get(id=fee_id)
+
+        if installment == 'FIRST':
+            amount = fee.first_installment
+
+        elif installment == 'SECOND':
+            amount = fee.second_installment
+
+        elif installment == 'THIRD':
+            amount = fee.third_installment
+
+    except AcademicFee.DoesNotExist:
+        pass
+
+    return JsonResponse({
+        'amount': str(amount)
+    })
+
+
+def fee_receipt_list(request):
+    receipts = FeeReceipt.objects.all().order_by('-id')
+
+    return render(request, 'fee_receipt_list.html', {
+        'receipts': receipts
+    })
+
+
+def fee_receipt_details(request, pk):
+    receipt = FeeReceipt.objects.get(pk=pk)
+
+    return render(request, 'fee_receipt_details.html', {
+        'receipt': receipt
+    })
+
+def student_fee_due_list(request):
+
+    dues = StudentFeeDue.objects.all()
+
+    return render(
+        request,
+        'student_fee_due_list.html',
+        {'dues': dues}
     )

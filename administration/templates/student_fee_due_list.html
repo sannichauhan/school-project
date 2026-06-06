@@ -1,0 +1,17 @@
+<table border="1">
+    <tr>
+        <th>Student</th>
+        <th>Total Fee</th>
+        <th>Paid</th>
+        <th>Due</th>
+    </tr>
+
+    {% for due in dues %}
+    <tr>
+        <td>{{ due.student.name }}</td>
+        <td>₹{{ due.total_fee }}</td>
+        <td>₹{{ due.paid_amount }}</td>
+        <td>₹{{ due.due_amount }}</td>
+    </tr>
+    {% endfor %}
+</table>

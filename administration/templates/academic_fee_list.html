@@ -1,0 +1,45 @@
+<h2>New Students Fee Structure</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Class</th>
+        <th>Annual Fee</th>
+        <th>1st Installment</th>
+        <th>2nd Installment</th>
+        <th>3rd Installment</th>
+    </tr>
+
+    {% for fee in new_fees %}
+    <tr>
+        <td>{{ fee.get_class_group_display }}</td>
+        <td>{{ fee.annual_fee }}</td>
+        <td>{{ fee.first_installment }}</td>
+        <td>{{ fee.second_installment }}</td>
+        <td>{{ fee.third_installment }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br><br>
+
+<h2>Old Students Fee Structure</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Class</th>
+        <th>Annual Fee</th>
+        <th>1st Installment</th>
+        <th>2nd Installment</th>
+        <th>3rd Installment</th>
+    </tr>
+
+    {% for fee in old_fees %}
+    <tr>
+        <td>{{ fee.get_class_group_display }}</td>
+        <td>{{ fee.annual_fee }}</td>
+        <td>{{ fee.first_installment }}</td>
+        <td>{{ fee.second_installment }}</td>
+        <td>{{ fee.third_installment }}</td>
+    </tr>
+    {% endfor %}
+</table>

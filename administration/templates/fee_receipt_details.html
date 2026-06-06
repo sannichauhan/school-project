@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #7f8c8d;
+            --light-bg: #f8f9fa;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header Styling */
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .institution-details h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .institution-details p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .receipt-title {
+            text-align: right;
+        }
+
+        .receipt-title h2 {
+            margin: 0;
+            font-size: 28px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .receipt-title p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* Info Grid (Meta Data) */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .info-block p {
+            margin: 6px 0;
+            font-size: 15px;
+        }
+
+        .info-block strong {
+            color: var(--primary-color);
+            display: inline-block;
+            width: 130px;
+        }
+
+        /* Table Styling */
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .receipt-table th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            text-align: left;
+            padding: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .receipt-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+        }
+
+        .receipt-table tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+        .info-grid1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 0;
+            background-color: var(--light-bg);
+            padding: 5px 20px;
+            border-radius: 6px;
+        }
+        .info-grid1 p {
+            padding: 10px 0px;
+            margin: 0px;
+        }
+
+        /* Summary & Total Section */
+        .summary-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .amount-words {
+            font-size: 14px;
+            font-style: italic;
+            color: #555;
+            max-width: 50%;
+        }
+
+        .total-table {
+            width: 40%;
+            border-collapse: collapse;
+        }
+
+        .total-table td {
+            padding: 8px 12px;
+            font-size: 15px;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 18px !important;
+            color: var(--primary-color);
+            background-color: var(--light-bg);
+            border-top: 2px solid var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Footer / Signatures */
+        .receipt-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 60px;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--secondary-color);
+            max-width: 60%;
+        }
+
+        .signature-space {
+            text-align: center;
+            border-top: 1px solid #333;
+            width: 200px;
+            padding-top: 8px;
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Print Optimization */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .receipt-container {
+                box-shadow: none;
+                padding: 0;
+                border: none;
+                max-width: 100%;
+            }
+            .info-grid, .total-row {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .receipt-table th {
+                background-color: #2c3e50 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt-container">
+    <!-- Header -->
+    <div class="receipt-header">
+        <div class="institution-details">
+            <h1>NAV CHETANA PUBLIC SCHOOL</h1>
+            <p>Chhahun, Kushinagar - 110001</p>
+            <p>Contact: +91-9936145369 | info@navchetanapublicschool.com</p>
+        </div>
+        <div class="receipt-title">
+            <h2>RECEIPT</h2>
+            <p>OFFICIAL COPY</p>
+        </div>
+    </div>
+    <!-- Metadata Details -->
+    <div class="info-grid">
+        <div class="info-block">
+            <p><strong>Student Name:</strong> {{ receipt.student.name }}</p> 
+            <p><strong>Father's Name:</strong> {{ receipt.student.father_name }}</p>
+            <p><strong>Payment Mode:</strong> {{receipt.payment_mode}}</p>
+            <p><strong>Class / Section:</strong> {{ receipt.student.admission_class }}</p>
+        </div>
+        <div class="info-block">
+            <p><strong>Roll No:</strong> {{ receipt.student.roll_number }}</p>
+            <p><strong>Receipt No:</strong> {{ receipt.receipt_no }}</p>
+            <p><strong>Date:</strong> {{ receipt.payment_date|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Fees Breakdown Table -->
+    <table class="receipt-table">
+        <thead>
+            <tr>
+                <th style="width: 65%;">Fee Description</th>
+                <th style="width: 25%;" class="text-right">Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Pay Fess for {{receipt.installment}} Installment</td>
+                <td class="text-right">{{ receipt.paid_amount }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="info-grid1">
+        <p><strong>Note:</strong> {{ receipt.remarks }}</p>
+    </div>
+</div>
+</body>
+</html>

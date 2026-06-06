@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Receipt List</title>
+</head>
+<body>
+
+<h2>Fee Receipt List</h2>
+
+<a href="#">
+    Add New Receipt
+</a>
+
+<br><br>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Receipt No</th>
+            <th>Student</th>
+            <th>Installment</th>
+            <th>Paid Amount</th>
+            <th>Payment Date</th>
+            <th>Mode</th>
+            <th>Print</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for receipt in receipts %}
+        <tr>
+            <td>{{ receipt.receipt_no }}</td>
+            <td>{{ receipt.student }}</td>
+            <td>{{ receipt.get_installment_display }}</td>
+            <td>₹ {{ receipt.paid_amount }}</td>
+            <td>{{ receipt.payment_date|date:"d/m/Y" }}</td>
+            <td>{{ receipt.payment_mode }}</td>
+
+            <td>
+                <a href="{% url 'fee_receipt_details' receipt.pk %}">
+                    Print
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">
+                No Receipt Found
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+</body>
+</html>
