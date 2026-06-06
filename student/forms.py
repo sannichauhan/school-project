@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student, Address, StudentClass, MarkSheet, StudentPromotion
+from .models import Student, Address, StudentClass, MarkSheet, StudentPromotion, Subject, Exam
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -86,3 +86,42 @@ class StudentPromotionForm(forms.ModelForm):
             'promotion_from_class',
             'promotion_to_class'
         ]
+
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+        fields = [
+            'student_class',
+            'name',
+            'order',
+            'max_test_marks',
+            'max_written_marks'
+        ]
+
+        widgets = {
+            'student_class': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'max_test_marks': forms.NumberInput(attrs={'class': 'form-control'}),
+            'max_written_marks': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+    # 👇 YAHI PE JAYEGA
+    def clean(self):
+        cleaned_data = super().clean()
+        test = cleaned_data.get("max_test_marks")
+        written = cleaned_data.get("max_written_marks")
+
+        if test is not None and test < 0:
+            self.add_error('max_test_marks', "Test marks cannot be negative")
+
+        if written is not None and written < 0:
+            self.add_error('max_written_marks', "Written marks cannot be negative")
+
+        return cleaned_data
+
+
+class ExamForm(forms.ModelForm):
+    class Meta:
+        model = Exam
+        fields = ['name', 'term', 'academic_year']

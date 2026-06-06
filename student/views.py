@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db import transaction
-from .forms import StudentAllInOneForm, AddressForm, StudentClassForm
+from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm
 from django.contrib import messages
 from django.db.models import Sum, F
 
@@ -500,3 +500,32 @@ def student_promotion_view(request):
         "student-promotion.html",
         context
     )
+
+def create_subject_view(request):
+    if request.method == "POST":
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('subject_list')  # list page pe bhej dega
+    else:
+        form = SubjectForm()
+
+    return render(request, 'subject_form.html', {'form': form})
+
+def subject_list_view(request):
+    subjects = Subject.objects.select_related('student_class').all()
+    return render(request, 'subject_list.html', {'subjects': subjects})
+
+# CREATE
+def exam_create_view(request):
+    form = ExamForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('exam_list')
+    return render(request, 'exam_form.html', {'form': form})
+
+
+# LIST
+def exam_list_view(request):
+    exams = Exam.objects.all().order_by('-id')
+    return render(request, 'exam_list.html', {'exams': exams})

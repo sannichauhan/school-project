@@ -94,3 +94,4 @@ class FeeReceiptForm(forms.ModelForm):
             self.instance.amount = cleaned_data['amount']
 
         return cleaned_data
+    

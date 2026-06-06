@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Exam</title>
+</head>
+<body>
+
+<h2>Create Exam</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Save</button>
+</form>
+
+<br>
+<a href="{% url 'exam_list' %}">Back to List</a>
+
+</body>
+</html>

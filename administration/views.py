@@ -266,3 +266,4 @@ def student_fee_due_list(request):
         'student_fee_due_list.html',
         {'dues': dues}
     )
+

@@ -5,7 +5,7 @@ from teacher import views
 from .views import (
     StudentClassViewSet, AddressViewSet, StudentViewSet,
     SubjectViewSet, ExamViewSet, MarkSheetViewSet, MarksViewSet, add_class_view, student_list_view, student_registration_view,
-    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view
+    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view
 )
 
 
@@ -30,4 +30,8 @@ urlpatterns = [
     path('add-student-marks/', add_student_marks_view, name="add-students-marks"),
     path('student-result/report-card/<int:pk>/', student_report_card_view, name='student-report-card'),
     path('all-student-marksheet/', all_students_marksheet_view, name="all-student-marksheet"),
+    path('subjects-create/', create_subject_view, name='create_subject'),
+    path('subjects-list/', subject_list_view, name='subject_list'),    
+    path('exams-create/', exam_create_view, name='exam_create'),
+    path('exams-list/', exam_list_view, name='exam_list'),
 ]

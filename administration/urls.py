@@ -17,5 +17,5 @@ urlpatterns = [
     path('fee-receipt-create/', fee_receipt_create, name='fee_receipt_create'),
     path('fee-receipt-list/', fee_receipt_list, name='fee_receipt_list'),
     path('fee-receipt-details/<int:pk>/', fee_receipt_details, name='fee_receipt_details'),
-    path('installment-amount/', get_installment_amount, name='get_installment_amount'),    
+    path('installment-amount/', get_installment_amount, name='get_installment_amount'),   
 ]
