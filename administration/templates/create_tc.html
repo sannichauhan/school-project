@@ -19,10 +19,10 @@
                <!-- Student Table Area Start Here -->
                 <div class="card height-auto">
                     <div class="card-body">
-                        <form method="post">
+                        <form method="post" class="createFee">
                             {% csrf_token %}
                             {{ form.as_p }}
-                            <button type="submit">Save TC</button>
+                            <button type="submit" class="btn btn-success btn-lg px-5">Save TC</button>
                         </form>
                         
                     </div>

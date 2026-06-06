@@ -1,18 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Subject</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+{% extends 'base2.html' %} {% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Header Menu Area Start Here -->
+  {% include "tags/header.html" %}
+  <!-- Header Menu Area End Here -->
 
-<body class="bg-light">
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      {% include "tags/breadcrumb.html" %}
+      <!-- Breadcubs Area End Here -->
 
-<div class="container mt-5">
-    <div class="card shadow p-4">
+      <!-- Admit Form Area Start Here -->
 
-        <h3 class="mb-4">Create Subject</h3>
-
-        <form method="POST">
+      <div class="card height-auto">
+        <div class="card-body">
+          <div class="heading-layout1">
+            <div class="item-title">
+              <h3>Add New Subject</h3>
+            </div>
+          </div>
+          <div class="container-fluid formFeilds">
+            <div class="row">
+            <form method="POST">
             {% csrf_token %}
 
             <div class="mb-3">
@@ -49,9 +62,19 @@
                 Save Subject
             </button>
         </form>
-
     </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admit Form Area End Here -->
+
+      <!-- Footer Area Start Here -->
+      {% include "tags/footer.html" %}
+      <!-- Footer Area End Here -->
+    </div>
+  </div>
+  <!-- Page Area End Here -->
 </div>
 
-</body>
-</html>
+{% endblock content %}

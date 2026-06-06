@@ -16,19 +16,28 @@
                 <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
-<h3>Create Fee Receipt</h3>
 
-<form method="post">
+<div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Create Fee Receipt</h3>
+                            </div>
+                        </div>
+<div class="createFee">
+    <form method="post">
     {% csrf_token %}
 
     {{ form.as_p }}
 
-    <button type="submit">
+    <button type="submit" class="btn btn-success btn-lg px-5">
         Save Receipt
     </button>
 
 </form>
-                
+</div>
+</div>
+</div>            
 
 <script>
 

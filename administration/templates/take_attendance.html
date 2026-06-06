@@ -1,4 +1,4 @@
-{% extends 'base2.html' %} 
+{% extends 'base4.html' %} 
 {% block content %}
     <div id="wrapper" class="wrapper bg-ash">
        <!-- Header Menu Area Start Here -->
@@ -14,13 +14,20 @@
                 <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
-
-
-<form method="GET">
+<div class="card height-auto">
+        <div class="card-body">
+          <div class="heading-layout1">
+            <div class="item-title">
+              <h3>Mark Attendance</h3>
+            </div>
+          </div>
+<div>
+<form method="GET" class="attendanceForm">
 
     <label>Select Class</label>
-
-    <select name="class_id">
+<div class="row">
+        <div class="col-xl-2">
+    <select name="class_id"  class="form-control">
         <option value="">Select Class</option>
 
         {% for cls in classes %}
@@ -30,26 +37,34 @@
         {% endfor %}
     </select>
 
-    <button type="submit">
+
+    <button type="submit" class="btn btn-success btn-lg px-5 mb15">
         Load Students
     </button>
+
+</div>
+</div>
 
 </form>
 
 {% if students %}
 
-<form method="POST">
+<form method="POST" >
     {% csrf_token %}
 
-    <input type="hidden"
+    <div class="row">
+        <div class="col-xl-2">
+            <input type="hidden"
            name="class_id"
            value="{{ selected_class.id }}">
 
-    <label>Date</label>
+            <label>Date</label>
 
-    <input type="date"
-           name="attendance_date"
-           value="{{ today|date:'Y-m-d' }}">
+            <input type="date"
+                name="attendance_date"
+                value="{{ today|date:'Y-m-d' }}" class="mb15 form-control" style='height:35px'>
+        </div>
+    </div>
 
     <table  class="table table-bordered">
 
@@ -66,9 +81,9 @@
 
             <td>{{ student.name }}</td>
 
-            <td>
+            <td class="attendanceForm2">
 
-                <select name="student_{{ student.id }}">
+                <select name="student_{{ student.id }}" class="form-control">
                     <option value="P">Present</option>
                     <option value="A">Absent</option>
                     <option value="L">Leave</option>
@@ -81,13 +96,17 @@
 
     </table>
 
-    <button type="submit">
+    <button type="submit" class="btn btn-success btn-lg px-5">
         Save Attendance
     </button>
 
 </form>
 
 {% endif %}
+
+</div>
+</div>
+</div>
                 
                 <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}

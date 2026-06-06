@@ -26,15 +26,17 @@
                         </div>
                         <div class="row">
                             <div class="col-xl-3">
+                                <div class="new-added-form feeForm"> 
                                 <form method="post">
                                     {% csrf_token %}
 
                                     {{ form.as_p }}
 
-                                    <button type="submit">
+                                    <button type="submit" class="btn btn-success btn-lg px-5">
                                         Save
                                     </button>
                                 </form>
+                            </div>
                             </div>
                         <div>
                     </div>

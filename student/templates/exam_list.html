@@ -1,35 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Exam List</title>
-</head>
-<body>
+{% extends 'base4.html' %} 
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
 
-<h2>Exam List</h2>
+               <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Exam List and Academic Session</h3>
+                            </div>
+                        </div>
+                    <div class="table-responsive">
+                            <table class="table display data-table text-nowrap">
 
-<a href="{% url 'exam_create' %}">+ Add Exam</a>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Term</th>
+                                <th>Academic Year</th>
+                            </tr>
+                        </thead>
 
-<table border="1" cellpadding="8">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Term</th>
-        <th>Academic Year</th>
-    </tr>
+                        {% for exam in exams %}
+                            <tr>
+                                <td>{{ exam.id }}</td>
+                                <td>{{ exam.name }}</td>
+                                <td>{{ exam.term }}</td>
+                                <td>{{ exam.academic_year }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4">No exams found</td>
+                            </tr>
+                            {% endfor %}
 
-    {% for exam in exams %}
-    <tr>
-        <td>{{ exam.id }}</td>
-        <td>{{ exam.name }}</td>
-        <td>{{ exam.term }}</td>
-        <td>{{ exam.academic_year }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4">No exams found</td>
-    </tr>
-    {% endfor %}
-</table>
+                    </table>
+                </div>
+                </div>
+                </div>
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}
 
-</body>
-</html>

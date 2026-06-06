@@ -1,21 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Exam</title>
-</head>
-<body>
+{% extends 'base2.html' %} {% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Header Menu Area Start Here -->
+  {% include "tags/header.html" %}
+  <!-- Header Menu Area End Here -->
 
-<h2>Create Exam</h2>
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      {% include "tags/breadcrumb.html" %}
+      <!-- Breadcubs Area End Here -->
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+      <!-- Admit Form Area Start Here -->
 
-    <button type="submit">Save</button>
-</form>
+      <div class="card height-auto">
+        <div class="card-body">
+          <div class="heading-layout1">
+            <div class="item-title">
+              <h3>Add New Exam and Academic Session</h3>
+            </div>
+          </div>
+          <div class="container-fluid formFeilds">
+            <div class="row">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
 
-<br>
-<a href="{% url 'exam_list' %}">Back to List</a>
+                    <button type="submit" class="btn btn-success btn-lg px-5">Save</button>
+                </form>
+            </div>
 
-</body>
-</html>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admit Form Area End Here -->
+
+      <!-- Footer Area Start Here -->
+      {% include "tags/footer.html" %}
+      <!-- Footer Area End Here -->
+    </div>
+  </div>
+  <!-- Page Area End Here -->
+</div>
+
+{% endblock content %}

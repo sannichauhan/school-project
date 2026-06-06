@@ -1,4 +1,4 @@
-{% extends 'base3.html' %} 
+{% extends 'base4.html' %} 
 {% block content %}
     <div id="wrapper" class="wrapper bg-ash">
        <!-- Header Menu Area Start Here -->
@@ -15,10 +15,16 @@
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
 
-               
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Attendance List</h3>
+                            </div>
+                        </div>
 
                     <div class="table-responsive">
-                            <table class="table table-bordered">
+                            <table class="table display data-table text-nowrap">
 
                         <thead>
                             <tr>
@@ -49,6 +55,8 @@
                         {% endfor %}
 
                     </table>
+                </div>
+                </div>
                 </div>
                 
                 <!-- Footer Area Start Here -->
