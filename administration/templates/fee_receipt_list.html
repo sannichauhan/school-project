@@ -1,57 +1,83 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Fee Receipt List</title>
-</head>
-<body>
+{% extends 'base4.html' %} 
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
 
-<h2>Fee Receipt List</h2>
+               <!-- Student Table Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>All Students Data</h3>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="table-responsive">
+                            <table class="table display data-table text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No</th>
+                                        <th>Student</th>
+                                        <th>Installment</th>
+                                        <th>Paid Amount</th>
+                                        <th>Payment Date</th>
+                                        <th>Mode</th>
+                                        <th>Print</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for receipt in receipts %}
+                                    <tr>
+                                        <td>{{ receipt.receipt_no }}</td>
+                                        <td>{{ receipt.student }}</td>
+                                        <td>{{ receipt.get_installment_display }}</td>
+                                        <td>₹ {{ receipt.paid_amount }}</td>
+                                        <td>{{ receipt.payment_date|date:"d/m/Y" }}</td>
+                                        <td>{{ receipt.payment_mode }}</td>
 
-<a href="#">
-    Add New Receipt
-</a>
+                                        <td>
+                                            <a href="{% url 'fee_receipt_details' receipt.pk %}">
+                                                Print
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7">
+                                            No Receipt Found
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                            </tbody>
+                                    
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Student Table Area End Here -->
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}
 
-<br><br>
 
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Receipt No</th>
-            <th>Student</th>
-            <th>Installment</th>
-            <th>Paid Amount</th>
-            <th>Payment Date</th>
-            <th>Mode</th>
-            <th>Print</th>
-        </tr>
-    </thead>
 
-    <tbody>
-        {% for receipt in receipts %}
-        <tr>
-            <td>{{ receipt.receipt_no }}</td>
-            <td>{{ receipt.student }}</td>
-            <td>{{ receipt.get_installment_display }}</td>
-            <td>₹ {{ receipt.paid_amount }}</td>
-            <td>{{ receipt.payment_date|date:"d/m/Y" }}</td>
-            <td>{{ receipt.payment_mode }}</td>
 
-            <td>
-                <a href="{% url 'fee_receipt_details' receipt.pk %}">
-                    Print
-                </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7">
-                No Receipt Found
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-
-</table>
-
-</body>
-</html>

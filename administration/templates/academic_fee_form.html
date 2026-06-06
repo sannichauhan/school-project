@@ -1,11 +1,53 @@
-<h2>Add Academic Fee</h2>
 
-<form method="post">
-    {% csrf_token %}
+{% extends 'base4.html' %} 
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
 
-    {{ form.as_p }}
+               <!-- Student Table Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>All Students Data</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-3">
+                                <form method="post">
+                                    {% csrf_token %}
 
-    <button type="submit">
-        Save
-    </button>
-</form>
+                                    {{ form.as_p }}
+
+                                    <button type="submit">
+                                        Save
+                                    </button>
+                                </form>
+                            </div>
+                        <div>
+                    </div>
+                </div>
+                <!-- Student Table Area End Here -->
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}
+
+
