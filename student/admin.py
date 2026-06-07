@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
 
 # --- Inlines for a better UI ---
 
@@ -36,6 +36,12 @@ class StudentClassAdmin(admin.ModelAdmin):
     list_display = ('name', 'section')
     search_fields = ('name',)
 
+@admin.register(AcademicSession)
+class AcademicSessionAdmin(admin.ModelAdmin):
+    list_display = ('start_year', 'end_year')
+    search_fields = ('start_year', 'end_year')
+    ordering = ('-start_year',)
+
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at')
@@ -48,7 +54,7 @@ class StudentAdmin(admin.ModelAdmin):
             'fields': ('name', 'student_photo', 'date_of_birth', 'gender', 'religion', 'category', 'adhaar_number', 'pen_number')
         }),
         ('Academic & Contact', {
-            'fields': ('admission_class', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'choose_school', 'conveyance_facility')
+            'fields': ('admission_class', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility')
         }),
         ('Addresses', {
             'fields': ('permanent_address', 'local_address')

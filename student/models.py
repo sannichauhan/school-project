@@ -42,7 +42,7 @@ class AcademicSession(models.Model):
         unique_together = ("start_year", "end_year")
 
     def __str__(self):
-        return f"{self.start_year}--{self.end_year}"
+        return f"{self.start_year}-{self.end_year}"
     
 class StudentPromotion(models.Model):
 

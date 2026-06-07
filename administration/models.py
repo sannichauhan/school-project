@@ -154,8 +154,8 @@ class TransferCertificate(models.Model):
         school = self.student.choose_school
 
         school_codes = {
-            'NAV CHETANA PUBLIC SCHOOL': '09591001108',
-            'KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S': '09591001109',
+            'NAV CHETANA PUBLIC SCHOOL': '09591001109',
+            'KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S': '09591001108',
         }
 
         return school_codes.get(school, '')

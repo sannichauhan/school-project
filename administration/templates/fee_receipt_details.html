@@ -176,13 +176,19 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 60px;
+            margin-top: 10px;
         }
 
         .note {
             font-size: 12px;
             color: var(--secondary-color);
             max-width: 60%;
+        }
+        .note ul {
+            padding-left: 15px;
+        }
+        .note ul li {
+            font-size: 11px;
         }
 
         .signature-space {
@@ -248,6 +254,7 @@
             <p><strong>Roll No:</strong> {{ receipt.student.roll_number }}</p>
             <p><strong>Receipt No:</strong> {{ receipt.receipt_no }}</p>
             <p><strong>Date:</strong> {{ receipt.payment_date|date:"d/m/Y" }}</p>
+            <p><strong>Session:</strong> {{ receipt.student.session }}</p>
         </div>
     </div>
 
@@ -268,6 +275,18 @@
     </table>
     <div class="info-grid1">
         <p><strong>Note:</strong> {{ receipt.remarks }}</p>
+    </div>
+    <div class="receipt-footer">
+        <div class="note">
+            <p><strong>Terms &amp; Conditions:</strong></p>
+            <ul>
+                <li>Fees once paid are non-refundable and non-transferable.</li>
+                <li>This is a computer-generated receipt and does not require a physical signature unless disputed.</li>
+            </ul>
+        </div>
+        <div class="signature-space">
+            Authorized Signatory
+        </div>
     </div>
 </div>
 </body>

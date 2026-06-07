@@ -164,7 +164,13 @@
     
     <div class="header">
         <div>
-            <img src="/static/img/ncps-logo.jpeg" alt="logo" />
+            {% if tc.student.choose_school == "NAV CHETANA PUBLIC SCHOOL" %}
+            <img src="/static/img/ncps-logo.jpeg" alt="logo">
+            {% elif tc.student.choose_school == "KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S" %}
+                <img src="/static/img/kdncps-logo.jpeg" alt="logo">
+            {% else %}
+                <img src="/static/img/default-logo.jpeg" alt="logo">
+            {% endif %}
         </div>
         <div>
         <h1>{{tc.student.choose_school}}</h1>
@@ -195,7 +201,7 @@
     </div>
 
     <div class="form-line">
-        4. Date of Birth : (in figures) <span class="dotted-fill" style="min-width: 88px;">{{ tc.student.date_of_birth }}</span> (in words) <span class="dotted-fill" style="min-width: 340px;">{{ tc.student.date_of_birth|date_in_words }}</span>
+        4. Date of Birth : (in figures) <span class="dotted-fill" style="min-width: 88px;">{{ tc.student.date_of_birth|date:"d/m/Y" }}</span> (in words) <span class="dotted-fill" style="min-width: 340px;">{{ tc.student.date_of_birth|date_in_words }}</span>
     </div>
     <div class="form-line indented">
         
@@ -213,7 +219,7 @@
     </div>
 
     <div class="form-line">
-        8. Date of first admission in the School with class <span class="dotted-fill" style="min-width: 180px;">{{tc.student.date_of_application}}</span>  <span class="dotted-fill" style="min-width: 181px;">{{tc.student.admission_class}}</span>
+        8. Date of first admission in the School with class <span class="dotted-fill" style="min-width: 180px;">{{tc.student.date_of_application|date:"d/m/Y"}}</span>  <span class="dotted-fill" style="min-width: 181px;">{{tc.student.admission_class}}</span>
     </div>
 
     <div class="form-line">
@@ -245,11 +251,11 @@
     </div>
 
     <div class="form-line">
-        16. Date of application for certificate <span class="dotted-fill" style="min-width: 451px;">{{tc.created_at}}</span>
+        16. Date of application for certificate <span class="dotted-fill" style="min-width: 451px;">{{tc.created_at|date:"d/m/Y"}}</span>
     </div>
 
     <div class="form-line">
-        17. Date of issue certificate <span class="dotted-fill" style="min-width: 506px;">{{tc.issue_date}}</span>
+        17. Date of issue certificate <span class="dotted-fill" style="min-width: 506px;">{{tc.issue_date|date:"d/m/Y"}}</span>
     </div>
 
     <div class="form-line">
