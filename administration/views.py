@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -266,4 +267,3 @@ def student_fee_due_list(request):
         'student_fee_due_list.html',
         {'dues': dues}
     )
-

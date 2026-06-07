@@ -16,8 +16,7 @@ db.sqlite3
 media/
 staticfiles/
 .env
-zyonicstore/
-myenv/
+env/
 
 # Migrations (optional: comment out if you want to keep them)
 **/migrations/*

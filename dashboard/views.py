@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from student.models import Student
 from teacher.models import Teacher
@@ -6,6 +7,7 @@ from django.db.models import Sum
 
 # Create your views here.
 
+@login_required
 def dashboard(request):
 
     total_students = Student.objects.count()
