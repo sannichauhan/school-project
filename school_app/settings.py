@@ -32,7 +32,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "navchetanapublicschool.com",
-    "www.navchetanapublicschool.com"
+    "www.navchetanapublicschool.com",
+    "server17213-10344.hostingprovider.com",
+    "*"
 ]
 
 
