@@ -5,7 +5,7 @@ from teacher import views
 from .views import (
     StudentClassViewSet, AddressViewSet, StudentViewSet,
     SubjectViewSet, ExamViewSet, MarkSheetViewSet, MarksViewSet, add_class_view, student_list_view, student_registration_view,
-    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, test_marks_entry_view, get_subjects_view, academic_session_list, academic_session_create
+    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, test_marks_entry_view, get_subjects_view, academic_session_list, academic_session_create, student_test_report_card_view
 )
 
 
@@ -38,4 +38,5 @@ urlpatterns = [
     path('get-subjects/', get_subjects_view, name='get_subjects'),
     path('academic-session/', academic_session_list, name='academic_session_list'),
     path('academic-session/add/', academic_session_create, name='academic_session_create'),
+    path('student-result/test-report-card/<int:pk>/', student_test_report_card_view, name='student-test-report-card'),
 ]

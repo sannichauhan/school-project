@@ -109,17 +109,17 @@
     <div class="header">
         <h1>NAV CHETANA PUBLIC SCHOOL</h1>
         <p>CHHAHUN KUSHINAGAR (U.P) - 274303</p>
-        <p class="session">ACADEMIC SESSION - 2026-27</p>
-        <p class="title">Mid-Term Progress Report</p>
+        <p class="session">ACADEMIC SESSION - {{ marksheet.academic_year }}</p>
+        <p class="title">{{ marksheet.exam_name.name }}</p>
     </div>
 
     <div class="student-info">
-        <div><span>Student's Name :</span> SACHIN CHAUHAN</div>
-        <div><span>Roll Number :</span> 9</div>
-        <div><span>Father's Name :</span> MR. ASHOK CHAUHAN</div>
-        <div><span>Class :</span> 7th</div>
-        <div><span>Mother's Name :</span> MRS. SARITA DEVI</div>
-        <div><span>Date Of Birth :</span> 16-Mar-2010</div>
+        <div><span>Student's Name :</span> {{ marksheet.student.name }}</div>
+        <div><span>Roll Number :</span> {{ marksheet.roll_number }}</div>
+        <div><span>Father's Name :</span> {{ marksheet.student.father_name }}</div>
+        <div><span>Class :</span> {{ marksheet.student_class }}</div>
+        <div><span>Mother's Name :</span> {{ marksheet.student.mother_name }}</div>
+        <div><span>Date Of Birth :</span> {{ marksheet.student.date_of_birth }}</div>
     </div>
 
     <table>
@@ -132,75 +132,9 @@
         </thead>
         <tbody>
             <tr>
-                <td>MATHEMATICS</td>
-                <td>40</td>
-                <td>22</td>
-                
-            </tr>
-            <tr>
-                <td>COMPUTER</td>
-                <td>30</td>
-                <td>29</td>
-            </tr>
-            <tr>
-                <td>SCIENCE</td>
-                <td>30</td>
-                <td>17</td>
-                
-            </tr>
-            <tr>
-                <td>DRAWING</td>
-                <td>40</td>
-                <td>38</td>
-                
-            </tr>
-            <tr>
-                <td>GENERAL KNOWLEDGE</td>
-                <td>40</td>
-                <td>33</td>
-                
-            </tr>
-            <tr>
-                <td>SOCIAL STUDIES</td>
-                <td>40</td>
-                <td>31</td>
-                
-            </tr>
-            <tr>
-                <td>SCIENCE LAB</td>
-                <td>10</td>
-                <td>10</td>
-                
-            </tr>
-            <tr>
-                <td>COMPUTER LAB</td>
-                <td>10</td>
-                <td>09</td>
-               
-            </tr>
-            <tr>
-                <td>SANSKRIT/URDU</td>
-                <td>40</td>
-                <td>33</td>
-                
-            </tr>
-            <tr>
-                <td>HINDI & GRAMMAR</td>
-                <td>40</td>
-                <td>34</td>
-                
-            </tr>
-            <tr>
-                <td>ENGLISH & GRAMMAR</td>
-                <td>40</td>
-                <td>30</td>
-                
-            </tr>
-            <tr>
-                <td>CONVERSATION</td>
-                <td>40</td>
-                <td>40</td>
-                
+                <td>{{ mark.subject }}</td>
+                <td>{{ mark.max_marks }}</td>
+                <td>{{ mark.obtained_marks }}</td>                
             </tr>
             <tr class="bold-text">
                 <td>Total</td>
@@ -214,7 +148,7 @@
         <tr>
             <td><span class="bold-text">RESULT :</span> PASS</td>
             <td><span class="bold-text">PERCENTAGE :</span> 81.5%</td>
-            <td><span class="bold-text">GRADE :</span> A2</td>
+            <td><span class="bold-text">GRADE :</span> {{ mark.grade }}</td>
         </tr>
     </table>
 

@@ -81,24 +81,6 @@ class SubjectViewSet(viewsets.ModelViewSet):
         return queryset
     
 
-
-    # def get_queryset(self):
-
-    #     queryset = TestSubject.objects.select_related(
-    #         'student_class'
-    #     ).all()
-
-    #     student_class = self.request.query_params.get(
-    #         'student_class'
-    #     )
-
-    #     if student_class:
-    #         queryset = queryset.filter(
-    #             student_class_id=student_class
-    #         )
-
-    #     return queryset
-
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
@@ -593,10 +575,12 @@ def test_marks_entry_view(request):
 
         # Create Marksheet
 
+        exam = Exam.objects.get(name="First Unit Test")
+
         marksheet = TestMarkSheet.objects.create(
             student_class_id=class_id,
             student_id=student_id,
-            exam_name="First Unit Test"
+            exam_name=exam
         )
 
         total_forms = int(
@@ -648,3 +632,28 @@ def test_marks_entry_view(request):
             "classes": classes,
         }
     )
+
+def student_test_report_card_view(request, pk):
+    # student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
+
+    # subjects = Subject.objects.filter(student_class=student.admission_class)
+
+    # exams = Exam.objects.filter(marksheet__student=student).distinct().order_by('id')
+
+    marksheet = get_object_or_404(TestMarkSheet, pk=pk)
+
+    marks = TestSubjectMark.objects.filter(marksheet=marksheet)
+
+    # print("Marksheet ID:", marksheet.id)
+    # print("Total Marks Records:", marks.count())
+
+    # for mark in marks:
+    #     print(mark.subject, mark.obtained_marks)
+
+    context = {
+        "marksheet": marksheet,
+        "marks": marks,
+        # "student": student,
+    }
+
+    return render(request, "report_card.html", context)

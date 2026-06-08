@@ -468,20 +468,13 @@ class Marks(models.Model):
 
 
 # Test MarkSheet
+
+
+
 class TestMarkSheet(models.Model):
     student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-
-    exam_name = models.CharField(
-        max_length=100,
-        default="First Unit Test"
-    )
-
-    
-
-    roll_no = models.CharField(max_length=20, blank=True)
-    academic_year = models.CharField(max_length=20, default="2025-2026")
-
+    exam_name = models.ForeignKey(Exam, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -501,7 +494,7 @@ class TestMarkSheet(models.Model):
             return 0
         return round((self.total_obtained / self.total_max) * 100, 2)
     
-
+    
 class TestSubjectMark(models.Model):
 
     marksheet = models.ForeignKey(
