@@ -6318,3 +6318,10 @@ ul {
   padding: 8px 10px;
   height: 35px;
 }
+.mt30{
+  margin-top: 30px;
+}
+.bg-color-mark {
+  background-color: #fff;
+  padding: 20px 20px 30px;
+}

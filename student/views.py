@@ -1,6 +1,7 @@
 from rest_framework import viewsets
+from django.http import JsonResponse
 from django.contrib import messages
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark, AcademicSession
 from .serializers import (
     StudentClassSerializer, AddressSerializer, StudentSerializer,
     SubjectSerializer, ExamSerializer, MarkSheetSerializer, MarksSerializer,
@@ -10,7 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db import transaction
-from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm
+from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm
 from django.contrib import messages
 from django.db.models import Sum, F
 
@@ -529,3 +530,121 @@ def exam_create_view(request):
 def exam_list_view(request):
     exams = Exam.objects.all().order_by('-id')
     return render(request, 'exam_list.html', {'exams': exams})
+
+def academic_session_create(request):
+    if request.method == "POST":
+        form = AcademicSessionForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('academic_session_list')
+    else:
+        form = AcademicSessionForm()
+
+    return render(request, 'session-create.html', {
+        'form': form
+    })
+
+
+def academic_session_list(request):
+    sessions = AcademicSession.objects.all().order_by('-start_year')
+
+    return render(request, 'session-list.html', {
+        'sessions': sessions
+    })
+
+# Test Marksheet
+
+def get_subjects_view(request):
+
+    class_id = request.GET.get('student_class')
+
+    subjects = Subject.objects.filter(
+        student_class_id=class_id
+    )
+
+    data = []
+
+    for subject in subjects:
+        data.append({
+            "id": subject.id,
+            "name": subject.name,
+        })
+
+    return JsonResponse(data, safe=False)
+
+def test_marks_entry_view(request):
+
+    classes = StudentClass.objects.all()
+
+    if request.method == "POST":
+
+        class_id = request.POST.get("student_class")
+        student_id = request.POST.get("student")
+
+        if not class_id or not student_id:
+
+            messages.error(
+                request,
+                "Please select Class and Student."
+            )
+
+            return redirect("test_marks_entry")
+
+        # Create Marksheet
+
+        marksheet = TestMarkSheet.objects.create(
+            student_class_id=class_id,
+            student_id=student_id,
+            exam_name="First Unit Test"
+        )
+
+        total_forms = int(
+            request.POST.get(
+                "form-TOTAL_FORMS",
+                0
+            )
+        )
+
+        for i in range(total_forms):
+
+            subject_id = request.POST.get(
+                f"form-{i}-subject"
+            )
+
+            obtained_marks = request.POST.get(
+                f"form-{i}-obtained_marks"
+            ) or 0
+
+            remarks = request.POST.get(
+                f"form-{i}-remarks"
+            ) or ""
+
+            max_marks = request.POST.get(
+                f"form-{i}-max_marks"
+            ) or 15
+
+            if subject_id:
+
+                TestSubjectMark.objects.create(
+                    marksheet=marksheet,
+                    subject_id=subject_id,
+                    obtained_marks=obtained_marks,
+                    max_marks=max_marks,
+                    remarks=remarks
+                )
+
+        messages.success(
+            request,
+            "Marks Saved Successfully."
+        )
+
+        return redirect("test_marks_entry")
+
+    return render(
+        request,
+        "test_marks_entry.html",
+        {
+            "classes": classes,
+        }
+    )

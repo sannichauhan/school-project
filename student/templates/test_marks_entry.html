@@ -1,0 +1,272 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+
+<div id="wrapper" class="wrapper bg-ash">
+
+    {% include "tags/header.html" %}
+
+    <div class="dashboard-page-one">
+
+        {% include "tags/sidebar.html" %}
+
+        <div class="dashboard-content-one">
+
+            {% include "tags/breadcrumb.html" %}
+
+            <div class="card height-auto">
+                <div class="card-body">
+
+                    <h3 class="mb-4">
+                        First Unit Test Marks Entry
+                    </h3>
+
+                    <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- Management Form Start -->
+
+                    <input
+                        type="hidden"
+                        name="form-TOTAL_FORMS"
+                        id="id_form-TOTAL_FORMS"
+                        value="0"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="form-INITIAL_FORMS"
+                        value="0"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="form-MIN_NUM_FORMS"
+                        value="0"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="form-MAX_NUM_FORMS"
+                        value="1000"
+                    >
+
+                    <!-- Management Form End -->
+
+
+                    <div class="row mb-4">
+
+                        <div class="col-md-4">
+                            <label>Class</label>
+
+                            <select
+                                id="class-select"
+                                name="student_class"
+                                class="form-control"
+                            >
+                                <option value="">
+                                    Select Class
+                                </option>
+
+                                {% for class in classes %}
+                                <option value="{{ class.id }}">
+                                    {{ class.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <label>Student</label>
+
+                            <select
+                                id="student-select"
+                                name="student"
+                                class="form-control"
+                            >
+
+                                <option value="">
+                                    Select Student
+                                </option>
+
+                                {% for class in classes %}
+                                    {% for student in class.students.all %}
+
+                                    <option
+                                        value="{{ student.id }}"
+                                        data-class="{{ class.id }}"
+                                    >
+                                        {{ student.name }}
+                                    </option>
+
+                                    {% endfor %}
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <table class="table table-bordered">
+
+                        <thead>
+
+                            <tr>
+                                <th>S.No.</th>
+                                <th>Subject</th>
+                                <th>Maximum Marks</th>
+                                <th>Written (15)</th>
+                                <th>Remarks</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="subject-rows">
+
+                        </tbody>
+
+                    </table>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+                        Save Marks
+                    </button>
+
+                </form>
+
+                </div>
+            </div>
+
+            {% include "tags/footer.html" %}
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+document.getElementById('class-select').addEventListener(
+    'change',
+    function () {
+
+        let classId = this.value;
+
+        let studentSelect =
+            document.getElementById('student-select');
+
+        Array.from(studentSelect.options).forEach(
+            function(option){
+
+                if(option.value === ''){
+                    return;
+                }
+
+                if(option.dataset.class === classId){
+                    option.hidden = false;
+                }else{
+                    option.hidden = true;
+                }
+
+            }
+        );
+
+        fetch(
+            `/students/api/subjects/?student_class=${classId}`
+        )
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            let tbody =
+                document.getElementById('subject-rows');
+
+            tbody.innerHTML = '';
+
+            document.getElementById(
+                'id_form-TOTAL_FORMS'
+            ).value = data.length;
+
+            data.forEach(function(subject,index){
+
+                tbody.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${index + 1}
+                    </td>
+
+                    <td>
+
+                        ${subject.name}
+
+                        <input
+                            type="hidden"
+                            name="form-${index}-subject"
+                            value="${subject.id}"
+                        >
+
+                    </td>
+
+                    <td>
+
+                        15
+
+                        <input
+                            type="hidden"
+                            name="form-${index}-max_marks"
+                            value="15"
+                        >
+
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="number"
+                            name="form-${index}-obtained_marks"
+                            class="form-control"
+                            min="0"
+                            max="15"
+                            value="0"
+                        >
+
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="text"
+                            name="form-${index}-remarks"
+                            class="form-control"
+                        >
+
+                    </td>
+
+                </tr>
+
+                `;
+
+            });
+
+        });
+
+    }
+);
+
+document.getElementById(
+    'id_form-TOTAL_FORMS'
+).value = data.length;
+
+</script>
+
+{% endblock %}

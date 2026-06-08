@@ -201,6 +201,40 @@
             font-weight: 600;
         }
 
+        
+
+         @page{
+            size:A4;
+            margin:10mm;
+        }
+
+     
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom:20px;
+        }
+        @media print{
+
+            .no-print{
+                display:none;
+            }
+
+            body{
+                margin:0;
+            }
+
+            .page{
+                gap:8px;
+            }
+
+            .card{
+                page-break-inside:avoid;
+            }
+        }
+
         /* Print Optimization */
         @media print {
             body {
@@ -229,13 +263,40 @@
 </head>
 <body>
 
+    <div class="toolbar no-print">
+
+    <a href="{% url 'fee_receipt_list' %}"
+       style="
+       text-decoration:none;
+       padding:10px 20px;
+       background:#6c757d;
+       color:white;
+       border-radius:5px;
+       ">
+       Back
+    </a>
+
+    <button onclick="window.print()"
+        style="
+        padding:10px 20px;
+        background:#28a745;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+        ">
+        Print / Save PDF
+    </button>
+
+</div>
+
 <div class="receipt-container">
     <!-- Header -->
     <div class="receipt-header">
         <div class="institution-details">
             <h1>NAV CHETANA PUBLIC SCHOOL</h1>
-            <p>Chhahun, Kushinagar - 110001</p>
-            <p>Contact: +91-9936145369 | info@navchetanapublicschool.com</p>
+            <p>Chhahun, Kushinagar - 274303</p>
+            <p>Contact: +91-9936145369 | Email: info@navchetanapublicschool.com</p>
         </div>
         <div class="receipt-title">
             <h2>RECEIPT</h2>

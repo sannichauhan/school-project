@@ -15,16 +15,18 @@
                 <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
-
+<div class="bg-color-mark">
                 <form method="post" id="marks-form">
     {% csrf_token %}
     {{ formset.management_form }}
 
     <div class="header-selection">
+        <div class="row">
+        <div class="col-xl-4">
         <label>Select Class:</label>
-        <label>Select Class:</label>
+        
 
-<select id="class-select" name="student_class">
+<select id="class-select" name="student_class" class="form-control">
     <option value="">Select Class</option>
 
     {% for class in classes %}
@@ -33,11 +35,11 @@
         </option>
     {% endfor %}
 </select>
-
-
+</div>
+<div class="col-xl-4">
 <label>Select Student:</label>
 
-<select id="student-select" name="student">
+<select id="student-select" name="student" class="form-control">
 
     <option value="">
         Select Student Name
@@ -59,16 +61,20 @@
     {% endfor %}
 
 </select>
+</div>
 
-        <label>Select Exam:</label>
-        <select name="exam">
+       <div class="col-xl-4">
+         <label>Select Exam:</label>
+        <select name="exam" class="form-control">
             {% for e in exams %}
                 <option value="{{ e.id }}">{{ e.name }}</option>
             {% endfor %}
         </select>
+       </div>
     </div>
+</div>
 
-    <table id="marks-table" class="table table-bordered">
+    <table id="marks-table" class="table table-bordered mt30">
         <thead>
             <tr>
                 <th>Subject</th>
@@ -82,7 +88,7 @@
 
     <button type="submit" class="btn btn-info mt-3">Save Marks</button>
 </form>
-
+</div>
 <script>
 document.getElementById('class-select').addEventListener('change', function() {
     const className = this.value;

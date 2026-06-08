@@ -11,6 +11,17 @@ def date_in_words(value):
 
     day = num2words(value.day, to='ordinal').title()
     month = value.strftime('%B')
-    year = num2words(value.year).title().lower()
 
-    return f"{day} {month} {year}"
+    year = value.year
+    if 1000 <= year <= 2099:
+        first_part = num2words(year // 100).title()
+        second_part = num2words(year % 100).title()
+
+        if year % 100 == 0:
+            year_words = f"{first_part} Hundred"
+        else:
+            year_words = f"{first_part} {second_part}"
+    else:
+        year_words = num2words(year).title()
+
+    return f"{day} {month} {year_words}"

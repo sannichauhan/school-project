@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
 
 # --- Inlines for a better UI ---
 
@@ -82,3 +82,21 @@ class ExamAdmin(admin.ModelAdmin):
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     list_display = ('district', 'pin_code', 'state')
+
+
+# Test MArksheet
+class TestSubjectMarkInline(admin.TabularInline):
+    model = TestSubjectMark
+    extra = 0
+
+@admin.register(TestMarkSheet)
+class TestMarkSheetAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'student',
+        'student_class',
+        'exam_name',
+        'percentage'
+    )
+
+    inlines = [TestSubjectMarkInline]

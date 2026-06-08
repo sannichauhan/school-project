@@ -465,3 +465,83 @@ class Marks(models.Model):
             (self.max_test_marks or 0) +
             (self.max_written_marks or 0)
         )
+
+
+# Test MarkSheet
+class TestMarkSheet(models.Model):
+    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+
+    exam_name = models.CharField(
+        max_length=100,
+        default="First Unit Test"
+    )
+
+    
+
+    roll_no = models.CharField(max_length=20, blank=True)
+    academic_year = models.CharField(max_length=20, default="2025-2026")
+
+    created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student.name} - {self.exam_name}"
+
+    @property
+    def total_obtained(self):
+        return sum(i.obtained_marks for i in self.subject_marks.all())
+
+    @property
+    def total_max(self):
+        return sum(i.max_marks for i in self.subject_marks.all())
+
+    @property
+    def percentage(self):
+        if self.total_max == 0:
+            return 0
+        return round((self.total_obtained / self.total_max) * 100, 2)
+    
+
+class TestSubjectMark(models.Model):
+
+    marksheet = models.ForeignKey(
+        TestMarkSheet,
+        on_delete=models.CASCADE,
+        related_name='subject_marks'
+    )
+
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE
+    )
+
+
+    obtained_marks = models.PositiveIntegerField(default=0)
+
+    max_marks = models.PositiveIntegerField(default=15)
+
+    remarks = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    class Meta:
+        unique_together = ('marksheet', 'subject')
+
+    @property
+    def grade(self):
+
+        marks = self.obtained_marks
+
+        if marks >= 14:
+            return "A+"
+        elif marks >= 12:
+            return "A"
+        elif marks >= 10:
+            return "B"
+        elif marks >= 8:
+            return "C"
+        elif marks >= 5:
+            return "D"
+
+        return "F"

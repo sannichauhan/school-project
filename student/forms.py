@@ -1,5 +1,6 @@
 from django import forms
-from .models import Student, Address, StudentClass, MarkSheet, StudentPromotion, Subject, Exam
+from .models import Student, Address, StudentClass, MarkSheet, StudentPromotion, Subject, Exam, TestSubjectMark, AcademicSession
+from django.forms import modelformset_factory
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -125,3 +126,51 @@ class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
         fields = ['name', 'term', 'academic_year']
+
+
+class AcademicSessionForm(forms.ModelForm):
+    class Meta:
+        model = AcademicSession
+        fields = ['start_year', 'end_year']
+        widgets = {
+            'start_year': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Start Year'
+            }),
+            'end_year': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'End Year'
+            }),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_year = cleaned_data.get("start_year")
+        end_year = cleaned_data.get("end_year")
+
+        if start_year and end_year:
+            if end_year <= start_year:
+                raise forms.ValidationError(
+                    "End year must be greater than start year."
+                )
+
+        return cleaned_data
+
+
+# Test Marksheet
+class TestSubjectMarkForm(forms.ModelForm):
+
+    class Meta:
+        model = TestSubjectMark
+
+        fields = [
+            'subject',
+            'obtained_marks',
+            'max_marks',
+            'remarks'
+        ]
+
+        widgets = {
+            'subject': forms.HiddenInput(),
+            'max_marks': forms.HiddenInput()
+        }
