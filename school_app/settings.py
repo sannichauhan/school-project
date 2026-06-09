@@ -25,16 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+# DEBUG = True
+# ALLOWED_HOSTS = ["*"]
 
-# DEBUG = False
-# ALLOWED_HOSTS = [
-#     "navchetanapublicschool.com",
-#     "www.navchetanapublicschool.com",
-#     "server17213-10344.hostingprovider.com",
-#     "*"
-# ]
+DEBUG = False
+ALLOWED_HOSTS = [
+    "navchetanapublicschool.com",
+    "www.navchetanapublicschool.com",
+    "server17213-10344.hostingprovider.com",
+    "*"
+]
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
