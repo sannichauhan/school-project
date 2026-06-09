@@ -6,7 +6,8 @@ from .models import (
     Attendance,
     AcademicFee,
     FeeReceipt,
-    StudentFeeDue
+    StudentFeeDue,
+    VanFee
 )
 
 # Register your models here.
@@ -104,3 +105,10 @@ class StudentFeeDueAdmin(admin.ModelAdmin):
     search_fields = (
         'student__name',
     )
+
+
+
+@admin.register(VanFee)
+class VanFeeAdmin(admin.ModelAdmin):
+    list_display = ('route_group', 'annual_fee', 'first_installment', 'second_installment')
+

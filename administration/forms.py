@@ -1,5 +1,6 @@
 from django import forms
-from .models import TransferCertificate, Attendance, AcademicFee, FeeReceipt
+from django.apps import apps
+from .models import TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentClass
 
 
 class TransferCertificateForm(forms.ModelForm):
@@ -61,6 +62,15 @@ class AcademicFeeForm(forms.ModelForm):
         }
 
 class FeeReceiptForm(forms.ModelForm):
+    # Overriding student_class correctly. 
+
+    # Django will automatically map this to your model's student_class ForeignKey field.
+    student_class = forms.ModelChoiceField(
+        queryset=StudentClass.objects.all(), # Straightforward, standard implementation
+        required=True,
+        label="Student Class"
+    )
+
 
     class Meta:
         model = FeeReceipt
@@ -71,27 +81,37 @@ class FeeReceiptForm(forms.ModelForm):
                 format='%Y-%m-%d'
             ),
             'amount': forms.NumberInput(attrs={'readonly': 'readonly'}),
-            
         }
 
     def clean(self):
         cleaned_data = super().clean()
 
-        academic_fee = cleaned_data.get('academic_fee')
+        fee_type = cleaned_data.get('fee_type')
         installment = cleaned_data.get('installment')
+        academic_fee = cleaned_data.get('academic_fee')
+        van_fee = cleaned_data.get('van_fee')
 
-        if academic_fee and installment:
-
+        # 1. ACADEMIC FEE AMOUNT LOGIC
+        if fee_type == 'ACADEMIC' and academic_fee and installment:
             if installment == 'FIRST':
                 cleaned_data['amount'] = academic_fee.first_installment
-
             elif installment == 'SECOND':
                 cleaned_data['amount'] = academic_fee.second_installment
-
             elif installment == 'THIRD':
                 cleaned_data['amount'] = academic_fee.third_installment
-
+            
             self.instance.amount = cleaned_data['amount']
 
+        # 2. VAN FEE AMOUNT LOGIC
+        elif fee_type == 'VAN' and van_fee and installment:
+            if installment == 'FIRST':
+                cleaned_data['amount'] = van_fee.first_installment
+            elif installment == 'SECOND':
+                cleaned_data['amount'] = van_fee.second_installment
+            elif installment == 'THIRD':
+                # Changed to add_error to make it target the field nicely in the UI
+                self.add_error('installment', "Van Fee has only 2 installments. 'THIRD' is invalid.")
+
         return cleaned_data
+    
     

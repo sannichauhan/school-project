@@ -166,52 +166,29 @@ class Student(models.Model):
 
     @property
     def calculate_percentage(self):
-
-        marks = Marks.objects.filter(
-            marksheet__student=self
-        )
-
-        # obtained marks
-        obtained = marks.aggregate(
-            total=Sum(
-                F('test_marks') + F('written_marks'),
-                output_field=IntegerField()
-            )
-        )['total'] or 0
-
-        # maximum marks
-        maximum = marks.aggregate(
-            total=Sum(
-                F('max_test_marks') + F('max_written_marks'),
-                output_field=IntegerField()
-            )
-        )['total'] or 0
-
+        marks = Marks.objects.filter(marksheet__student=self)
+        obtained = marks.aggregate(total=Sum(F('test_marks') + F('written_marks'), output_field=IntegerField()))['total'] or 0
+        maximum = marks.aggregate(total=Sum(F('max_test_marks') + F('max_written_marks'), output_field=IntegerField()))['total'] or 0
         if maximum == 0:
             return 0
-
-        return round(
-            (obtained / maximum) * 100,
-            2
-        )
-    
-    
+        return round((obtained / maximum) * 100, 2)
 
     def save(self, *args, **kwargs):
-
-        if not self.roll_number:
-            last_student = Student.objects.filter(admission_class=self.admission_class).order_by('-id').first()
+        if not self.roll_number or self.roll_number == 0:
+            # वर्तमान सेशन और क्लास के आखरी छात्र को ढूंढें
+            last_student = Student.objects.filter(
+                admission_class=self.admission_class,
+                session=self.session
+            ).order_by('-roll_number').first()
+            
             if last_student and last_student.roll_number:
-                new_roll = int(last_student.roll_number) + 1
+                self.roll_number = last_student.roll_number + 1
             else:
-                new_roll = 1001
-
-            self.roll_number = str(new_roll)
-
+                self.roll_number = 1001 # शुद्ध इंटीजर असाइनमेंट
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} ({self.roll_number})"
     
     
 class Subject(models.Model):

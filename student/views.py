@@ -657,3 +657,7 @@ def student_test_report_card_view(request, pk):
     }
 
     return render(request, "report_card.html", context)
+
+def all_student_test_marksheet(request):
+    students = Student.objects.all()    
+    return render(request, 'all-student-test-marksheet.html', {'students': students})
