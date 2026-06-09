@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Sum
 from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark, AcademicSession
 from .serializers import (
     StudentClassSerializer, AddressSerializer, StudentSerializer,
@@ -558,30 +559,35 @@ def get_subjects_view(request):
 def test_marks_entry_view(request):
 
     classes = StudentClass.objects.all()
+    exams = Exam.objects.all()
 
     if request.method == "POST":
 
         class_id = request.POST.get("student_class")
         student_id = request.POST.get("student")
+        exam_id = request.POST.get("exam")
 
-        if not class_id or not student_id:
+        if not class_id or not student_id or not exam_id:
 
             messages.error(
                 request,
-                "Please select Class and Student."
+                "Please select Class, Student and Exam."
             )
 
             return redirect("test_marks_entry")
 
-        # Create Marksheet
-
-        exam = Exam.objects.get(name="First Unit Test")
-
-        marksheet = TestMarkSheet.objects.create(
+        marksheet, created = TestMarkSheet.objects.get_or_create(
             student_class_id=class_id,
             student_id=student_id,
-            exam_name=exam
+            exam_name_id=exam_id
         )
+
+        if not created:
+            messages.error(
+                request,
+                "Marks already entered for this student."
+            )
+            return redirect("test_marks_entry")
 
         total_forms = int(
             request.POST.get(
@@ -630,33 +636,60 @@ def test_marks_entry_view(request):
         "test_marks_entry.html",
         {
             "classes": classes,
+            "exams": exams,
         }
     )
 
 def student_test_report_card_view(request, pk):
-    # student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
-
-    # subjects = Subject.objects.filter(student_class=student.admission_class)
-
-    # exams = Exam.objects.filter(marksheet__student=student).distinct().order_by('id')
-
+    student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
     marksheet = get_object_or_404(TestMarkSheet, pk=pk)
-
     marks = TestSubjectMark.objects.filter(marksheet=marksheet)
+    exams = Exam.objects.filter(marksheet__student=student).distinct().order_by('id')
 
-    # print("Marksheet ID:", marksheet.id)
-    # print("Total Marks Records:", marks.count())
+    # Calculate totals dynamically
+    total_max = marks.aggregate(Sum('max_marks'))['max_marks__sum'] or 0
+    total_obtained = marks.aggregate(Sum('obtained_marks'))['obtained_marks__sum'] or 0
+    
+    # Calculate percentage safely
+    percentage = (total_obtained / total_max * 100) if total_max > 0 else 0
 
-    # for mark in marks:
-    #     print(mark.subject, mark.obtained_marks)
+    # 1. Determine Status (Pass/Fail) - e.g., passing mark is 33%
+    if percentage >= 33:
+        status = "PASS"
+    else:
+        status = "FAIL"
+
+    # 2. Determine Grade based on standard school metrics
+    if percentage >= 91:
+        grade = "A1"
+    elif percentage >= 81:
+        grade = "A2"
+    elif percentage >= 71:
+        grade = "B1"
+    elif percentage >= 61:
+        grade = "B2"
+    elif percentage >= 51:
+        grade = "C1"
+    elif percentage >= 41:
+        grade = "C2"
+    elif percentage >= 33:
+        grade = "D"
+    else:
+        grade = "E (Essential Repeat)"
 
     context = {
         "marksheet": marksheet,
         "marks": marks,
-        # "student": student,
+        "total_max": total_max,
+        'exams': exams,
+        'student': student,
+        "total_obtained": total_obtained,
+        "percentage": round(percentage, 2),
+        "status": status,
+        "grade": grade,
     }
 
-    return render(request, "report_card.html", context)
+    return render(request, "test_report_card.html", context)
 
 def all_student_test_marksheet(request):
     students = Student.objects.all()    

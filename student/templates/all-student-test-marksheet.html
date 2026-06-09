@@ -42,13 +42,38 @@
                         </form>
                         
                                <div class="table-responsive">
-                                    <p>All Test Marksheet List
+                                    <table class="table display data-table text-nowrap">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Percentage</th>
+                                        <th>Exam Term</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for item in students %}   
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{item.name}}</td>
+                                            <td>{{item.admission_class}}</td>
+                                            <td>{{item.calculate_percentage}}%</td>
+                                            <td>{{ marksheet.exam_name.name }}</td>
+                                            <td>
+                                                <a href="{% url 'student_test_report_card' item.pk %}" class="btn btn-md btn-info">View result</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                            
                     </div>
                 </div>
                 <!-- Student Promotion Area End Here -->
-                
+                                 
                 <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
                 <!-- Footer Area End Here -->

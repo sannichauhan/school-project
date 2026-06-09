@@ -109,13 +109,16 @@
     <div class="header">
         <h1>NAV CHETANA PUBLIC SCHOOL</h1>
         <p>CHHAHUN KUSHINAGAR (U.P) - 274303</p>
-        <p class="session">ACADEMIC SESSION - {{ marksheet.academic_year }}</p>
-        <p class="title">{{ marksheet.exam_name.name }}</p>
+        <p class="session">ACADEMIC SESSION - {{ marksheet.student.session }}</p>
+        <p class="title">{{ exams.name }}</p>
+        {% for exam in exams %}
+            <p class="title">{{ exams.name }}</p>
+        {% endfor %}
     </div>
 
     <div class="student-info">
         <div><span>Student's Name :</span> {{ marksheet.student.name }}</div>
-        <div><span>Roll Number :</span> {{ marksheet.roll_number }}</div>
+        <div><span>Roll Number :</span> {{ marksheet.student.roll_number }}</div>
         <div><span>Father's Name :</span> {{ marksheet.student.father_name }}</div>
         <div><span>Class :</span> {{ marksheet.student_class }}</div>
         <div><span>Mother's Name :</span> {{ marksheet.student.mother_name }}</div>
@@ -131,24 +134,30 @@
             </tr>
         </thead>
         <tbody>
+            {% for mark in marks %}
             <tr>
                 <td>{{ mark.subject }}</td>
                 <td>{{ mark.max_marks }}</td>
                 <td>{{ mark.obtained_marks }}</td>                
             </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No Marks Found</td>
+            </tr>
+            {% endfor %}
             <tr class="bold-text">
                 <td>Total</td>
-                <td>400</td>
-                <td>326</td>                
+                <td>{{total_max}}</td>
+                <td>{{total_obtained}}</td>                
             </tr>
         </tbody>
     </table>
 
     <table class="summary-table">
         <tr>
-            <td><span class="bold-text">RESULT :</span> PASS</td>
-            <td><span class="bold-text">PERCENTAGE :</span> 81.5%</td>
-            <td><span class="bold-text">GRADE :</span> {{ mark.grade }}</td>
+            <td><span class="bold-text">RESULT :</span> {{status}}</td>
+            <td><span class="bold-text">PERCENTAGE :</span> {{percentage}}%</td>
+            <td><span class="bold-text">GRADE :</span> {{ grade }}</td>
         </tr>
     </table>
 

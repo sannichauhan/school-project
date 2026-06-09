@@ -109,6 +109,18 @@
 
                         </div>
 
+                        <div class="col-xl-4">
+                            <label>Select Exam:</label>
+                            <select id="exam-select" name="exam" class="form-control">
+                                <option value="">
+                                    Select Exam
+                                </option>
+                                {% for e in exams %}
+                                    <option value="{{ e.id }}">{{ e.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
                     </div>
 
 
@@ -158,6 +170,7 @@ document.getElementById('class-select').addEventListener(
     function () {
 
         let classId = this.value;
+        let examId = document.getElementById('exam-select').value;
 
         let studentSelect =
             document.getElementById('student-select');
@@ -169,17 +182,12 @@ document.getElementById('class-select').addEventListener(
                     return;
                 }
 
-                if(option.dataset.class === classId){
-                    option.hidden = false;
-                }else{
-                    option.hidden = true;
-                }
-
+                option.hidden = option.dataset.class !== classId;
             }
         );
 
         fetch(
-            `/students/api/subjects/?student_class=${classId}`
+            `/students/api/subjects/?student_class=${classId}&exam=${examId}`
         )
 
         .then(response => response.json())
@@ -201,12 +209,9 @@ document.getElementById('class-select').addEventListener(
 
                 <tr>
 
-                    <td>
-                        ${index + 1}
-                    </td>
+                    <td>${index + 1}</td>
 
                     <td>
-
                         ${subject.name}
 
                         <input
@@ -214,59 +219,48 @@ document.getElementById('class-select').addEventListener(
                             name="form-${index}-subject"
                             value="${subject.id}"
                         >
-
                     </td>
 
                     <td>
-
-                        15
+                        ${subject.max_marks || 15}
 
                         <input
                             type="hidden"
                             name="form-${index}-max_marks"
-                            value="15"
+                            value="${subject.max_marks || 15}"
                         >
-
                     </td>
 
                     <td>
-
                         <input
                             type="number"
                             name="form-${index}-obtained_marks"
                             class="form-control"
                             min="0"
-                            max="15"
+                            max="${subject.max_marks || 15}"
                             value="0"
                         >
-
                     </td>
 
                     <td>
-
                         <input
                             type="text"
                             name="form-${index}-remarks"
                             class="form-control"
                         >
-
                     </td>
 
                 </tr>
-
                 `;
-
             });
 
         });
 
     }
 );
-
-document.getElementById(
+{% comment %} document.getElementById(
     'id_form-TOTAL_FORMS'
-).value = data.length;
-
+).value = data.length; {% endcomment %}
 </script>
 
 {% endblock %}
