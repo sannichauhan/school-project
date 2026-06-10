@@ -1,6 +1,6 @@
 from django import forms
 from django.apps import apps
-from .models import TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentClass
+from .models import TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentClass, AdmitCard
 
 
 class TransferCertificateForm(forms.ModelForm):
@@ -114,4 +114,17 @@ class FeeReceiptForm(forms.ModelForm):
 
         return cleaned_data
     
-    
+
+class AdmitCardForm(forms.ModelForm):
+    class Meta:
+        model = AdmitCard
+        fields = ['student', 'session', 'exam_type', 'exam_start_date', 'exam_end_date', 'remarks']
+        
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-control'}),
+            'session': forms.Select(attrs={'class': 'form-control'}),
+            'exam_type': forms.Select(attrs={'class': 'form-control'}),
+            'exam_start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'exam_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional remarks...'}),
+        }

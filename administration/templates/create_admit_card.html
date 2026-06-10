@@ -1,0 +1,81 @@
+{% extends 'base4.html' %} 
+
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+        {% include "tags/header.html" %}
+        
+        <div class="dashboard-page-one">
+            {% include "tags/sidebar.html" %}
+            
+            <div class="dashboard-content-one">
+                {% include "tags/breadcrumb.html" %}
+
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Generate New Admit Card</h3>
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <form method="POST" class="new-added-form">
+                            {% csrf_token %}
+                            <div class="row gutters-8">
+                                
+                                <div class="col-xl-4 col-lg-6 col-12 form-group">
+                                    <label>Select Student *</label>
+                                    {{ form.student }}
+                                    <small class="text-danger">{{ form.student.errors }}</small>
+                                </div>
+
+                                <div class="col-xl-4 col-lg-6 col-12 form-group">
+                                    <label>Academic Session *</label>
+                                    {{ form.session }}
+                                    <small class="text-danger">{{ form.session.errors }}</small>
+                                </div>
+
+                                <div class="col-xl-4 col-lg-6 col-12 form-group">
+                                    <label>Exam Type *</label>
+                                    {{ form.exam_type }}
+                                    <small class="text-danger">{{ form.exam_type.errors }}</small>
+                                </div>
+
+                                <div class="col-xl-6 col-lg-6 col-12 form-group">
+                                    <label>Exam Start Date</label>
+                                    {{ form.exam_start_date }}
+                                    <small class="text-danger">{{ form.exam_start_date.errors }}</small>
+                                </div>
+
+                                <div class="col-xl-6 col-lg-6 col-12 form-group">
+                                    <label>Exam End Date</label>
+                                    {{ form.exam_end_date }}
+                                    <small class="text-danger">{{ form.exam_end_date.errors }}</small>
+                                </div>
+
+                                <div class="col-12 form-group">
+                                    <label>Remarks</label>
+                                    {{ form.remarks }}
+                                    <small class="text-danger">{{ form.remarks.errors }}</small>
+                                </div>
+
+                                <div class="col-12 form-group mg-t-8">
+                                    <button type="submit" class="btn-fill-lg btn-gradient-yellow btn-hover-bluish">Save & Generate</button>
+                                    <button type="reset" class="btn-fill-lg bg-blue-dark btn-hover-yellow">Reset Form</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% include "tags/footer.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -5,8 +5,9 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
 from .models import AdmitCard, TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentFeeDue
-from .forms import TransferCertificateForm, AcademicFeeForm, FeeReceiptForm
+from .forms import TransferCertificateForm, AcademicFeeForm, FeeReceiptForm, AdmitCardForm
 from student.models import StudentClass, Student
+from django.db import IntegrityError
 
 def administration(request):
     return HttpResponse("Hello")       
@@ -267,3 +268,19 @@ def student_fee_due_list(request):
         'student_fee_due_list.html',
         {'dues': dues}
     )
+
+def create_admit_card_view(request):
+    if request.method == 'POST':
+        form = AdmitCardForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Admit Card generated successfully!")
+                # REDIRECT FIX: Send them back to your existing marksheet dashboard view
+                return redirect('admit-card') 
+            except IntegrityError:
+                form.add_error(None, "An Admit Card already exists for this student in this academic session.")
+    else:
+        form = AdmitCardForm()
+        
+    return render(request, 'create_admit_card.html', {'form': form})
