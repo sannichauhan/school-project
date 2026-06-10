@@ -641,10 +641,11 @@ def test_marks_entry_view(request):
     )
 
 def student_test_report_card_view(request, pk):
-    student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
+    marksheet = get_object_or_404(TestMarkSheet.objects.select_related('student', 'student__admission_class'), pk=pk)
+    student = marksheet.student
     marksheet = get_object_or_404(TestMarkSheet, pk=pk)
     marks = TestSubjectMark.objects.filter(marksheet=marksheet)
-    exams = Exam.objects.filter(marksheet__student=student).distinct().order_by('id')
+    exams = Exam.objects.filter(testmarksheet__student=student).distinct().order_by('id')
 
     # Calculate totals dynamically
     total_max = marks.aggregate(Sum('max_marks'))['max_marks__sum'] or 0
@@ -691,6 +692,11 @@ def student_test_report_card_view(request, pk):
 
     return render(request, "test_report_card.html", context)
 
+# def all_student_test_marksheet(request):
+#     students = Student.objects.all()    
+#     return render(request, 'all-student-test-marksheet.html', {'students': students})
+
 def all_student_test_marksheet(request):
-    students = Student.objects.all()    
-    return render(request, 'all-student-test-marksheet.html', {'students': students})
+    marksheets = TestMarkSheet.objects.select_related('student', 'student__admission_class', 'exam_name').all()
+    # The key here MUST match the template loop variable
+    return render(request, 'all-student-test-marksheet.html', {'marksheets': marksheets})

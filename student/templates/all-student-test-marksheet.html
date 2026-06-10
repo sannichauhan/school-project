@@ -2,21 +2,11 @@
 
 {% block content %}
     <div id="wrapper" class="wrapper bg-ash">
-       <!-- Header Menu Area Start Here -->
-        {% include "tags/header.html" %}
-        <!-- Header Menu Area End Here -->
-         
-        <!-- Page Area Start Here -->
+       {% include "tags/header.html" %}
         <div class="dashboard-page-one">
-            <!-- Sidebar Area Start Here -->
             {% include "tags/sidebar.html" %}
-            <!-- Sidebar Area End Here -->
             <div class="dashboard-content-one">
-                <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
-                <!-- Breadcubs Area End Here -->
-
-                <!-- Student Promotion Area Start Here -->
                 <div class="card height-auto">
                     <div class="card-body">
                         <div class="heading-layout1">
@@ -41,9 +31,9 @@
                             </div>
                         </form>
                         
-                               <div class="table-responsive">
-                                    <table class="table display data-table text-nowrap">
-                                    <thead>
+                        <div class="table-responsive">
+                            <table class="table display data-table text-nowrap">
+                                <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Student</th>
@@ -52,33 +42,34 @@
                                         <th>Exam Term</th>
                                         <th>Actions</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for item in students %}   
-                                        <tr>
-                                            <td>{{ forloop.counter }}</td>
-                                            <td>{{item.name}}</td>
-                                            <td>{{item.admission_class}}</td>
-                                            <td>{{item.calculate_percentage}}%</td>
-                                            <td>{{ marksheet.exam_name.name }}</td>
-                                            <td>
-                                                <a href="{% url 'student_test_report_card' item.pk %}" class="btn btn-md btn-info">View result</a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                           
+                                </thead>
+                                <tbody>
+                                {% for item in marksheets %}  
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ item.student.name }}</td>
+                                        
+                                        <td>{{ item.student.admission_class.name }}</td>
+                                        
+                                        <td>{{ item.percentage }}%</td>
+                                        
+                                        <td>{{ item.exam_name.name }}</td>
+                                        <td>
+                                            <a href="{% url 'student_test_report_card' item.pk %}" class="btn btn-md btn-info">View result</a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No student data available.</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <!-- Student Promotion Area End Here -->
-                                 
-                <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
-                <!-- Footer Area End Here -->
-            </div>
+                </div>
         </div>
-        <!-- Page Area End Here -->
-    </div>
+        </div>
 {% endblock content %}

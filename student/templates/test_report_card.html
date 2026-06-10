@@ -101,19 +101,26 @@
             padding-top: 40px;
             margin: 0 10px;
         }
+        @page {
+            margin: 3.16mm 10.16mm 10.16mm 10.16mm;
+        }
     </style>
 </head>
 <body>
+
+<div class="no-print" style="max-width: 1000px; margin: 20px auto; text-align: center;">
+    <a href="{% url 'all_student_test_marksheet' %}" class="btn-secondary" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px;">Back to List</a>
+    <button onclick="window.print()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        Print Report Card / Save as PDF
+    </button>
+</div>    
 
 <div class="report-card">
     <div class="header">
         <h1>NAV CHETANA PUBLIC SCHOOL</h1>
         <p>CHHAHUN KUSHINAGAR (U.P) - 274303</p>
         <p class="session">ACADEMIC SESSION - {{ marksheet.student.session }}</p>
-        <p class="title">{{ exams.name }}</p>
-        {% for exam in exams %}
-            <p class="title">{{ exams.name }}</p>
-        {% endfor %}
+        <p class="title">{{ marksheet.exam_name.name }}</p>
     </div>
 
     <div class="student-info">
