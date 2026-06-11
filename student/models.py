@@ -164,6 +164,36 @@ class Student(models.Model):
     student_photo = models.ImageField(upload_to='students/', blank=True, null=True)
     conveyance_facility = models.BooleanField(default=False)
 
+
+    @property
+    def current_academic_record(self):
+        """Returns the active session and class details for the student"""
+        return self.academic_history.filter(is_active=True).first()
+
+    @property
+    def current_class(self):
+        record = self.current_academic_record
+        return record.student_class if record else self.admission_class
+
+    @property
+    def current_session(self):
+        record = self.current_academic_record
+        return record.session if record else self.session
+
+    # Automatically create the initial History record upon registration
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            StudentAcademicHistory.objects.create(
+                student=self,
+                session=self.session,
+                student_class=self.admission_class,
+                roll_number=self.roll_number,
+                is_active=True
+            )
+
     @property
     def calculate_percentage(self):
         marks = Marks.objects.filter(marksheet__student=self)
@@ -515,3 +545,89 @@ class TestSubjectMark(models.Model):
             return "D"
 
         return "F"
+
+
+class StudentAcademicHistory(models.Model):
+    """Tracks which class and section a student belonged to in any given session"""
+    student = models.ForeignKey(
+        'Student', 
+        on_delete=models.CASCADE, 
+        related_name='academic_history'
+    )
+    session = models.ForeignKey(
+        AcademicSession, 
+        on_delete=models.CASCADE, 
+        related_name='student_enrollments'
+    )
+    student_class = models.ForeignKey(
+        StudentClass, 
+        on_delete=models.CASCADE, 
+        related_name='class_enrollments'
+    )
+    roll_number = models.IntegerField()
+    is_active = models.BooleanField(
+        default=True, 
+        help_text="Designates if this is the student's current active session/class."
+    )
+    promoted_status = models.CharField(
+        max_length=20,
+        choices=[('PROMOTED', 'Promoted'), ('DETAINED', 'Detained'), ('PENDING', 'Pending')],
+        default='PENDING'
+    )
+
+    class Meta:
+        unique_together = ['student', 'session']
+        verbose_name = "Student Academic History"
+        verbose_name_plural = "Student Academic Histories"
+
+    def __str__(self):
+        return f"{self.student.name} - {self.student_class} ({self.session})"
+
+    def save(self, *args, **kwargs):
+        # Handle automatic roll number generation if not provided
+        if not self.roll_number or self.roll_number == 0:
+            last_record = StudentAcademicHistory.objects.filter(
+                student_class=self.student_class,
+                session=self.session
+            ).order_by('-roll_number').first()
+            
+            if last_record and last_record.roll_number:
+                self.roll_number = last_record.roll_number + 1
+            else:
+                self.roll_number = 1001
+        
+        # Ensure only one record is 'active' for a student at a time
+        if self.is_active:
+            StudentAcademicHistory.objects.filter(student=self.student, is_active=True).exclude(pk=self.pk).update(is_active=False)
+            
+        super().save(*args, **kwargs)
+
+
+class StudentPromotionLog(models.Model):
+    """Logs the explicit transaction of moving students from one session/class to the next"""
+    student = models.ForeignKey(
+        'Student', 
+        on_delete=models.CASCADE, 
+        related_name='promotions'
+    )
+    from_session = models.ForeignKey(
+        AcademicSession, on_delete=models.CASCADE, related_name='promotions_from'
+    )
+    to_session = models.ForeignKey(
+        AcademicSession, on_delete=models.CASCADE, related_name='promotions_to'
+    )
+    from_class = models.ForeignKey(
+        StudentClass, on_delete=models.CASCADE, related_name='promoted_from'
+    )
+    to_class = models.ForeignKey(
+        StudentClass, on_delete=models.CASCADE, related_name='promoted_to'
+    )
+    promoted_by = models.CharField(max_length=100, blank=True, null=True) # Optional: track user
+    promotion_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Promoted {self.student.name} to {self.to_class} ({self.to_session})"
+        
+    def clean(self):
+        if self.from_session == self.to_session:
+            raise ValidationError("Source and target sessions cannot be the same.")

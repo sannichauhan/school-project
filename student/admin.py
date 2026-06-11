@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
+from .services import promote_student_list
 
 # --- Inlines for a better UI ---
 
@@ -44,9 +45,41 @@ class AcademicSessionAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at')
+    list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
     list_filter = ('admission_class', 'gender', 'religion')
     search_fields = ('name', 'adhaar_number', 'contact_number')
+    actions = ['bulk_promote_to_next_class']
+
+    @admin.action(description='Promote selected students to next session')
+    def bulk_promote_to_next_class(self, request, queryset):
+        # For a production setup, you would typically redirect to an intermediate page 
+        # to pick the specific target class/session. Here is a simplified version:
+        
+        student_ids = list(queryset.values_list('id', flat=True))
+        
+        # Hardcoded example IDs for demonstration; replace these with dynamic inputs
+        try:
+            target_class_id = 2   # e.g., ID of 'Grade 2'
+            target_session_id = 2 # e.g., ID of '2026-2027'
+            
+            promote_student_list(
+                student_ids=student_ids,
+                target_class_id=target_class_id,
+                target_session_id=target_session_id,
+                user_name=request.user.username
+            )
+            
+            self.message_user(
+                request, 
+                f"Successfully promoted {len(student_ids)} students.", 
+                messages.SUCCESS
+            )
+        except Exception as e:
+            self.message_user(
+                request, 
+                f"Error during promotion: {str(e)}", 
+                messages.ERROR
+            )
     
     # Organize fields into sections (Fieldsets)
     fieldsets = (
