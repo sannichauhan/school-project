@@ -108,10 +108,7 @@ class TransferCertificate(models.Model):
         max_length=100,
         blank=True,
         null=True
-    )
-
-
-   
+    )   
 
     total_working_days = models.IntegerField(
         default=0
