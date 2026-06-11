@@ -46,3 +46,6 @@ build/
 # System
 .DS_Store
 Thumbs.db
+
+# Setting 
+school_app/settings.py
