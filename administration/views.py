@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate, login
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -204,8 +203,12 @@ def fee_receipt_create(request):
         form = FeeReceiptForm(request.POST)
 
         if form.is_valid():
-            form.save()
-            return redirect('fee_receipt_list')
+            try:
+                form.save()
+                return redirect('fee_receipt_list')
+            except Exception as e:
+                return HttpResponse(str(e))
+
 
     else:
         form = FeeReceiptForm()
@@ -253,7 +256,7 @@ def fee_receipt_list(request):
 
 
 def fee_receipt_details(request, pk):
-    receipt = FeeReceipt.objects.get(pk=pk)
+    receipt = get_object_or_404(FeeReceipt, pk=pk)
 
     return render(request, 'fee_receipt_details.html', {
         'receipt': receipt
