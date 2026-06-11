@@ -25,6 +25,11 @@
                            
                         </div>
                         <div class="single-info-details">
+                            {% if student.student_photo %}
+                                <img src="{{ student.student_photo.url }}" alt="Student Photo">
+                            {% else %}
+                                <img src="/static/img/admin.jpg" alt="No Photo">
+                            {% endif %}
                             <div class="item-img">
                                 <img src="{{ students.student_photo.url }}" alt="student">
                             </div>
