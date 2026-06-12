@@ -44,42 +44,6 @@ class AcademicSession(models.Model):
     def __str__(self):
         return f"{self.start_year}-{self.end_year}"
     
-class StudentPromotion(models.Model):
-
-    current_session = models.ForeignKey(
-        AcademicSession,
-        on_delete=models.CASCADE,
-        related_name="current_promotions"
-    )
-
-    promote_session = models.ForeignKey(
-        AcademicSession,
-        on_delete=models.CASCADE,
-        related_name="next_promotions"
-    )
-
-    promotion_from_class = models.ForeignKey(
-        StudentClass,
-        on_delete=models.CASCADE,
-        related_name="promotion_from"
-    )
-
-    promotion_to_class = models.ForeignKey(
-        StudentClass,
-        on_delete=models.CASCADE,
-        related_name="promotion_to"
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    def __str__(self):
-
-        return (
-            f"{self.promotion_from_class} "
-            f"-> {self.promotion_to_class}"
-        )
 
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
