@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz
 # DEBUG = True
 # ALLOWED_HOSTS = ["*"]
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = [
     "navchetanapublicschool.com",
     "www.navchetanapublicschool.com",
