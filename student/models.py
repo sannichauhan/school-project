@@ -6,18 +6,22 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.db.models import IntegerField, Sum, F
 
+class Section(models.Model):
+    name = models.CharField(max_length=10, unique=True, help_text="e.g. A, B, C")
+    
+    def __str__(self):
+        return self.name
+
 class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
     name = models.CharField(max_length=50)
-    section = models.CharField(max_length=10, blank=True, null=True)
 
     class Meta:
         verbose_name = "Class"
         verbose_name_plural = "Classes"
-        unique_together = ['name', 'section']
 
     def __str__(self):
-        return f"{self.name} {self.section or ''}".strip()
+        return f"{self.name}".strip()
 
 
 class Address(models.Model):
@@ -35,16 +39,61 @@ class Address(models.Model):
         return f"{self.address_line}, {self.district}, {self.pin_code}, {self.state}"
 
 class AcademicSession(models.Model):
-    start_year=models.IntegerField()
-    end_year=models.IntegerField()
-    
-    class  Meta:
-        unique_together = ("start_year", "end_year")
+    name = models.CharField(max_length=20, help_text="e.g., 2026-2027", null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.start_year}-{self.end_year}"
-    
+        return self.name
 
+    
+    class  Meta:
+        unique_together = ("start_date", "end_date")
+    
+class StudentPromotion(models.Model):
+
+    current_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.CASCADE,
+        related_name="current_promotions"
+    )
+
+    promote_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.CASCADE,
+        related_name="next_promotions"
+    )
+
+    promotion_from_class = models.ForeignKey(
+        StudentClass,
+        on_delete=models.CASCADE,
+        related_name="promotion_from"
+    )
+
+    promotion_to_class = models.ForeignKey(
+        StudentClass,
+        on_delete=models.CASCADE,
+        related_name="promotion_to"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"{self.promotion_from_class} "
+            f"-> {self.promotion_to_class}"
+        )
+class TransportRoute(models.Model):
+    route_name = models.CharField(max_length=100)
+    yearly_fee = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.route_name
+    
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
     RELIGION_CHOICES = [
@@ -61,6 +110,16 @@ class Student(models.Model):
     SCHOOL_CHOICES = [
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
         ('KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
+    ]
+    
+    FEE_TYPE_CHOICES = [
+        ('QUARTERLY', 'Quarterly'),
+        ('HALF_YEARLY', 'Half Yearly'),
+        ('YEARLY', 'Yearly'),
+    ]
+    TRANSPORT_INSTALLMENT_CHOICES = [
+        ('1_INSTALLMENT', 'Single Installment'),
+        ('2_INSTALLMENT', 'Two Installments'),
     ]
 
     # Identity & Basic Info
@@ -83,8 +142,14 @@ class Student(models.Model):
     # Academic Info
     admission_class = models.ForeignKey(
     StudentClass, 
-    on_delete=models.PROTECT,  # This prevents deleting a Class if students are in it
-    related_name='students'
+        on_delete=models.PROTECT,  # This prevents deleting a Class if students are in it
+        related_name='students'
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
     )
     roll_number = models.IntegerField(
         default=0
@@ -128,6 +193,9 @@ class Student(models.Model):
     student_photo = models.ImageField(upload_to='students/', blank=True, null=True)
     conveyance_facility = models.BooleanField(default=False)
 
+    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='QUARTERLY')
+    transport_route = models.ForeignKey(TransportRoute, on_delete=models.SET_NULL, null=True, blank=True)
+    transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
 
     @property
     def current_academic_record(self):

@@ -12,6 +12,9 @@ def main_home_page(request):
 
 
 def login_page(request):
+    is_authenticated = request.user.is_authenticated
+    if is_authenticated:
+        return redirect('dashboard')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():

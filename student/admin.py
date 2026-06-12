@@ -1,5 +1,9 @@
+from pyexpat.errors import messages
+
 from django.contrib import admin
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
+
+from fee.models import FeeLedger
+from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
 from .services import promote_student_list
 
 # --- Inlines for a better UI ---
@@ -34,21 +38,32 @@ class MarksInline(admin.TabularInline):
 
 @admin.register(StudentClass)
 class StudentClassAdmin(admin.ModelAdmin):
-    list_display = ('name', 'section')
+    list_display = ('name',)
+    search_fields = ('name',)
+    
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    list_display = ('name',)
     search_fields = ('name',)
 
 @admin.register(AcademicSession)
 class AcademicSessionAdmin(admin.ModelAdmin):
-    list_display = ('start_year', 'end_year')
-    search_fields = ('start_year', 'end_year')
-    ordering = ('-start_year',)
+    list_display = ('name', 'start_date', 'end_date')
+    search_fields = ('start_date', 'end_date')
+    ordering = ('-start_date',)
 
+class FeeLedgerInline(admin.TabularInline):
+    model = FeeLedger
+    extra = 0
+    readonly_fields = ('paid_amount', 'remaining_amount', 'status')
+    
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
     list_filter = ('admission_class', 'gender', 'religion')
     search_fields = ('name', 'adhaar_number', 'contact_number')
     actions = ['bulk_promote_to_next_class']
+    inlines = [FeeLedgerInline]
 
     @admin.action(description='Promote selected students to next session')
     def bulk_promote_to_next_class(self, request, queryset):
@@ -87,10 +102,13 @@ class StudentAdmin(admin.ModelAdmin):
             'fields': ('name', 'student_photo', 'date_of_birth', 'gender', 'religion', 'category', 'adhaar_number', 'pen_number')
         }),
         ('Academic & Contact', {
-            'fields': ('admission_class', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility')
+            'fields': ('admission_class','section', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility','transport_route')
         }),
         ('Addresses', {
             'fields': ('permanent_address', 'local_address')
+        }),
+        ('Fee Information', {
+            'fields': ('fee_type', 'transport_installment_type')
         }),
     )
 

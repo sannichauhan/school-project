@@ -1,4 +1,7 @@
 from django import forms
+
+from django.forms import modelformset_factory
+
 from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
 
 class AddressForm(forms.ModelForm):
@@ -21,6 +24,7 @@ class StudentAllInOneForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_class': forms.Select(attrs={'class': 'select2'}),
+            'section': forms.Select(attrs={'class': 'select2'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'select2'}),
             'religion': forms.Select(attrs={'class': 'select2'}),
@@ -37,20 +41,30 @@ class StudentAllInOneForm(forms.ModelForm):
             'father_occupation': forms.TextInput(attrs={'class': 'form-control'}),
             'mother_occupation': forms.TextInput(attrs={'class': 'form-control'}),
             'session': forms.Select(attrs={'class': 'select2'}),
+            'transport_route': forms.Select(attrs={'class': 'select2'}),
+            'fee_type': forms.Select(attrs={'class': 'form-control'}),
+            'transport_installment_type': forms.Select(attrs={'class': 'form-control'}),
         }
         
 class StudentClassForm(forms.ModelForm):
     class Meta:
         model = StudentClass
-        fields = ['name', 'section']
+        fields = ['name']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'e.g. Class 10, Nursery, Grade 1'
             }),
-            'section': forms.TextInput(attrs={
+        }
+        
+class SectionForm(forms.ModelForm):
+    class Meta:
+        model = Section
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={
                 'class': 'form-control', 
-                'placeholder': 'e.g. A, B, Blue'
+                'placeholder': 'e.g. A, B, C'
             }),
         }
 
@@ -113,27 +127,27 @@ class ExamForm(forms.ModelForm):
 class AcademicSessionForm(forms.ModelForm):
     class Meta:
         model = AcademicSession
-        fields = ['start_year', 'end_year']
+        fields = ['name', 'start_date', 'end_date']
         widgets = {
-            'start_year': forms.NumberInput(attrs={
+            'start_date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Start Year'
+                'placeholder': 'Start Date'
             }),
-            'end_year': forms.NumberInput(attrs={
+            'end_date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'End Year'
+                'placeholder': 'End Date'
             }),
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        start_year = cleaned_data.get("start_year")
-        end_year = cleaned_data.get("end_year")
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
 
-        if start_year and end_year:
-            if end_year <= start_year:
+        if start_date and end_date:
+            if end_date <= start_date:
                 raise forms.ValidationError(
-                    "End year must be greater than start year."
+                    "End date must be greater than start date."
                 )
 
         return cleaned_data

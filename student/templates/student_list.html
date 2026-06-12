@@ -83,6 +83,7 @@
                                         {% if student.id %}
                                             <a href="{% url 'student-details' student.pk %}" class="btn btn-sm btn-info">Details</a>
                                             <a href="{% url 'student-update' student.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="{% url 'student_fee_dashboard' student.pk %}" class="btn btn-sm btn-warning">Fee</a>
                                         {% endif %}
                                     </td>
                                 </tr>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Process Fee Payment</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="bg-blue-600 p-6 text-white">
+            <h2 class="text-xl font-bold">Collect Student Fee</h2>
+            <p class="text-blue-100 text-sm mt-1">Processing payment for {{ ledger.student.first_name }} {{ ledger.student.last_name }}</p>
+        </div>
+
+        <form method="POST" class="p-6 space-y-4">
+            {% csrf_token %}
+            
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm space-y-1.5">
+                <p class="text-gray-500">Component: <span class="font-semibold text-gray-800">{{ ledger.description }}</span></p>
+                <p class="text-gray-500">Net Due Amount: <span class="font-bold text-rose-600 text-base">₹{{ ledger.remaining_amount }}</span></p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Amount to Pay (₹)</label>
+                <input type="number" step="0.01" name="amount_paid" max="{{ ledger.remaining_amount }}" value="{{ ledger.remaining_amount }}" 
+                       class="w-full border border-gray-300 rounded-lg p-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden" required>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Payment Mode</label>
+                <select name="payment_mode" class="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-hidden" required>
+                    <option value="CASH">Cash</option>
+                    <option value="ONLINE">Online / UPI</option>
+                    <option value="CHEQUE">Cheque</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Transaction ID / Reference (Optional)</label>
+                <input type="text" name="transaction_id" placeholder="e.g., TXN1298493" 
+                       class="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+            </div>
+
+            <div class="pt-2 flex gap-3">
+                <a href="{% url 'student_fee_dashboard' ledger.student.id %}" class="w-1/2 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg font-semibold transition text-sm">
+                    Cancel
+                </a>
+                <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-semibold shadow-md transition text-sm">
+                    Submit Payment
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

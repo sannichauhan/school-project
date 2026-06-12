@@ -27,6 +27,7 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("administration/", include("administration.urls")),
     path("", include("frontend.urls")),
+    path("student/fee/", include("fee.urls")),
 
 ]
 if settings.DEBUG:

@@ -573,7 +573,7 @@ def academic_session_create(request):
 
 
 def academic_session_list(request):
-    sessions = AcademicSession.objects.all().order_by('-start_year')
+    sessions = AcademicSession.objects.all().order_by('-start_date')
 
     return render(request, 'session-list.html', {
         'sessions': sessions
