@@ -1,0 +1,181 @@
+{% extends 'base2.html' %} 
+{% block extra_css %}
+<script>
+        window.tailwind = {
+            config: {
+                important: true,
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+   
+    
+{% endblock %}
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
+
+    <div class="w-full">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-4 mb-4 text-white bg-green-600 rounded-lg shadow">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">{{ student.name }}</h1>
+                <p class="text-gray-500 mt-1">Roll Number: <span class="font-semibold text-gray-700">{{ student.roll_number|default:"N/A" }}</span> | Class: {{ student.current_class.name }} | Section: {{ student.section.name }}</p>
+                <div class="mt-2 flex gap-2">
+                    <span class="px-3 py-1 text-xl font-semibold bg-purple-100 text-purple-800 rounded-full">Plan: {{ student.get_fee_type_display }}</span>
+                    {% if student.conveyance_facility %}
+                        <span class="px-3 py-1 text-xl font-semibold bg-blue-100 text-blue-800 rounded-full">Transport: {{ student.transport_route.route_name }}</span>
+                    {% else %}
+                        <span class="px-3 py-1 text-xl font-semibold bg-gray-100 text-gray-600 rounded-full">No Transport</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-lg text-center min-w-[140px]">
+                    <p class="text-2xl text-emerald-700 uppercase font-bold tracking-wider">Total Paid</p>
+                    <p class="text-4xl font-black text-emerald-600 mt-1">₹{{ total_paid }}</p>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 p-4 rounded-lg text-center min-w-[140px]">
+                    <p class="text-2xl text-rose-700 uppercase font-bold tracking-wider">Total Due</p>
+                    <p class="text-4xl font-black text-rose-600 mt-1">₹{{ total_due }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                📂 Academic Fee Schedule
+            </h2>
+            <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 text-xxl font-semibold">
+                            <th class="p-4">Installment / Description</th>
+                            <th class="p-4">Due Date</th>
+                            <th class="p-4">Total Amount</th>
+                            <th class="p-4">Paid Amount</th>
+                            <th class="p-4">Remaining</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700 text-xxl">
+                        {% for ledger in academic_ledgers %}
+                        <tr>
+                            <td class="p-4 font-medium">{{ ledger.description }}</td>
+                            <td class="p-4 text-gray-500">{{ ledger.due_date }}</td>
+                            <td class="p-4 font-semibold">₹{{ ledger.total_amount }}</td>
+                            <td class="p-4 text-emerald-600">₹{{ ledger.paid_amount }}</td>
+                            <td class="p-4 text-rose-600 font-bold">₹{{ ledger.remaining_amount }}</td>
+                            <td class="p-4">
+                                {% if ledger.status == 'PAID' %}
+                                    <span class="px-2 py-1 text-xl bg-green-100 text-green-700 rounded-md font-bold">PAID</span>
+                                {% elif ledger.status == 'PARTIALLY_PAID' %}
+                                    <span class="px-2 py-1 text-xl bg-amber-100 text-amber-700 rounded-md font-bold">PARTIAL</span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xl bg-red-100 text-red-700 rounded-md font-bold">PENDING</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 text-center">
+                                {% if ledger.status != 'PAID' %}
+                                    <a href="{% url 'collect_fee' ledger.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-medium text-xl shadow transition">Pay Fee</a>
+                                {% else %}
+                                    <span class="text-gray-400 text-xl">Settled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="p-4 text-center text-gray-400">No Academic fee generated. Double check Base Fee Structure.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if student.conveyance_facility %}
+        <div>
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                🚌 Transport Fee Schedule
+            </h2>
+            <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 text-xxl font-semibold">
+                            <th class="p-4">Installment / Description</th>
+                            <th class="p-4">Due Date</th>
+                            <th class="p-4">Total Amount</th>
+                            <th class="p-4">Paid Amount</th>
+                            <th class="p-4">Remaining</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700 text-xxl">
+                        {% for ledger in transport_ledgers %}
+                        <tr>
+                            <td class="p-4 font-medium">{{ ledger.description }}</td>
+                            <td class="p-4 text-gray-500">{{ ledger.due_date }}</td>
+                            <td class="p-4 font-semibold">₹{{ ledger.total_amount }}</td>
+                            <td class="p-4 text-emerald-600">₹{{ ledger.paid_amount }}</td>
+                            <td class="p-4 text-rose-600 font-bold">₹{{ ledger.remaining_amount }}</td>
+                            <td class="p-4">
+                                {% if ledger.status == 'PAID' %}
+                                    <span class="px-2 py-1 text-xl bg-green-100 text-green-700 rounded-md font-bold">PAID</span>
+                                {% elif ledger.status == 'PARTIALLY_PAID' %}
+                                    <span class="px-2 py-1 text-xl bg-amber-100 text-amber-700 rounded-md font-bold">PARTIAL</span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xl bg-red-100 text-red-700 rounded-md font-bold">PENDING</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 text-center">
+                                {% if ledger.status != 'PAID' %}
+                                    <a href="{% url 'collect_fee' ledger.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-medium text-xl shadow transition">Pay Fee</a>
+                                {% else %}
+                                    <span class="text-gray-400 text-xl">Settled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="p-4 text-center text-gray-400">Transport schedule routing error.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+<!-- Student Details Area End Here -->
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}
