@@ -1,6 +1,8 @@
 from django import forms
-from .models import Section, Student, Address, StudentClass, MarkSheet, StudentPromotion, Subject, Exam, TestSubjectMark, AcademicSession
+
 from django.forms import modelformset_factory
+
+from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -81,23 +83,6 @@ class MarkSheetForm(forms.ModelForm):
             'written_marks': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-
-
-class StudentPromotionForm(forms.ModelForm):
-    class Meta:
-        model = StudentPromotion
-        fields = "__all__"
-
-
-class StudentPromotionForm(forms.ModelForm):
-    class Meta:
-        model = StudentPromotion
-        fields = [
-            'current_session',
-            'promote_session',
-            'promotion_from_class',
-            'promotion_to_class'
-        ]
 
 class SubjectForm(forms.ModelForm):
     class Meta:
@@ -185,3 +170,55 @@ class TestSubjectMarkForm(forms.ModelForm):
             'subject': forms.HiddenInput(),
             'max_marks': forms.HiddenInput()
         }
+
+class StudentPromotionForm(forms.Form):
+    current_session = forms.ModelChoiceField(
+        queryset=AcademicSession.objects.all(),
+        widget=forms.Select(attrs={'class': 'select2', 'id': 'id_current_session'}),
+        required=True
+    )
+    promotion_from_class = forms.ModelChoiceField(
+        queryset=StudentClass.objects.all(),
+        widget=forms.Select(attrs={'class': 'select2', 'id': 'id_from_class'}),
+        required=True
+    )
+    promote_session = forms.ModelChoiceField(
+        queryset=AcademicSession.objects.all(),
+        widget=forms.Select(attrs={'class': 'select2'}),
+        required=True
+    )
+    promotion_to_class = forms.ModelChoiceField(
+        queryset=StudentClass.objects.all(),
+        widget=forms.Select(attrs={'class': 'select2'}),
+        required=True
+    )
+    # This field will hold the list of students matching the current session/class
+    students = forms.ModelMultipleChoiceField(
+        queryset=StudentAcademicHistory.objects.none(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'student-checkbox'}),
+        required=False,
+        help_text="Select the specific students you want to promote."
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Dynamically filter students if session and class are passed
+        current_session_id = kwargs.pop('current_session_id', None)
+        from_class_id = kwargs.pop('from_class_id', None)
+        
+        super().__init__(*args, **kwargs)
+        
+        if current_session_id and from_class_id:
+            self.fields['students'].queryset = StudentAcademicHistory.objects.filter(
+                session_id=current_session_id,
+                student_class_id=from_class_id,
+                is_active=True
+            ).select_related('student')
+            
+    def clean(self):
+        cleaned_data = super().clean()
+        current_session = cleaned_data.get('current_session')
+        promote_session = cleaned_data.get('promote_session')
+
+        if current_session and promote_session and current_session == promote_session:
+            raise forms.ValidationError("Current session and Promote session cannot be the same.")
+        return cleaned_data

@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Sum
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark, AcademicSession
 from .serializers import (
     StudentClassSerializer, AddressSerializer, StudentSerializer,
     SubjectSerializer, ExamSerializer, MarkSheetSerializer, MarksSerializer,
@@ -11,10 +11,9 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from django.db import transaction
-from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm
-from django.contrib import messages
-from django.db.models import Sum, F
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark, AcademicSession, StudentAcademicHistory, StudentPromotionLog
+from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
+
 
 class StudentClassViewSet(viewsets.ModelViewSet):
     queryset = StudentClass.objects.all()
@@ -120,6 +119,8 @@ def student_registration_view(request):
                     student.permanent_address = perm_address
                     student.local_address = local_address
                     student.save()
+
+                    
                     
                     return redirect(request.path) # Change to your list view
             except Exception as e:
@@ -432,51 +433,93 @@ def all_students_marksheet_view(request):
 
 def student_promotion_view(request):
 
-    sessions = AcademicSession.objects.all()
-    classes = StudentClass.objects.all()
+    # Standardize fetching parameters from both POST and GET
+    current_session_id = request.POST.get('current_session') or request.GET.get('current_session')
+    from_class_id = request.POST.get('promotion_from_class') or request.GET.get('promotion_from_class')
 
-    if request.method == "POST":
-        current_session = request.POST.get("current_session")
-        promote_session = request.POST.get("promote_session")
-        promotion_from_class = request.POST.get("promotion_from_class")
-        promotion_to_class = request.POST.get("promotion_to_class")
+    # Ensure IDs are converted to integers safely if they exist
+    try:
+        current_session_id = int(current_session_id) if current_session_id else None
+        from_class_id = int(from_class_id) if from_class_id else None
+    except ValueError:
+        current_session_id = None
+        from_class_id = None
 
-        current_session_obj = AcademicSession.objects.get(id=current_session)
-        promote_session_obj = AcademicSession.objects.get(id=promote_session)
-
-        from_class = StudentClass.objects.get(id=promotion_from_class)
-        to_class = StudentClass.objects.get(id=promotion_to_class)
-
-        StudentPromotion.objects.create(
-            current_session=current_session_obj,
-            promote_session=promote_session_obj,
-            promotion_from_class=from_class,
-            promotion_to_class=to_class
+    if request.method == 'POST':
+        form = StudentPromotionForm(
+            request.POST, 
+            current_session_id=current_session_id, 
+            from_class_id=from_class_id
         )
+        
+        if 'fetch_students' in request.POST:
+            # Force re-evaluation of the form with initial values to show dropdown selections
+            form = StudentPromotionForm(
+                current_session_id=current_session_id, 
+                from_class_id=from_class_id, 
+                initial=request.POST
+            )
+        elif form.is_valid():
+            curr_session = form.cleaned_data['current_session']
+            prom_session = form.cleaned_data['promote_session']
+            from_cls = form.cleaned_data['promotion_from_class']
+            to_cls = form.cleaned_data['promotion_to_class']
+            selected_histories = form.cleaned_data['students']
 
-        students = Student.objects.filter(
-            admission_class=from_class,
-            session=current_session_obj
-        )
+            if not selected_histories:
+                messages.error(request, "Please select at least one student to promote.")
+            else:
+                try:
+                    with transaction.atomic():
+                        promoted_count = 0
+                        for history in selected_histories:
+                            if StudentAcademicHistory.objects.filter(student=history.student, session=prom_session).exists():
+                                continue
 
-        total = students.count()
+                            history.promoted_status = 'PROMOTED'
+                            history.save()
 
-        for student in students:
-            student.admission_class = to_class
-            student.session = promote_session_obj
-            student.roll_number = 0
-            student.save()
+                            StudentAcademicHistory.objects.create(
+                                student=history.student,
+                                session=prom_session,
+                                student_class=to_cls,
+                                is_active=True,
+                                promoted_status='PENDING'
+                            )
 
-        messages.success(
-            request,
-            f"{total} students promoted successfully."
-        )
+                            StudentPromotionLog.objects.create(
+                                student=history.student,
+                                from_session=curr_session,
+                                to_session=prom_session,
+                                from_class=from_cls,
+                                to_class=to_cls,
+                                promoted_by=str(request.user if request.user.is_authenticated else "Admin")
+                            )
+                            promoted_count += 1
 
-        return redirect("student-promotion")
+                    messages.success(request, f"Successfully promoted {promoted_count} students.")
+                    return redirect('promote_students')
+                except Exception as e:
+                    messages.error(request, f"An error occurred: {str(e)}")
+    else:
+        form = StudentPromotionForm(current_session_id=current_session_id, from_class_id=from_class_id)
+
+    # Re-evaluate queryset verification dynamically for the template logic
+    has_students = False
+    if current_session_id and from_class_id:
+        has_students = StudentAcademicHistory.objects.filter(
+            session_id=current_session_id,
+            student_class_id=from_class_id,
+            is_active=True
+        ).exists()
 
     context = {
-        "sessions": sessions,
-        "classes": classes,
+        'sessions': AcademicSession.objects.all(),
+        'classes': StudentClass.objects.all(),
+        'form': form,
+        'has_students': has_students,
+        'current_session_id': current_session_id,
+        'from_class_id': from_class_id,
     }
 
     return render(

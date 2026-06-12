@@ -42,48 +42,71 @@
                         {% endif %}
                         <form method="POST">
                             {% csrf_token %}
-
                             <div class="row">
-
                                 <div class="col-xl-3 col-lg-6 col-12 form-group">
                                     <label>Current Session *</label>
-                                    <select name="current_session" class="select2" required>
+                                    <select name="current_session" id="id_current_session" class="select2" required>
                                         <option value="">Select Session</option>
-
                                         {% for session in sessions %}
-                                        <option value="{{ session.id }}">
+                                        <option value="{{ session.id }}" {% if current_session_id == session.id %}selected{% endif %}>
                                             {{ session }}
                                         </option>
                                         {% endfor %}
-
-                                    </select>
-                                </div>
-
-                                <div class="col-xl-3 col-lg-6 col-12 form-group">
-                                    <label>Promote Session *</label>
-                                    <select name="promote_session" class="select2" required>
-                                        <option value="">Select Session</option>
-
-                                        {% for session in sessions %}
-                                        <option value="{{ session.id }}">
-                                            {{ session }}
-                                        </option>
-                                        {% endfor %}
-
                                     </select>
                                 </div>
 
                                 <div class="col-xl-3 col-lg-6 col-12 form-group">
                                     <label>Promotion From Class *</label>
-                                    <select name="promotion_from_class" class="select2" required>
+                                    <select name="promotion_from_class" id="id_from_class" class="select2" required>
                                         <option value="">Select Class</option>
-
                                         {% for cls in classes %}
-                                        <option value="{{ cls.id }}">
+                                        <option value="{{ cls.id }}" {% if from_class_id == cls.id %}selected{% endif %}>
                                             {{ cls }}
                                         </option>
                                         {% endfor %}
+                                    </select>
+                                </div>
 
+                                <div class="col-xl-6 col-12 form-group mg-t-30">
+                                    <button type="submit" name="fetch_students" class="btn-fill-lg bg-blue-dark text-light" formnovalidate>
+                                        Load Students List
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="mg-v-20">
+
+                            {% if has_students %}
+                            <div class="card bg-light mg-b-20">
+                                <div class="card-body">
+                                    <h4 class="mg-b-15">Select Students to Promote</h4>
+                                    <div class="form-group Checkbox-student-list" style="max-height: 250px; overflow-y: auto;">
+                                        <div class="custom-control custom-checkbox mg-b-10">
+                                            <input type="checkbox" class="custom-control-input" id="selectAllStudents">
+                                            <label class="custom-control-label font-bold" for="selectAllStudents"><strong>Select All Students</strong></label>
+                                        </div>
+                                        
+                                        {% for checkbox in form.students %}
+                                        <div class="custom-control custom-checkbox profile-chk mg-b-5">
+                                            {{ checkbox.tag }}
+                                            <label class="custom-control-label">{{ checkbox.choice_label }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif request.POST or request.GET.current_session %}
+                            <p class="text-danger">No active students found matching the selected class and session.</p>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Promote Session *</label>
+                                    <select name="promote_session" class="select2" required>
+                                        <option value="">Select Session</option>
+                                        {% for session in sessions %}
+                                        <option value="{{ session.id }}">{{ session }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
 
@@ -91,23 +114,17 @@
                                     <label>Promotion To Class *</label>
                                     <select name="promotion_to_class" class="select2" required>
                                         <option value="">Select Class</option>
-
                                         {% for cls in classes %}
-                                        <option value="{{ cls.id }}">
-                                            {{ cls }}
-                                        </option>
+                                        <option value="{{ cls.id }}">{{ cls }}</option>
                                         {% endfor %}
-
                                     </select>
                                 </div>
 
                                 <div class="col-12 form-group mg-t-8">
-                                    <button type="submit"
-                                            class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark">
-                                        Submit
+                                    <button type="submit" class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark">
+                                        Execute Promotion Flow
                                     </button>
                                 </div>
-
                             </div>
                         </form>
                     </div>
@@ -117,8 +134,16 @@
                 <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
                 <!-- Footer Area End Here -->
+                    <script>
+                        document.getElementById('selectAllStudents')?.addEventListener('change', function() {
+                            const checkboxes = document.querySelectorAll('.student-checkbox');
+                            checkboxes.forEach(cb => cb.checked = this.checked);
+                        });
+                    </script>
             </div>
         </div>
         <!-- Page Area End Here -->
     </div>
+
+ 
 {% endblock content %}
