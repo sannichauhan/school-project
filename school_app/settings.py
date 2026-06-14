@@ -25,17 +25,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
-ALLOWED_HOSTS = [
-    "navchetanapublicschool.com",
-    "www.navchetanapublicschool.com",
-    "server17213-10344.hostingprovider.com",
-    "*"
-]
+# DEBUG = True
+# ALLOWED_HOSTS = [
+#     "navchetanapublicschool.com",
+#     "www.navchetanapublicschool.com",
+#     "server17213-10344.hostingprovider.com",
+#     "*"
+# ]
 
-LOGIN_URL = '/login/'
+#test
+
+
+
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -55,7 +60,7 @@ INSTALLED_APPS = [
     "smart_selects",
     "administration",
     "frontend",
-    "fee",
+    "fee"
 ]
 
 REST_FRAMEWORK = {
@@ -99,23 +104,23 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'navcheta_ncps_db',
-        'USER': 'navcheta_ncps_user',
-        'PASSWORD': 'OW)!nY3aT0NsPb@!',
-        'HOST': 'localhost',
-        'PORT': '3306',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'navcheta_ncps_db',
+#         'USER': 'navcheta_ncps_user',
+#         'PASSWORD': 'OW)!nY3aT0NsPb@!',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 # DATABASES = {
 #     'default': {
@@ -164,8 +169,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_ROOT = '/home/navcheta/public_html/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = '/home/navcheta/public_html/static/'
 
 STATICFILES_DIRS = [
     os.path.join(os.path.normpath(BASE_DIR), "static")
