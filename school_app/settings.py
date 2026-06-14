@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
-# DEBUG = True
+# DEBUG = False
 # ALLOWED_HOSTS = [
 #     "navchetanapublicschool.com",
 #     "www.navchetanapublicschool.com",
@@ -36,11 +36,7 @@ ALLOWED_HOSTS = ["*"]
 #     "*"
 # ]
 
-#test
-
-
-
-
+LOGIN_URL = '/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -60,7 +56,7 @@ INSTALLED_APPS = [
     "smart_selects",
     "administration",
     "frontend",
-    "fee"
+    "fee",
 ]
 
 REST_FRAMEWORK = {
@@ -116,22 +112,13 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'navcheta_ncps_db',
 #         'USER': 'navcheta_ncps_user',
-#         'PASSWORD': 'OW)!nY3aT0NsPb@!',
+#         'PASSWORD': '7Mshf.;[8O2Iun2h',
 #         'HOST': 'localhost',
 #         'PORT': '3306',
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'navcheta_ncps',
-#         'USER': 'navcheta_ncps',
-#         'PASSWORD': 'NPlk1IOZ7&vFT6z.',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
+
 
 
 # Password validation
