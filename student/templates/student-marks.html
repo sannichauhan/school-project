@@ -66,6 +66,9 @@
        <div class="col-xl-4">
          <label>Select Exam:</label>
         <select name="exam" class="form-control">
+            <option value="">
+                Select Exam
+            </option>
             {% for e in exams %}
                 <option value="{{ e.id }}">{{ e.name }}</option>
             {% endfor %}

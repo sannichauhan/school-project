@@ -3,7 +3,7 @@ from pyexpat.errors import messages
 from django.contrib import admin
 
 from fee.models import FeeLedger
-from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
+from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .services import promote_student_list
 
 # --- Inlines for a better UI ---
@@ -15,24 +15,38 @@ class AddressInline(admin.StackedInline):
 class MarksInline(admin.TabularInline):
     model = Marks
     extra = 1
+    
+    # 1. Fields list me wahi naam aayenge jo niche defined hain
     fields = [
         'subject',
         'test_marks',
         'max_test_marks',
         'written_marks',
         'max_written_marks',
-        'obtained_total',
-        'max_total',
+        'display_obtained_total',  # Custom method name
+        'display_max_total',       # Custom method name
     ]
 
+    # 2. Jo bhi properties ya custom methods hain, unhe readonly banana zaroori hai
     readonly_fields = [
-        'obtained_total',
-        'max_total',
+        'display_obtained_total',
+        'display_max_total',
     ]
 
-    def total_display(self, obj):
-        return obj.total_marks
-    total_display.short_description = "Total"
+    # 3. Obtained Total dikhane ke liye custom method
+    def display_obtained_total(self, obj):
+        if obj.id: # Agar object database me save hai tabhi total dikhaye
+            return obj.obtained_total
+        return "-"
+    display_obtained_total.short_description = "Obtained Total"
+
+    # 4. Max Total dikhane ke liye custom method
+    def display_max_total(self, obj):
+        if obj.id:
+            return obj.max_total
+        return "-"
+    display_max_total.short_description = "Max Total"
+
 
 # --- Main Admin Classes ---
 
@@ -117,37 +131,29 @@ class SubjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'student_class', 'max_test_marks', 'max_written_marks')
     list_filter = ('student_class',)
 
-@admin.register(MarkSheet)
-class MarkSheetAdmin(admin.ModelAdmin):
-    list_display = ('student', 'exam', 'student_class')
-    list_filter = ('exam', 'student_class')
-    inlines = [MarksInline] # Allows entering marks directly inside the marksheet
-
-    
-
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'academic_year')
+    # 'academic_year' ko badal kar 'academic_session' kar dein
+    list_display = ('name', 'academic_session', 'term') 
+    
+    # Agar aapne list_filter ya search_fields me bhi use kiya hai, toh wahan bhi badlein:
+    list_filter = ('academic_session', 'term')
+    search_fields = ('name',)
 
 # We register Address separately just in case you need to edit an address independently
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     list_display = ('district', 'pin_code', 'state')
 
+@admin.register(MarkSheet)
+class MarkSheetAdmin(admin.ModelAdmin):
+    list_display = ('student', 'exam', 'student_class')
+    list_filter = ('exam', 'student_class')
+    search_fields = ('student__name', 'student__roll_number') # Search bar ke liye (Optional par useful)
+    inlines = [MarksInline]  # Ab ye sahi se kaam karega
 
-# Test MArksheet
-class TestSubjectMarkInline(admin.TabularInline):
-    model = TestSubjectMark
-    extra = 0
+    
 
-@admin.register(TestMarkSheet)
-class TestMarkSheetAdmin(admin.ModelAdmin):
 
-    list_display = (
-        'student',
-        'student_class',
-        'exam_name',
-        'percentage'
-    )
 
-    inlines = [TestSubjectMarkInline]
+

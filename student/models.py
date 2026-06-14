@@ -197,6 +197,27 @@ class Student(models.Model):
     transport_route = models.ForeignKey(TransportRoute, on_delete=models.SET_NULL, null=True, blank=True)
     transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
 
+    
+        
+    def save(self, *args, **kwargs):
+        if not self.roll_number or self.roll_number == 0:
+            # वर्तमान सेशन और क्लास के आखरी छात्र को ढूंढें
+            last_student = Student.objects.filter(
+                admission_class=self.admission_class,
+                session=self.session
+            ).order_by('-roll_number').first()
+            
+            if last_student and last_student.roll_number:
+                self.roll_number = last_student.roll_number + 1
+            else:
+                self.roll_number = 1001 # शुद्ध इंटीजर असाइनमेंट
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.roll_number})"
+    
+
+
     @property
     def current_academic_record(self):
         """Returns the active session and class details for the student"""
@@ -228,29 +249,64 @@ class Student(models.Model):
 
     @property
     def calculate_percentage(self):
-        marks = Marks.objects.filter(marksheet__student=self)
-        obtained = marks.aggregate(total=Sum(F('test_marks') + F('written_marks'), output_field=IntegerField()))['total'] or 0
-        maximum = marks.aggregate(total=Sum(F('max_test_marks') + F('max_written_marks'), output_field=IntegerField()))['total'] or 0
-        if maximum == 0:
-            return 0
-        return round((obtained / maximum) * 100, 2)
+        # 1. Fetch all marks with related data in one go (Same as view)
+        marks_list = Marks.objects.filter(
+            marksheet__student=self
+        ).select_related('marksheet__exam')
+        
+        total_score = 0
+        max_marks = 0
 
-    def save(self, *args, **kwargs):
-        if not self.roll_number or self.roll_number == 0:
-            # वर्तमान सेशन और क्लास के आखरी छात्र को ढूंढें
-            last_student = Student.objects.filter(
-                admission_class=self.admission_class,
-                session=self.session
-            ).order_by('-roll_number').first()
+        for mark in marks_list:
+            # Obtained marks summation
+            total_score += (mark.test_marks or 0) + (mark.written_marks or 0)
             
-            if last_student and last_student.roll_number:
-                self.roll_number = last_student.roll_number + 1
+            # Max marks calculation based on exam name logic (Same as view)
+            exam_name = mark.marksheet.exam.name.lower() if mark.marksheet and mark.marksheet.exam else ""
+            
+            if 'quaterly' in exam_name:
+                max_marks += (mark.max_test_marks or 0)
             else:
-                self.roll_number = 1001 # शुद्ध इंटीजर असाइनमेंट
-        super().save(*args, **kwargs)
+                max_marks += (
+                    (mark.max_test_marks or 0) +
+                    (mark.max_written_marks or 0)
+                )
 
-    def __str__(self):
-        return f"{self.name} ({self.roll_number})"
+        # 2. Percentage calculation
+        if max_marks == 0:
+            return 0
+            
+        return round((total_score / max_marks) * 100, 2)   
+
+    
+    @property
+    def calculate_grade(self):
+        percentage = self.calculate_percentage  # Upar banayi hui property ko call kiya
+        
+        if percentage >= 90:
+            return 'A+'
+        elif percentage >= 80:
+            return 'A'
+        elif percentage >= 70:
+            return 'B'
+        elif percentage >= 60:
+            return 'C'
+        elif percentage >= 50:
+            return 'D'
+        elif percentage >= 33:
+            return 'E'
+        else:
+            return 'F'
+        
+    @property
+    def pass_status(self):
+        percentage = self.calculate_percentage # Purani property se percentage li
+        
+        # Agar 33% se kam hai toh Fail, warna Pass
+        if percentage >= 33:
+            return 'Pass'
+        else:
+            return 'Fail'
     
     
 class Subject(models.Model):
@@ -277,10 +333,19 @@ class Exam(models.Model):
     """Examples: Unit Test 1, Half Yearly, Final Exam"""
     name = models.CharField(max_length=50)
     term = models.CharField(max_length=20, blank=True, null=True) # e.g., Term 1
-    academic_year = models.CharField(max_length=15, default="2025-2026")
+    
+    # CharField ko hata kar ForeignKey add kiye hain
+    academic_session = models.ForeignKey(
+        AcademicSession, 
+        on_delete=models.CASCADE, 
+        related_name="exams",
+        verbose_name="Academic Year",
+        null=True,  
+        blank=True  
+    )
 
     def __str__(self):
-        return f"{self.name} ({self.academic_year})"
+        return f"{self.name} ({self.academic_session.name})"
     
 
 # =========================
@@ -311,11 +376,6 @@ class MarkSheet(models.Model):
         on_delete=models.CASCADE
     )
 
-    @property
-    def calculate_grade(self):
-
-        return grade(self.percentage)
-
     class Meta:
 
         unique_together = ['student', 'exam']
@@ -327,99 +387,47 @@ class MarkSheet(models.Model):
     def __str__(self):
 
         return f"{self.student.name} - {self.exam.name}"
+    
 
-
-    # =========================
-    # OBTAINED MARKS
-    # =========================
-
+    # 1. Total Obtain Marks (Test Marks) nikalne ke liye method
     @property
-    def obtained_marks(self):
+    def total_obtained_marks(self):
+        return sum(mark.obtained_total for mark in self.subject_marks.all())
 
-        total = 0
-
-        for mark in self.subject_marks.all():
-
-            total += mark.obtained_total
-
-        return total
-
-
-    # =========================
-    # GRAND TOTAL MARKS
-    # =========================
-
+    # 2. Total Max Marks nikalne ke liye method
     @property
-    def grand_total_marks(self):
-        total = 0
-        for mark in self.subject_marks.all():
-            total += mark.max_total
-        return total
+    def total_max_marks(self):
+        return sum(mark.max_total for mark in self.subject_marks.all())
 
+    # 3. Percentage Calculate karne ke liye method
+    def calculate_percentage(self):
+        if self.total_max_marks > 0:
+            percentage = (self.total_obtained_marks / self.total_max_marks) * 100
+            return round(percentage, 2)
+        return 0
 
-    # =========================
-    # PERCENTAGE
-    # =========================
-
-    @property
-    def percentage(self):
-
-        if self.grand_total_marks == 0:
-            return 0
-
-        return round(
-            (self.obtained_marks / self.grand_total_marks) * 100,
-            2
-        )
-
-
-    # =========================
-    # PASS / FAIL
-    # =========================
-
-    @property
-    def result(self):
-
-        if self.percentage >= 33:
+    # 4. Pass / Fail Status nikalne ke liye method
+    def result_status(self):
+        if self.calculate_percentage() >= 33:  # 33% passing criteria
             return "Pass"
-
         return "Fail"
 
-
-    # =========================
-    # GRADE
-    # =========================
-
-    @property
-    def grade(self):
-
-        percentage = self.percentage
-
-        if percentage >= 90:
-            return "A+"
-
-        elif percentage >= 80:
-            return "A"
-
-        elif percentage >= 70:
-            return "B"
-
-        elif percentage >= 60:
-            return "C"
-
-        elif percentage >= 50:
-            return "D"
-
-        elif percentage >= 33:
-            return "E"
-
-        return "F"
-
-
+    # 5. Grade nikalne ke liye method
+    def calculate_grade(self):
+        per = self.calculate_percentage()
+        if per >= 85: return "A+"
+        elif per >= 70: return "A"
+        elif per >= 60: return "B"
+        elif per >= 50: return "C"
+        elif per >= 33: return "D"
+        else: return "E (Fail)"
+    
 
 # =========================
 # SUBJECT WISE MARKS
 # =========================
+
+
 
 class Marks(models.Model):
 
@@ -505,80 +513,6 @@ class Marks(models.Model):
             (self.max_written_marks or 0)
         )
 
-
-# Test MarkSheet
-
-
-
-class TestMarkSheet(models.Model):
-    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    exam_name = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    created_at = models.DateField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.student.name} - {self.exam_name}"
-
-    @property
-    def total_obtained(self):
-        return sum(i.obtained_marks for i in self.subject_marks.all())
-
-    @property
-    def total_max(self):
-        return sum(i.max_marks for i in self.subject_marks.all())
-
-    @property
-    def percentage(self):
-        if self.total_max == 0:
-            return 0
-        return round((self.total_obtained / self.total_max) * 100, 2)
-    
-    
-class TestSubjectMark(models.Model):
-
-    marksheet = models.ForeignKey(
-        TestMarkSheet,
-        on_delete=models.CASCADE,
-        related_name='subject_marks'
-    )
-
-    subject = models.ForeignKey(
-        Subject,
-        on_delete=models.CASCADE
-    )
-
-
-    obtained_marks = models.PositiveIntegerField(default=0)
-
-    max_marks = models.PositiveIntegerField(default=15)
-
-    remarks = models.CharField(
-        max_length=100,
-        blank=True
-    )
-
-    class Meta:
-        unique_together = ('marksheet', 'subject')
-
-    @property
-    def grade(self):
-
-        marks = self.obtained_marks
-
-        if marks >= 14:
-            return "A+"
-        elif marks >= 12:
-            return "A"
-        elif marks >= 10:
-            return "B"
-        elif marks >= 8:
-            return "C"
-        elif marks >= 5:
-            return "D"
-
-        return "F"
-
-
 class StudentAcademicHistory(models.Model):
     """Tracks which class and section a student belonged to in any given session"""
     student = models.ForeignKey(
@@ -663,3 +597,4 @@ class StudentPromotionLog(models.Model):
     def clean(self):
         if self.from_session == self.to_session:
             raise ValidationError("Source and target sessions cannot be the same.")
+        

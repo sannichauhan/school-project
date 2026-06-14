@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mid-Term Progress Report</title>
+    <title>Student Progress Report</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,6 +101,11 @@
             padding-top: 40px;
             margin: 0 10px;
         }
+        @media print {
+            .no-print { display: none; }
+            body { background-color: #fff; margin: 0; }
+            .report-card { border: none; box-shadow: none; padding: 0; }
+        }
         @page {
             margin: 3.16mm 10.16mm 10.16mm 10.16mm;
         }
@@ -108,26 +113,37 @@
 </head>
 <body>
 
-<div class="no-print" style="max-width: 1000px; margin: 20px auto; text-align: center;">
-    <a href="{% url 'all_student_test_marksheet' %}" class="btn-secondary" style="text-decoration: none; padding: 10px 20px; background: #6c757d; color: white; border-radius: 5px;">Back to List</a>
-    <button onclick="window.print()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+<div class="no-print" style="max-width: 700px; margin: 20px auto; text-align: center;display:flex; gap:10px;justify-content: center;">
+    <a href="{% url "all-student-test-marksheet" %}" style="padding: 10px 20px; background: #454545; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;text-decoration: none;">
+        Back
+    </a>
+    <a onclick="window.print()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
         Print Report Card / Save as PDF
-    </button>
+    </a>
 </div>    
 
 <div class="report-card">
     <div class="header">
-        <h1>NAV CHETANA PUBLIC SCHOOL</h1>
+        <h1>{{ marksheet.student.choose_school }}</h1>
         <p>CHHAHUN KUSHINAGAR (U.P) - 274303</p>
         <p class="session">ACADEMIC SESSION - {{ marksheet.student.session }}</p>
-        <p class="title">{{ marksheet.exam_name.name }}</p>
+        <p class="title">
+            {% if marksheet.exam.name == "Quaterly" %}
+                    First Unit Test
+            {% elif marksheet.exam.name == "Half Yearly" %}
+                    Second Unit Test
+            {% elif marksheet.exam.name == "Annual" %}
+                    Third Unit Test
+            {% else %}
+            {{ marksheet.exam.name }}  {% endif %}
+        </p>
     </div>
 
-    <div class="student-info">
+    <div class="student-info">        
         <div><span>Student's Name :</span> {{ marksheet.student.name }}</div>
         <div><span>Roll Number :</span> {{ marksheet.student.roll_number }}</div>
         <div><span>Father's Name :</span> {{ marksheet.student.father_name }}</div>
-        <div><span>Class :</span> {{ marksheet.student_class }}</div>
+        <div><span>Class :</span> {{ marksheet.student_class.name }}</div>
         <div><span>Mother's Name :</span> {{ marksheet.student.mother_name }}</div>
         <div><span>Date Of Birth :</span> {{ marksheet.student.date_of_birth }}</div>
     </div>
@@ -136,35 +152,43 @@
         <thead>
             <tr>
                 <th>Subject</th>
-                <th>M.M.</th>
-                <th>O.M.</th>
+                <th>M.M. (Max Marks)</th>
+                <th>O.M. (Obtained Marks)</th>
             </tr>
         </thead>
         <tbody>
             {% for mark in marks %}
-            <tr>
-                <td>{{ mark.subject }}</td>
-                <td>{{ mark.max_marks }}</td>
-                <td>{{ mark.obtained_marks }}</td>                
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No Marks Found</td>
-            </tr>
+                <tr>
+                    <td>{{ mark.subject.name }}</td>
+                    <td>{{ mark.max_test_marks }}</td>
+                    <td>{{ mark.test_marks }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">No Marks Found</td>
+                </tr>
             {% endfor %}
+            
             <tr class="bold-text">
                 <td>Total</td>
-                <td>{{total_max}}</td>
-                <td>{{total_obtained}}</td>                
+                <td>{{ total_max   }}</td>
+                <td>{{ total_obtained   }}</td>                
             </tr>
         </tbody>
     </table>
 
     <table class="summary-table">
         <tr>
-            <td><span class="bold-text">RESULT :</span> {{status}}</td>
-            <td><span class="bold-text">PERCENTAGE :</span> {{percentage}}%</td>
-            <td><span class="bold-text">GRADE :</span> {{ grade }}</td>
+            <td><span class="bold-text">RESULT :</span> 
+                <span style="text-transform:uppercase">{{result_status}}</span>
+                {% comment %} {% if marksheet.result_status == "Pass" %}
+                    <span style="color: green; font-weight: bold;">PASS</span>
+                {% else %}
+                    <span style="color: red; font-weight: bold;">FAILED</span>
+                {% endif %}                 {% endcomment %}
+            </td>
+            <td><span class="bold-text">PERCENTAGE :</span> {{ percentage  }}%</td>
+            <td><span class="bold-text">GRADE :</span> {{ grade  }}</td>
         </tr>
     </table>
 

@@ -48,9 +48,9 @@
                                         <th>#</th>
                                         <th>Student</th>
                                         <th>Class</th>
-                                        {% comment %} <th>Result</th>
-                                        <th>Grade</th> {% endcomment %}
                                         <th>Percentage</th>
+                                        <th>Grade</th>
+                                        <th>Result</th>
                                         <th>Actions</th>
                                     </tr>
                                     </thead>
@@ -60,9 +60,9 @@
                                             <td>{{ forloop.counter }}</td>
                                             <td>{{item.name}}</td>
                                             <td>{{item.admission_class}}</td>
-                                            {% comment %} <td>{{item.percentage.grade}}</td>
-                                            <td>{{item.admission_class}}</td> {% endcomment %}
                                             <td>{{item.calculate_percentage}}%</td>
+                                            <td>{{item.calculate_grade}}</td>
+                                            <td>{{item.pass_status}}</td>
                                             <td>
                                                 <a href="{% url 'student-report-card' item.pk %}" class="btn btn-md btn-info">View result</a>
                                             </td>

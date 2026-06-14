@@ -3,11 +3,7 @@ from django.utils.html import format_html
 from .models import (
     AdmitCard,
     TransferCertificate,
-    Attendance,
-    AcademicFee,
-    FeeReceipt,
-    StudentFeeDue,
-    VanFee
+    Attendance
 )
 
 # Register your models here.
@@ -53,62 +49,3 @@ class AttendanceAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = 'attendance_date'
-
-
-@admin.register(AcademicFee)
-class AcademicFeeAdmin(admin.ModelAdmin):
-    list_display = (
-        'student_type',
-        'class_group',
-        'annual_fee',
-        'first_installment',
-        'second_installment',
-        'third_installment',
-    )
-
-    list_filter = (
-        'student_type',
-        'class_group',
-    )
-
-    search_fields = (
-        'student_type',
-        'class_group',
-    )
-
-@admin.register(FeeReceipt)
-class FeeReceiptAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'receipt_no',
-        'student',
-        'installment',
-        'amount',
-        'payment_date'
-    )
-
-    search_fields = (
-        'receipt_no',
-        'student__name'
-    )
-
-@admin.register(StudentFeeDue)
-class StudentFeeDueAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'student',
-        'total_fee',
-        'paid_amount',
-        'due_amount'
-    )
-
-    search_fields = (
-        'student__name',
-    )
-
-
-
-@admin.register(VanFee)
-class VanFeeAdmin(admin.ModelAdmin):
-    list_display = ('route_group', 'annual_fee', 'first_installment', 'second_installment')
-

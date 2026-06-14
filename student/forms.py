@@ -1,8 +1,5 @@
 from django import forms
-
-from django.forms import modelformset_factory
-
-from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
+from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, AcademicSession, StudentAcademicHistory, Section
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -20,7 +17,7 @@ class StudentAllInOneForm(forms.ModelForm):
     class Meta:
         model = Student
         # We exclude the address fields because we handle them as separate form instances
-        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number']
+        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number', 'section']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_class': forms.Select(attrs={'class': 'select2'}),
@@ -121,7 +118,17 @@ class SubjectForm(forms.ModelForm):
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
-        fields = ['name', 'term', 'academic_year']
+        # 'academic_year' ki jagah ab 'academic_session' aayega
+        fields = ['name', 'term', 'academic_session']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Pro Tip: Dropdown me sirf active sessions dikhane ke liye (Optional)
+        self.fields['academic_session'].queryset = AcademicSession.objects.filter(is_active=True)
+        
+        # Agar aap chahte hain ki iska label form me "Academic Year" dikhe
+        self.fields['academic_session'].label = "Academic Year"
 
 
 class AcademicSessionForm(forms.ModelForm):
@@ -153,23 +160,6 @@ class AcademicSessionForm(forms.ModelForm):
         return cleaned_data
 
 
-# Test Marksheet
-class TestSubjectMarkForm(forms.ModelForm):
-
-    class Meta:
-        model = TestSubjectMark
-
-        fields = [
-            'subject',
-            'obtained_marks',
-            'max_marks',
-            'remarks'
-        ]
-
-        widgets = {
-            'subject': forms.HiddenInput(),
-            'max_marks': forms.HiddenInput()
-        }
 
 class StudentPromotionForm(forms.Form):
     current_session = forms.ModelChoiceField(
