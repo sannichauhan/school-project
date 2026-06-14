@@ -109,24 +109,15 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'navcheta_ncps_db',
-        'USER': 'navcheta_ncps_user',
-        'PASSWORD': 'OW)!nY3aT0NsPb@!',
+        'NAME': 'navcheta_ncps_all_db',
+        'USER': 'navcheta_all_user',
+        'PASSWORD': 'B;{Pb=kG}1uGYdRf',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'navcheta_ncps',
-#         'USER': 'navcheta_ncps',
-#         'PASSWORD': 'NPlk1IOZ7&vFT6z.',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
+
 
 
 # Password validation
