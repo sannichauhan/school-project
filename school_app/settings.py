@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 ALLOWED_HOSTS = [
@@ -109,15 +109,24 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'navcheta_ncps_all_db',
-        'USER': 'navcheta_all_user',
-        'PASSWORD': 'B;{Pb=kG}1uGYdRf',
+        'NAME': 'navcheta_ncps_db',
+        'USER': 'navcheta_ncps_user',
+        'PASSWORD': 'OW)!nY3aT0NsPb@!',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
 
-
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'navcheta_ncps',
+#         'USER': 'navcheta_ncps',
+#         'PASSWORD': 'NPlk1IOZ7&vFT6z.',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 
 # Password validation
