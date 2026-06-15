@@ -4,7 +4,9 @@ from django.db import models
 from smart_selects.db_fields import ChainedForeignKey
 from django.utils import timezone
 from django.core.validators import RegexValidator
-from django.db.models import IntegerField, Sum, F
+from django.core.exceptions import ValidationError
+from django.db.models import Sum, F
+from django.db.models.functions import Coalesce
 
 class Section(models.Model):
     name = models.CharField(max_length=10, unique=True, help_text="e.g. A, B, C")
@@ -354,6 +356,13 @@ class Exam(models.Model):
 
 class MarkSheet(models.Model):
 
+    academic_session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.PROTECT,
+        null=True,  
+        blank=True 
+    )
+
     student_class = models.ForeignKey(
         StudentClass, 
         on_delete=models.PROTECT,
@@ -378,7 +387,7 @@ class MarkSheet(models.Model):
 
     class Meta:
 
-        unique_together = ['student', 'exam']
+        unique_together = ['academic_session', 'student', 'exam']
 
         verbose_name = "Marksheet"
 
@@ -392,29 +401,50 @@ class MarkSheet(models.Model):
     # 1. Total Obtain Marks (Test Marks) nikalne ke liye method
     @property
     def total_obtained_marks(self):
-        return sum(mark.obtained_total for mark in self.subject_marks.all())
+        # Coalesce se agar value NULL hogi toh woh usko 0 maan lega
+        result = self.subject_marks.aggregate(
+            total=Sum(Coalesce(F('test_marks'), 0) + Coalesce(F('written_marks'), 0))
+        )
+        return result['total'] or 0
 
     # 2. Total Max Marks nikalne ke liye method
     @property
     def total_max_marks(self):
-        return sum(mark.max_total for mark in self.subject_marks.all())
+        exam_name = self.exam.name.lower()
+        
+        # Agar exam Quarterly hai toh sirf max_test_marks jodo
+        if 'quaterly' in exam_name or 'quarterly' in exam_name:
+            result = self.subject_marks.aggregate(
+                total=Sum(Coalesce(F('max_test_marks'), 0))
+            )
+        else:
+            # Baaki exams ke liye dono jodo
+            result = self.subject_marks.aggregate(
+                total=Sum(Coalesce(F('max_test_marks'), 0) + Coalesce(F('max_written_marks'), 0))
+            )
+        return result['total'] or 0
 
     # 3. Percentage Calculate karne ke liye method
+    @property
     def calculate_percentage(self):
-        if self.total_max_marks > 0:
-            percentage = (self.total_obtained_marks / self.total_max_marks) * 100
+        max_m = self.total_max_marks
+        if max_m > 0:
+            percentage = (self.total_obtained_marks / max_m) * 100
             return round(percentage, 2)
-        return 0
+        return 0.0
 
     # 4. Pass / Fail Status nikalne ke liye method
+    @property
     def result_status(self):
-        if self.calculate_percentage() >= 33:  # 33% passing criteria
+        # function calling hata kar direct property use ki
+        if self.calculate_percentage >= 33:  
             return "Pass"
         return "Fail"
 
     # 5. Grade nikalne ke liye method
+    @property
     def calculate_grade(self):
-        per = self.calculate_percentage()
+        per = self.calculate_percentage
         if per >= 85: return "A+"
         elif per >= 70: return "A"
         elif per >= 60: return "B"
@@ -482,11 +512,7 @@ class Marks(models.Model):
 
 
     def __str__(self):
-
-        return (
-            f"{self.subject.name} "
-            f"({self.obtained_total}/{self.max_total})"
-        )
+        return f"{self.subject.name} ({self.obtained_total}/{self.max_total})"
 
 
     # =========================
@@ -496,10 +522,7 @@ class Marks(models.Model):
    
     @property
     def obtained_total(self):
-        return (
-            (self.test_marks or 0) +
-            (self.written_marks or 0)
-        )
+        return (self.test_marks or 0) + (self.written_marks or 0)
 
 
     # =========================
@@ -508,10 +531,15 @@ class Marks(models.Model):
 
     @property
     def max_total(self):
-        return (
-            (self.max_test_marks or 0) +
-            (self.max_written_marks or 0)
-        )
+        # marksheet ke zariye exam ka naam check karenge
+        if self.marksheet and self.marksheet.exam:
+            exam_name = self.marksheet.exam.name.lower()
+            if 'quaterly' in exam_name or 'quarterly' in exam_name:
+                return self.max_test_marks or 0  # Quarterly mein sirf test marks max honge
+        
+        # Baaki sabhi exams ke liye dono ka sum
+        return (self.max_test_marks or 0) + (self.max_written_marks or 0)
+    
 
 class StudentAcademicHistory(models.Model):
     """Tracks which class and section a student belonged to in any given session"""

@@ -257,12 +257,15 @@ def add_student_marks_view(request):
 
     if request.method == "POST":
 
+        academic_session_id = request.POST.get("academic_session")
         student_class_id = request.POST.get("student_class")
         student_id = request.POST.get("student")
         exam_id = request.POST.get("exam")
 
+
         # Check duplicate marksheet
         if MarkSheet.objects.filter(
+            academic_session_id=academic_session_id,
             student_id=student_id,
             exam_id=exam_id
         ).exists():
@@ -276,6 +279,7 @@ def add_student_marks_view(request):
 
         # Create parent marksheet
         marksheet = MarkSheet.objects.create(
+            academic_session_id=academic_session_id,
             student_class_id=student_class_id,
             student_id=student_id,
             exam_id=exam_id,
@@ -321,6 +325,7 @@ def add_student_marks_view(request):
     ).all()
 
     exams = Exam.objects.all()
+    sessions = AcademicSession.objects.all()
 
     return render(
         request,
@@ -328,6 +333,7 @@ def add_student_marks_view(request):
         {
             "classes": classes,
             "exams": exams,
+            "sessions": sessions,
         },
     )
 
@@ -372,6 +378,8 @@ def student_report_card_view(request, pk):
 
     report_matrix = {}
     subject_totals = {}
+
+    
     
     for sub in subjects:
         report_matrix[sub.id] = {}
@@ -393,7 +401,9 @@ def student_report_card_view(request, pk):
 
     for mark in marks_list:
         exam_name = mark.marksheet.exam.name.lower()
-        if 'quaterly' in exam_name:
+        
+        # Dono type ki spellings check kar rahe hain (safe side)
+        if 'quaterly' in exam_name or 'quarterly' in exam_name:
             max_marks += (mark.max_test_marks or 0)
         else:
             max_marks += (
