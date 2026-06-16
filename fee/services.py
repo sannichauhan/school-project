@@ -21,7 +21,7 @@ def create_fee_schedule_for_student(student, academic_year):
         elif student.fee_type == 'HALF_YEARLY':
             intervals = [0, 180]
         else: # QUARTERLY
-            intervals = [0, 90, 180, 270]
+            intervals = [0, 90, 180]
 
         inst_count = len(intervals)
         academic_inst_amount = Decimal(total_academic_fee) / inst_count

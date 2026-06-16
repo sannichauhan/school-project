@@ -8,11 +8,20 @@ from django.core.exceptions import ValidationError
 from django.db.models import Sum, F
 from django.db.models.functions import Coalesce
 
-class Section(models.Model):
-    name = models.CharField(max_length=10, unique=True, help_text="e.g. A, B, C")
-    
+
+
+class AcademicSession(models.Model):
+    name = models.CharField(max_length=20, help_text="e.g., 2026-2027", null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
+
+    
+    class  Meta:
+        unique_together = ("start_date", "end_date")
 
 class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
@@ -25,6 +34,11 @@ class StudentClass(models.Model):
     def __str__(self):
         return f"{self.name}".strip()
 
+class Section(models.Model):
+    name = models.CharField(max_length=10, unique=True, help_text="e.g. A, B, C")
+    
+    def __str__(self):
+        return self.name
 
 class Address(models.Model):
     """Reusable address model for permanent and local addresses"""
@@ -39,56 +53,8 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.address_line}, {self.district}, {self.pin_code}, {self.state}"
-
-class AcademicSession(models.Model):
-    name = models.CharField(max_length=20, help_text="e.g., 2026-2027", null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
-
     
-    class  Meta:
-        unique_together = ("start_date", "end_date")
-    
-class StudentPromotion(models.Model):
 
-    current_session = models.ForeignKey(
-        AcademicSession,
-        on_delete=models.CASCADE,
-        related_name="current_promotions"
-    )
-
-    promote_session = models.ForeignKey(
-        AcademicSession,
-        on_delete=models.CASCADE,
-        related_name="next_promotions"
-    )
-
-    promotion_from_class = models.ForeignKey(
-        StudentClass,
-        on_delete=models.CASCADE,
-        related_name="promotion_from"
-    )
-
-    promotion_to_class = models.ForeignKey(
-        StudentClass,
-        on_delete=models.CASCADE,
-        related_name="promotion_to"
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    def __str__(self):
-
-        return (
-            f"{self.promotion_from_class} "
-            f"-> {self.promotion_to_class}"
-        )
 class TransportRoute(models.Model):
     route_name = models.CharField(max_length=100)
     yearly_fee = models.DecimalField(max_digits=10, decimal_places=2)
@@ -96,6 +62,9 @@ class TransportRoute(models.Model):
     def __str__(self):
         return self.route_name
     
+# मान लेते हैं कि ये मॉडल्स पहले से इम्पोर्टेड या डिफाइंड हैं:
+# StudentClass, Section, AcademicSession, Address, TransportRoute, Marks, StudentAcademicHistory
+
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
     RELIGION_CHOICES = [
@@ -103,59 +72,36 @@ class Student(models.Model):
         ('Buddhist', 'Buddhist'), ('Others', 'Others'),
     ]
     CATEGORY_CHOICES = [
-        ('GENERAL', 'General'),
-        ('OBC', 'OBC'),
-        ('SC', 'SC'),
-        ('ST', 'ST'),
+        ('GENERAL', 'General'), ('OBC', 'OBC'), ('SC', 'SC'), ('ST', 'ST'),
     ]
-
     SCHOOL_CHOICES = [
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
         ('KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
-    
     FEE_TYPE_CHOICES = [
-        ('QUARTERLY', 'Quarterly'),
-        ('HALF_YEARLY', 'Half Yearly'),
-        ('YEARLY', 'Yearly'),
+        ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'),
     ]
     TRANSPORT_INSTALLMENT_CHOICES = [
-        ('1_INSTALLMENT', 'Single Installment'),
-        ('2_INSTALLMENT', 'Two Installments'),
+        ('1_INSTALLMENT', 'Single Installment'), ('2_INSTALLMENT', 'Two Installments'),
     ]
 
     # Identity & Basic Info
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
-    
     religion = models.CharField(max_length=20, choices=RELIGION_CHOICES)
-    category = models.CharField(
-        max_length=20,
-        choices=CATEGORY_CHOICES,
-        null=True,
-        blank=True
-    )
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
+    
     adhaar_number = models.CharField(
         max_length=12, unique=True, blank=True, null=True,
         validators=[RegexValidator(regex=r'^\d{12}$', message="Aadhaar must be 12 digits")]
     )    
 
     # Academic Info
-    admission_class = models.ForeignKey(
-    StudentClass, 
-        on_delete=models.PROTECT,  # This prevents deleting a Class if students are in it
-        related_name='students'
-    )
-    section = models.ForeignKey(
-        Section,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    roll_number = models.IntegerField(
-        default=0
-    )
+    admission_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='students')
+    section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True, blank=True)
+    roll_number = models.IntegerField(default=0)
+    
     # Family Info
     father_name = models.CharField(max_length=100)
     father_occupation = models.CharField(max_length=100, blank=True)
@@ -166,44 +112,26 @@ class Student(models.Model):
         max_length=15,
         validators=[RegexValidator(regex=r'^[6-9]\d{9}$', message="Enter valid 10 digit mobile number")]
     )
-    session=models.ForeignKey(
-        AcademicSession,
-        null=True,
-        on_delete=models.CASCADE
-    )
-    choose_school = models.CharField(
-        max_length=100,
-        choices=SCHOOL_CHOICES,
-        null=True,
-        blank=True
-    )
+    session = models.ForeignKey('AcademicSession', null=True, on_delete=models.CASCADE)
+    choose_school = models.CharField(max_length=100, choices=SCHOOL_CHOICES, null=True, blank=True)
     last_institution = models.CharField(max_length=150, blank=True, null=True)
-    permanent_address = models.OneToOneField(
-        Address, 
-        on_delete=models.CASCADE, 
-        related_name='permanent_for_student'
-    )
-    local_address = models.OneToOneField(
-        Address, 
-        on_delete=models.CASCADE, 
-        related_name='local_for_student', 
-        blank=True, 
-        null=True
-    )
+    permanent_address = models.OneToOneField('Address', on_delete=models.CASCADE, related_name='permanent_for_student')
+    local_address = models.OneToOneField('Address', on_delete=models.CASCADE, related_name='local_for_student', blank=True, null=True)
+    
     date_of_application = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)    
     student_photo = models.ImageField(upload_to='students/', blank=True, null=True)
     conveyance_facility = models.BooleanField(default=False)
 
     fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='QUARTERLY')
-    transport_route = models.ForeignKey(TransportRoute, on_delete=models.SET_NULL, null=True, blank=True)
+    transport_route = models.ForeignKey('TransportRoute', on_delete=models.SET_NULL, null=True, blank=True)
     transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
 
-    
-        
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        # अगर नया छात्र है या रोल नंबर नहीं है, तो ऑटो-जनरेट करें
         if not self.roll_number or self.roll_number == 0:
-            # वर्तमान सेशन और क्लास के आखरी छात्र को ढूंढें
             last_student = Student.objects.filter(
                 admission_class=self.admission_class,
                 session=self.session
@@ -212,18 +140,34 @@ class Student(models.Model):
             if last_student and last_student.roll_number:
                 self.roll_number = last_student.roll_number + 1
             else:
-                self.roll_number = 1001 # शुद्ध इंटीजर असाइनमेंट
+                self.roll_number = 1001
+
+        # पैरेंट क्लास के save() को कॉल करें
         super().save(*args, **kwargs)
+        
+        # नया छात्र होने पर ही पहली हिस्ट्री रो (Row) बनाएं
+        if is_new:
+            # Circular Import से बचने के लिए मॉडल को यहीं इम्पोर्ट करना सबसे सेफ है
+            from .models import StudentAcademicHistory
+            StudentAcademicHistory.objects.get_or_create(
+                student=self,
+                session=self.session,
+                student_class=self.admission_class,
+                defaults={'roll_number': self.roll_number, 'is_active': True}
+            )
 
     def __str__(self):
         return f"{self.name} ({self.roll_number})"
-    
 
-
+    # ==============================================================================
+    # प्रॉपर्टीज (Properties) एवं ऑप्टिमाइजेशन लॉजिक
+    # ==============================================================================
     @property
     def current_academic_record(self):
-        """Returns the active session and class details for the student"""
-        return self.academic_history.filter(is_active=True).first()
+        # caching तकनीक का उपयोग ताकि एक ही रिक्वेस्ट में बार-बार क्वेरी न चले
+        if not hasattr(self, '_cached_academic_record'):
+            self._cached_academic_record = self.academic_history.filter(is_active=True).first()
+        return self._cached_academic_record
 
     @property
     def current_class(self):
@@ -235,108 +179,50 @@ class Student(models.Model):
         record = self.current_academic_record
         return record.session if record else self.session
 
-    # Automatically create the initial History record upon registration
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        
-        if is_new:
-            StudentAcademicHistory.objects.create(
-                student=self,
-                session=self.session,
-                student_class=self.admission_class,
-                roll_number=self.roll_number,
-                is_active=True
-            )
-
     @property
     def calculate_percentage(self):
-        # 1. Fetch all marks with related data in one go (Same as view)
-        marks_list = Marks.objects.filter(
-            marksheet__student=self
-        ).select_related('marksheet__exam')
-        
+        # N+1 क्वेरी से बचने के लिए select_related और filter लगाया गया है
+        marks_list = Marks.objects.filter(marksheet__student=self).select_related('marksheet__exam')
         total_score = 0
         max_marks = 0
 
         for mark in marks_list:
-            # Obtained marks summation
             total_score += (mark.test_marks or 0) + (mark.written_marks or 0)
-            
-            # Max marks calculation based on exam name logic (Same as view)
             exam_name = mark.marksheet.exam.name.lower() if mark.marksheet and mark.marksheet.exam else ""
             
-            if 'quaterly' in exam_name:
+            # स्पेलिंग मिस्टेक फिक्स: 'quaterly' और 'quarterly' दोनों को सुरक्षित रूप से हैंडल किया गया है
+            if 'quaterly' in exam_name or 'quarterly' in exam_name:
                 max_marks += (mark.max_test_marks or 0)
             else:
-                max_marks += (
-                    (mark.max_test_marks or 0) +
-                    (mark.max_written_marks or 0)
-                )
+                max_marks += ((mark.max_test_marks or 0) + (mark.max_written_marks or 0))
 
-        # 2. Percentage calculation
         if max_marks == 0:
             return 0
             
         return round((total_score / max_marks) * 100, 2)   
 
-    
     @property
     def calculate_grade(self):
-        percentage = self.calculate_percentage  # Upar banayi hui property ko call kiya
-        
-        if percentage >= 90:
-            return 'A+'
-        elif percentage >= 80:
-            return 'A'
-        elif percentage >= 70:
-            return 'B'
-        elif percentage >= 60:
-            return 'C'
-        elif percentage >= 50:
-            return 'D'
-        elif percentage >= 33:
-            return 'E'
-        else:
-            return 'F'
+        percentage = self.calculate_percentage
+        if percentage >= 90: return 'A+'
+        elif percentage >= 80: return 'A'
+        elif percentage >= 70: return 'B'
+        elif percentage >= 60: return 'C'
+        elif percentage >= 50: return 'D'
+        elif percentage >= 33: return 'E'
+        else: return 'F'
         
     @property
     def pass_status(self):
-        percentage = self.calculate_percentage # Purani property se percentage li
-        
-        # Agar 33% se kam hai toh Fail, warna Pass
-        if percentage >= 33:
-            return 'Pass'
-        else:
-            return 'Fail'
+        return 'Pass' if self.calculate_percentage >= 33 else 'Fail'
     
-    
-class Subject(models.Model):
-    # Link to the StudentClass model instead of using choices
-    student_class = models.ForeignKey(
-        'StudentClass', 
-        on_delete=models.CASCADE, 
-        related_name='subjects'
-    )
-    name = models.CharField(max_length=100)
-    order = models.PositiveIntegerField(default=0)
-    max_test_marks = models.IntegerField(default=15)
-    max_written_marks = models.IntegerField(default=35)
 
-    class Meta:
-        # Prevents duplicate subjects in the same class (e.g., two "Maths" in Class 1)
-        unique_together = ['name', 'student_class']
-        ordering = ['order']
 
-    def __str__(self):
-        return f"{self.name} ({self.student_class.name})"
+
 
 class Exam(models.Model):
-    """Examples: Unit Test 1, Half Yearly, Final Exam"""
     name = models.CharField(max_length=50)
-    term = models.CharField(max_length=20, blank=True, null=True) # e.g., Term 1
-    
-    # CharField ko hata kar ForeignKey add kiye hain
+    term = models.CharField(max_length=20, blank=True, null=True)     
     academic_session = models.ForeignKey(
         AcademicSession, 
         on_delete=models.CASCADE, 
@@ -347,8 +233,8 @@ class Exam(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name} ({self.academic_session.name})"
-    
+        return f"{self.name} ({self.academic_session.name})"   
+
 
 # =========================
 # MARKSHEET MODEL
@@ -451,14 +337,37 @@ class MarkSheet(models.Model):
         elif per >= 50: return "C"
         elif per >= 33: return "D"
         else: return "E (Fail)"
+
+        
+class Subject(models.Model):
+    # Link to the StudentClass model instead of using choices
+    student_class = models.ForeignKey(
+        'StudentClass', 
+        on_delete=models.CASCADE, 
+        related_name='subjects'
+    )
+    name = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+    max_test_marks = models.IntegerField(default=15)
+    max_written_marks = models.IntegerField(default=35)
+
+    class Meta:
+        # Prevents duplicate subjects in the same class (e.g., two "Maths" in Class 1)
+        unique_together = ['name', 'student_class']
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.name} ({self.student_class.name})"
+
+
+    
+
+
     
 
 # =========================
 # SUBJECT WISE MARKS
 # =========================
-
-
-
 class Marks(models.Model):
 
     marksheet = models.ForeignKey(
@@ -540,7 +449,6 @@ class Marks(models.Model):
         # Baaki sabhi exams ke liye dono ka sum
         return (self.max_test_marks or 0) + (self.max_written_marks or 0)
     
-
 class StudentAcademicHistory(models.Model):
     """Tracks which class and section a student belonged to in any given session"""
     student = models.ForeignKey(
@@ -549,12 +457,12 @@ class StudentAcademicHistory(models.Model):
         related_name='academic_history'
     )
     session = models.ForeignKey(
-        AcademicSession, 
+        'AcademicSession', 
         on_delete=models.CASCADE, 
         related_name='student_enrollments'
     )
     student_class = models.ForeignKey(
-        StudentClass, 
+        'StudentClass', 
         on_delete=models.CASCADE, 
         related_name='class_enrollments'
     )
@@ -565,7 +473,7 @@ class StudentAcademicHistory(models.Model):
     )
     promoted_status = models.CharField(
         max_length=20,
-        choices=[('PROMOTED', 'Promoted'), ('DETAINED', 'Detained'), ('PENDING', 'Pending')],
+        choices=[('PROMOTED', 'Promoted'), ('RETAINED', 'Retained'), ('PENDING', 'Pending')],
         default='PENDING'
     )
 
@@ -578,7 +486,7 @@ class StudentAcademicHistory(models.Model):
         return f"{self.student.name} - {self.student_class} ({self.session})"
 
     def save(self, *args, **kwargs):
-        # Handle automatic roll number generation if not provided
+        # 1. ऑटोमैटिक रोल नंबर जनरेशन (यदि पहले से मौजूद न हो या 0 हो)
         if not self.roll_number or self.roll_number == 0:
             last_record = StudentAcademicHistory.objects.filter(
                 student_class=self.student_class,
@@ -590,9 +498,12 @@ class StudentAcademicHistory(models.Model):
             else:
                 self.roll_number = 1001
         
-        # Ensure only one record is 'active' for a student at a time
+        # 2. डेटाबेस इंटीग्रिटी: एक छात्र का एक समय पर सिर्फ एक ही रिकॉर्ड 'Active' होना चाहिए
         if self.is_active:
-            StudentAcademicHistory.objects.filter(student=self.student, is_active=True).exclude(pk=self.pk).update(is_active=False)
+            StudentAcademicHistory.objects.filter(
+                student=self.student, 
+                is_active=True
+            ).exclude(pk=self.pk).update(is_active=False)
             
         super().save(*args, **kwargs)
 
@@ -605,24 +516,31 @@ class StudentPromotionLog(models.Model):
         related_name='promotions'
     )
     from_session = models.ForeignKey(
-        AcademicSession, on_delete=models.CASCADE, related_name='promotions_from'
+        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_from'
     )
     to_session = models.ForeignKey(
-        AcademicSession, on_delete=models.CASCADE, related_name='promotions_to'
+        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_to'
     )
     from_class = models.ForeignKey(
-        StudentClass, on_delete=models.CASCADE, related_name='promoted_from'
+        'StudentClass', on_delete=models.CASCADE, related_name='promoted_from'
     )
     to_class = models.ForeignKey(
-        StudentClass, on_delete=models.CASCADE, related_name='promoted_to'
+        'StudentClass', on_delete=models.CASCADE, related_name='promoted_to'
     )
-    promoted_by = models.CharField(max_length=100, blank=True, null=True) # Optional: track user
+    promoted_by = models.CharField(max_length=100, blank=True, null=True) 
     promotion_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Promoted {self.student.name} to {self.to_class} ({self.to_session})"
         
     def clean(self):
+        super().clean()
+        # लॉजिकल वैलिडेशन: पुराना और नया सेशन सेम नहीं हो सकता
         if self.from_session == self.to_session:
-            raise ValidationError("Source and target sessions cannot be the same.")
+            raise ValidationError("Source (From) and target (To) sessions cannot be the same.")
+
+    def save(self, *args, **kwargs):
+        # यह सुनिश्चित करता है कि जब बैकएंड या स्क्रिप्ट से ऑब्जेक्ट बने, तब भी clean() वैलिडेशन चले
+        self.full_clean()
+        super().save(*args, **kwargs)
         

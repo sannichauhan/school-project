@@ -5,6 +5,7 @@ from django.contrib import admin
 from fee.models import FeeLedger
 from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .services import promote_student_list
+from .forms import AcademicSessionForm
 
 # --- Inlines for a better UI ---
 
@@ -62,9 +63,40 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(AcademicSession)
 class AcademicSessionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'start_date', 'end_date')
-    search_fields = ('start_date', 'end_date')
-    ordering = ('-start_date',)
+    # एडमिन में ऊपर बनाए गए फॉर्म का ही उपयोग करें (ताकि डेट वैलिडेशन यहाँ भी चले)
+    form = AcademicSessionForm
+    
+    # टेबल लिस्ट व्यू में दिखने वाले कॉलम्स
+    list_display = ('name', 'start_date', 'end_date', 'is_active_status')
+    
+    # किन कॉलम्स पर क्लिक करके खोला जा सकता है
+    list_display_links = ('name',)
+    
+    # साइडबार में क्विक फ़िल्टर लगाने के लिए
+    list_filter = ('is_active', 'start_date', 'end_date')
+    
+    # सर्च बार के लिए फ़ील्ड्स
+    search_fields = ('name',)
+    
+    # एडमिन लिस्ट पेज से ही डायरेक्ट ऐक्टिव/इनऐक्टिव टॉगल करने के लिए
+    list_editable = () # यदि आप चाहें तो यहाँ 'is_active' डाल सकते हैं
+    
+    # नया सेशन बनाते समय दिखने वाले सेक्शन्स (UI Layout)
+    fieldsets = (
+        ('Session Identity', {
+            'fields': ('name', 'is_active'),
+            'description': 'Enter the name of the academic year.'
+        }),
+        ('Duration / Dates', {
+            'fields': ('start_date', 'end_date'),
+            'description': 'Specify the operational dates for this session.'
+        }),
+    )
+
+    # UI Improvement: एक्टिव स्टेटस के लिए सुंदर टिक/क्रॉस दिखाने के लिए
+    @admin.display(boolean=True, description='Is Active?')
+    def is_active_status(self, obj):
+        return obj.is_active
 
 class FeeLedgerInline(admin.TabularInline):
     model = FeeLedger

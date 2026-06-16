@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from django.contrib import messages
-from django.db.models import Sum
+
 from django.db import transaction
 from .serializers import (
     StudentClassSerializer, AddressSerializer, StudentSerializer,
@@ -10,9 +10,9 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentAcademicHistory, StudentPromotionLog
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentAcademicHistory
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
-
+from .services import promote_student_list
 
 class StudentClassViewSet(viewsets.ModelViewSet):
     queryset = StudentClass.objects.all()
@@ -438,18 +438,23 @@ def all_students_marksheet_view(request):
 
 
 def student_promotion_view(request):
+    # 1. 'UnboundLocalError' से बचने के लिए वेरिएबल्स को शुरुआत में ही डिफ़ॉल्ट None वैल्यू दें
+    current_session_id = None
+    from_class_id = None
 
-    # Standardize fetching parameters from both POST and GET
-    current_session_id = request.POST.get('current_session') or request.GET.get('current_session')
-    from_class_id = request.POST.get('promotion_from_class') or request.GET.get('promotion_from_class')
+    # 2. POST और GET दोनों से रॉ डेटा सुरक्षित रूप से निकालें
+    raw_session = request.POST.get('current_session') or request.GET.get('current_session')
+    raw_class = request.POST.get('promotion_from_class') or request.GET.get('promotion_from_class')
 
-    # Ensure IDs are converted to integers safely if they exist
+    # 3. सुरक्षित रूप से इंटीजर (Integer) में कन्वर्ट करें
     try:
-        current_session_id = int(current_session_id) if current_session_id else None
-        from_class_id = int(from_class_id) if from_class_id else None
-    except ValueError:
-        current_session_id = None
-        from_class_id = None
+        if raw_session:
+            current_session_id = int(raw_session)
+        if raw_class:
+            from_class_id = int(raw_class)
+    except (ValueError, TypeError):
+        # यदि कन्वर्शन फेल होता है, तो वैल्यू पहले से ही None सेट है
+        pass
 
     if request.method == 'POST':
         form = StudentPromotionForm(
@@ -458,17 +463,17 @@ def student_promotion_view(request):
             from_class_id=from_class_id
         )
         
+        # यदि यूज़र ने सिर्फ 'Load Students List' बटन दबाया है
         if 'fetch_students' in request.POST:
-            # Force re-evaluation of the form with initial values to show dropdown selections
             form = StudentPromotionForm(
                 current_session_id=current_session_id, 
                 from_class_id=from_class_id, 
                 initial=request.POST
             )
+        
+        # यदि यूज़र ने 'Execute Promotion Flow' सबमिट किया है और फॉर्म वैलिड है
         elif form.is_valid():
-            curr_session = form.cleaned_data['current_session']
             prom_session = form.cleaned_data['promote_session']
-            from_cls = form.cleaned_data['promotion_from_class']
             to_cls = form.cleaned_data['promotion_to_class']
             selected_histories = form.cleaned_data['students']
 
@@ -476,41 +481,33 @@ def student_promotion_view(request):
                 messages.error(request, "Please select at least one student to promote.")
             else:
                 try:
-                    with transaction.atomic():
-                        promoted_count = 0
-                        for history in selected_histories:
-                            if StudentAcademicHistory.objects.filter(student=history.student, session=prom_session).exists():
-                                continue
+                    # सिलेक्टेड स्टूडेंट हिस्ट्री रिकॉर्ड्स से छात्र की IDs निकालें
+                    student_ids = [history.student_id for history in selected_histories]
+                    
+                    # यूजर का नाम ट्रैक करें
+                    user_name = str(request.user if request.user.is_authenticated else "Admin")
+                    
+                    # महा-ऑप्टिमाइज्ड फ़ंक्शन को कॉल करें
+                    promoted_count = promote_student_list(
+                        student_ids=student_ids,
+                        target_class_id=to_cls.id,
+                        target_session_id=prom_session.id,
+                        user_name=user_name
+                    )
 
-                            history.promoted_status = 'PROMOTED'
-                            history.save()
-
-                            StudentAcademicHistory.objects.create(
-                                student=history.student,
-                                session=prom_session,
-                                student_class=to_cls,
-                                is_active=True,
-                                promoted_status='PENDING'
-                            )
-
-                            StudentPromotionLog.objects.create(
-                                student=history.student,
-                                from_session=curr_session,
-                                to_session=prom_session,
-                                from_class=from_cls,
-                                to_class=to_cls,
-                                promoted_by=str(request.user if request.user.is_authenticated else "Admin")
-                            )
-                            promoted_count += 1
-
-                    messages.success(request, f"Successfully promoted {promoted_count} students.")
-                    return redirect('promote_students')
+                    if promoted_count > 0:
+                        messages.success(request, f"Successfully promoted {promoted_count} students.")
+                    else:
+                        messages.warning(request, "No new students were promoted (they might have been promoted already).")
+                        
+                    return redirect('promote_students')  # अपनी सही URL नाम/नेमस्पेस यहाँ डालें
+                    
                 except Exception as e:
-                    messages.error(request, f"An error occurred: {str(e)}")
+                    messages.error(request, f"An error occurred during promotion: {str(e)}")
     else:
         form = StudentPromotionForm(current_session_id=current_session_id, from_class_id=from_class_id)
 
-    # Re-evaluate queryset verification dynamically for the template logic
+    # 4. टेम्पलेट में टेबल या ड्रॉपडाउन दिखाने के लिए वेरिफिकेशन लॉजिक
     has_students = False
     if current_session_id and from_class_id:
         has_students = StudentAcademicHistory.objects.filter(
@@ -528,11 +525,7 @@ def student_promotion_view(request):
         'from_class_id': from_class_id,
     }
 
-    return render(
-        request,
-        "student-promotion.html",
-        context
-    )
+    return render(request, "student-promotion.html", context)
 
 def create_subject_view(request):
     if request.method == "POST":

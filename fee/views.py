@@ -4,9 +4,15 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from .models import FeeLedger, Transaction
 from django.contrib.auth.decorators import login_required
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db import transaction
+from .models import FeeLedger, Transaction
+from student.models import Student
 
 @login_required
 @transaction.atomic
@@ -36,11 +42,7 @@ def collect_fee_payment(ledger_id, amount_paid, payment_mode, transaction_id, us
     return txn
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.db import transaction
-from .models import FeeLedger, Transaction
-from student.models import Student
+
 
 @login_required
 def student_fee_dashboard(request, student_id):

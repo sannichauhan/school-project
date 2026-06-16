@@ -1,19 +1,28 @@
-{% extends 'base.html' %}
-
+{% extends 'base2.html' %} 
 {% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+       <!-- Header Menu Area Start Here -->
+        {% include "tags/header.html" %}
+        <!-- Header Menu Area End Here -->
+         
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            {% include "tags/sidebar.html" %}
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                {% include "tags/breadcrumb.html" %}
+                <!-- Breadcubs Area End Here -->
 
-<div class="container mt-4">
-
-    <div class="d-flex justify-content-between mb-3">
-        <h4>Academic Sessions</h4>
-
-        <a href="{% url 'academic_session_create' %}"
-           class="btn btn-success">
-            Add Session
-        </a>
-    </div>
-
-    <table class="table table-bordered">
+               <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Academic Sessions</h3>
+                            </div>
+                        </div>
+                    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
@@ -33,7 +42,16 @@
             {% endfor %}
         </tbody>
     </table>
+                </div>
+                </div>
+                
+                <!-- Footer Area Start Here -->
+                {% include "tags/footer.html" %}
+                <!-- Footer Area End Here -->
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+{% endblock content %}
 
-</div>
 
-{% endblock %}
