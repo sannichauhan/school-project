@@ -22,6 +22,7 @@
         .header {
             text-align: center;
             margin-bottom: 25px;
+            padding-top:40px;
         }
         .header h1 {
             margin: 0;
@@ -102,12 +103,14 @@
             margin: 0 10px;
         }
         @media print {
-            .no-print { display: none; }
+            .no-print {
+                display: none !important;
+            }
             body { background-color: #fff; margin: 0; }
             .report-card { border: none; box-shadow: none; padding: 0; }
         }
         @page {
-            margin: 3.16mm 10.16mm 10.16mm 10.16mm;
+            margin: 10.16mm;
         }
     </style>
 </head>

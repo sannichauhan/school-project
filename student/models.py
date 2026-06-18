@@ -43,6 +43,7 @@ class Section(models.Model):
 class Address(models.Model):
     """Reusable address model for permanent and local addresses"""
     address_line = models.TextField()
+    post_office = models.CharField(max_length=100, default="", verbose_name="Post Office")
     district = models.CharField(max_length=100)
     pin_code = models.CharField(
         max_length=6,
@@ -52,7 +53,7 @@ class Address(models.Model):
     nationality = models.CharField(max_length=100, default="Indian")
 
     def __str__(self):
-        return f"{self.address_line}, {self.district}, {self.pin_code}, {self.state}"
+        return f"{self.address_line}, {self.post_office}, {self.district}, {self.pin_code}, {self.state}"
     
 
 class TransportRoute(models.Model):
@@ -359,11 +360,6 @@ class Subject(models.Model):
     def __str__(self):
         return f"{self.name} ({self.student_class.name})"
 
-
-    
-
-
-    
 
 # =========================
 # SUBJECT WISE MARKS

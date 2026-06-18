@@ -10,20 +10,26 @@ class TransferCertificateForm(forms.ModelForm):
 
         widgets = {
             'application_date': forms.DateInput(
-                attrs={'type': 'date'},
+                attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
             ),
             'issue_date': forms.DateInput(
-                attrs={'type': 'date'},
+                attrs={'type': 'date', 'class': 'form-control'},
                 format='%Y-%m-%d'
             ),
             'reason_for_leaving': forms.Textarea(
-                attrs={'rows': 3}
+                attrs={'rows': 3, 'class': 'form-control'}
             ),
             'remarks': forms.Textarea(
-                attrs={'rows': 3}
+                attrs={'rows': 3, 'class': 'form-control'}
             ),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.setdefault('class', 'form-control')
 
         
 

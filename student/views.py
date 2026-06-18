@@ -120,6 +120,11 @@ def student_registration_view(request):
                     student.local_address = local_address
                     student.save()
 
+                    messages.success(
+                        request,
+                        f"Student '{student.name}' registered successfully."
+                    )
+
                     
                     
                     return redirect(request.path) # Change to your list view
@@ -128,6 +133,12 @@ def student_registration_view(request):
                 print(e)
                 
                 student_form.add_error(None, f"Database Error: {e}")
+        else:
+            messages.error(
+                request,
+                "Please correct the errors below and try again."
+            )
+
     else:
         student_form = StudentAllInOneForm()
         perm_addr_form = AddressForm(prefix='perm')
@@ -190,29 +201,39 @@ def student_details_view(request, pk):
 
 
 def update_student_view(request, pk):
-
     student = get_object_or_404(Student, pk=pk)
 
     if request.method == "POST":
-        form = StudentAllInOneForm(request.POST, request.FILES, instance=student)
-        perm_addr_form = AddressForm(request.POST, prefix='perm', instance=student.permanent_address)
-        local_addr_form = AddressForm(request.POST, prefix='local', instance=student.local_address)
+        form = StudentAllInOneForm(
+            request.POST,
+            request.FILES,
+            instance=student
+        )
+
+        perm_addr_form = AddressForm(
+            request.POST,
+            prefix='perm',
+            instance=student.permanent_address
+        )
+
+        local_addr_form = AddressForm(
+            request.POST,
+            prefix='local',
+            instance=student.local_address
+        )
+
         if (
             form.is_valid()
             and perm_addr_form.is_valid()
             and local_addr_form.is_valid()
         ):
-            
-            # Save address first
+
             permanent_address = perm_addr_form.save()
             local_address = local_addr_form.save()
 
-            # Save student
             student_obj = form.save(commit=False)
-
             student_obj.permanent_address = permanent_address
             student_obj.local_address = local_address
-
             student_obj.save()
 
             messages.success(
@@ -220,38 +241,35 @@ def update_student_view(request, pk):
                 "Student updated successfully!"
             )
 
-            return redirect(
-                'student-update',
-                pk=student.pk
-            )
+            return redirect('student-list')
+
         else:
-            print("error")
+            print("Student Errors:", form.errors)
+            print("Perm Errors:", perm_addr_form.errors)
+            print("Local Errors:", local_addr_form.errors)
+
     else:
-        form = StudentAllInOneForm(
-            request.POST or None,
-            request.FILES or None,
-            instance=student
-        )
+        form = StudentAllInOneForm(instance=student)
 
         perm_addr_form = AddressForm(
-            request.POST or None, prefix='perm',
+            prefix='perm',
             instance=student.permanent_address
         )
 
         local_addr_form = AddressForm(
-            request.POST or None,
-            prefix="local",
+            prefix='local',
             instance=student.local_address
         )
-        return render(
-            request,
-            "registration_form.html",
-            {
-                "student_form": form,
-                "perm_addr_form": perm_addr_form,
-                "local_addr_form": local_addr_form,
-            }
-        )
+
+    return render(
+        request,
+        "registration_form.html",
+        {
+            "student_form": form,
+            "perm_addr_form": perm_addr_form,
+            "local_addr_form": local_addr_form,
+        }
+    )
 
 def add_student_marks_view(request):
 

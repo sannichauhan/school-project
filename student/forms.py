@@ -4,14 +4,21 @@ from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, Ac
 class AddressForm(forms.ModelForm):
     class Meta:
         model = Address
-        fields = ['address_line', 'district', 'pin_code', 'state', 'nationality']
+        fields = ['address_line', 'post_office', 'district', 'pin_code', 'state', 'nationality']
         widgets = {
-            'address_line': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Street, House No, Landmark'}),
+            'address_line': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Street, House No, Landmark, Village Name'}),
+            'post_office':forms.TextInput(attrs={'class': 'form-control'}),
             'district': forms.TextInput(attrs={'class': 'form-control'}),
             'pin_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '6-digit PIN'}),
             'state': forms.TextInput(attrs={'class': 'form-control'}),
             'nationality': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
 
 class StudentAllInOneForm(forms.ModelForm):
     class Meta:

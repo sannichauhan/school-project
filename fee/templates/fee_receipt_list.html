@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipts Ledger Log - Nav Chetana Public School</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #7f8c8d;
+            --success-color: #27ae60;
+            --info-color: #2980b9;
+            --light-bg: #f8f9fa;
+            --border-color: #e2e8f0;
+            --text-main: #2d3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+            color: var(--text-main);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Top Header Styling */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 26px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .school-badge {
+            font-size: 13px;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* System Action Controls Component */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--info-color);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+        }
+
+        /* Action Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Responsive Matrix Logs Grid */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .receipt-log-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background-color: #fff;
+        }
+
+        .receipt-log-table th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 15px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .receipt-log-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .receipt-log-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .receipt-log-table tr:hover {
+            background-color: var(--light-bg);
+        }
+
+        /* Status Badges */
+        .badge-mode {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-cash { background-color: #e3f2fd; color: #0d47a1; }
+        .badge-online { background-color: #e8f5e9; color: #1b5e20; }
+        .badge-cheque { background-color: #fff3e0; color: #e65100; }
+
+        .text-bold {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        /* Empty State Layout */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--secondary-color);
+        }
+
+        .empty-state p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+        }
+
+        /* Client-Side Live Search Animation Utility */
+        .hidden-row {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="page-header">
+        <div>
+            <h2>Fee Collection Receipts Logs</h2>
+        </div>
+        <div class="school-badge">
+            NAV CHETANA PUBLIC SCHOOL
+        </div>
+    </div>
+
+    <div class="controls-row">
+        <div class="search-box">
+            <input type="text" id="receiptSearchInput" onkeyup="filterReceiptsTable()" placeholder="Search by Student Name, Admission No, or Txn ID...">
+        </div>
+        
+        <div>
+            <button onclick="window.print()" class="btn btn-outline" style="margin-right: 8px;">
+                Export Audit Log
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="receipt-log-table" id="receiptsLogTable">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">Receipt / Txn ID</th>
+                    <th style="width: 25%;">Student Name</th>
+                    <th style="width: 15%;">Class Range Structure</th>
+                    <th style="width: 15%;" class="text-right">Amount Collected</th>
+                    <th style="width: 15%;">Payment Mode</th>
+                    <th style="width: 12%;">Collection Date</th>
+                    <th style="width: 8%;" class="text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for txn in transactions %}
+                <tr class="receipt-data-row">
+                    <td class="text-bold">
+                        {% if txn.transaction_id %}
+                            {{ txn.transaction_id }}
+                        {% else %}
+                            #{{ txn.id }}
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        <span class="searchable-student-name" style="font-weight: 600; display: block; color: var(--primary-color);">
+                            {{ txn.ledger.student.name }}  </span>
+                        <small style="color: var(--secondary-color);">ID/Adm No: {{ txn.ledger.student.id }}</small>
+                    </td>
+                    
+                    <td>
+                        <span style="display: block;">
+                            {{ txn.ledger.student.admission_class }} 
+                        </span>
+                        <small style="color: #888; font-style: italic;">
+                            {{ txn.ledger.get_category_display }}
+                        </small>
+                    </td>
+                    
+                    <td class="text-right text-bold" style="color: var(--success-color);">
+                        ₹{{ txn.amount_paid }}
+                    </td>
+                    
+                    <td>
+                        {% if txn.payment_mode == 'CASH' %}
+                            <span class="badge-mode badge-cash">Cash Counter</span>
+                        {% elif txn.payment_mode == 'ONLINE' %}
+                            <span class="badge-mode badge-online">UPI / Online</span>
+                        {% else %}
+                            <span class="badge-mode badge-cheque">Cheque Clear</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        <span style="display: block;">{{ txn.payment_date|date:"d M Y" }}</span>
+                        <small style="color: var(--secondary-color);">Time: {{ txn.payment_date|date:"h:i A" }}</small>
+                    </td>
+                    
+                    <td class="text-right">
+                        <a href="{% url 'fee_receipt_detail' transaction_id=txn.id %}" class="btn btn-success" style="padding: 6px 12px; font-size: 12px; border-radius: 4px;">
+                            Print Slips
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <p><strong>No transaction entries found!</strong></p>
+                            <small>Database me abhi tak koi payment record nahi kiya gaya hai.</small>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterReceiptsTable() {
+    const input = document.getElementById("receiptSearchInput");
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById("receiptsLogTable");
+    const rows = table.getElementsByClassName("receipt-data-row");
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        // Scans row text nodes dynamically across Student Profile and Unique Token ID
+        const textContent = row.textContent || row.innerText;
+        
+        if (textContent.toUpperCase().indexOf(filter) > -1) {
+            row.classList.remove("hidden-row");
+        } else {
+            row.classList.add("hidden-row");
+        }
+    }
+}
+</script>
+
+</body>
+</html>
