@@ -112,10 +112,6 @@ def student_fee_dashboard(request, student_id):
 
 @login_required
 def fee_receipt_detail(request, transaction_id):
-    """
-    Renders the beautiful print-ready official fee receipt for a specific transaction.
-    """
-    # Performance Optimization: Using select_related to load student, class and collector in 1 query
     transaction = get_object_or_404(
         Transaction.objects.select_related(
             'ledger',
@@ -131,10 +127,6 @@ def fee_receipt_detail(request, transaction_id):
 
 @login_required
 def fee_receipt_list(request):
-    """
-    Displays a historical table log of all payment transactions collected across the institution.
-    """
-    
     transactions = Transaction.objects.select_related(
         'ledger__student', 
         'collected_by'
