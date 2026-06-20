@@ -205,3 +205,38 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - {self.attendance_date} - {self.get_status_display()}"
+
+
+class ExamSlot(models.Model):
+    SHIFT_CHOICES = [
+        ('I', 'I Shift (8:45 AM - 11:55 AM)'),
+        ('II', 'II Shift (12:15 PM - 2:45 PM)'),
+    ]
+    
+    date = models.DateField()
+    day = models.CharField(max_length=20)  # e.g., Wednesday, Thursday
+    shift = models.CharField(max_length=2, choices=SHIFT_CHOICES)
+
+    class Meta:
+        ordering = ['date', 'shift']
+        unique_together = ('date', 'shift')
+
+    def __str__(self):
+        return f"{self.date} ({self.day}) - Shift {self.shift}"
+
+
+class ExamSchedule(models.Model):
+    CLASS_CATEGORY_CHOICES = [
+        ('NUR_UKG', 'Nursery/U.K.G.'),
+        ('I_VIII', '1st to VIIIth'),
+    ]
+
+    slot = models.ForeignKey(ExamSlot, on_delete=models.CASCADE, related_name='schedules')
+    class_category = models.CharField(max_length=10, choices=CLASS_CATEGORY_CHOICES)
+    subject = models.CharField(max_length=100, default="Study", help_text="Enter subject name or 'Study'/'Holiday'")
+
+    class Meta:
+        unique_together = ('slot', 'class_category')
+
+    def __str__(self):
+        return f"{self.class_category} - {self.subject} on {self.slot.date}"

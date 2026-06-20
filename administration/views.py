@@ -2,10 +2,12 @@ from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
-from .models import AdmitCard, TransferCertificate, Attendance
+from collections import defaultdict
+from .models import AdmitCard, TransferCertificate, Attendance, ExamSlot, ExamSchedule
 from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
+
 
 def administration(request):
     return HttpResponse("Hello")       
@@ -178,3 +180,39 @@ def create_admit_card_view(request):
         form = AdmitCardForm()
         
     return render(request, 'create_admit_card.html', {'form': form})
+
+
+
+
+def exam_timetable_view(request):
+    slots = ExamSlot.objects.prefetch_related('schedules').all()
+    
+    # Process and structure data to match the image grid
+    matrix = defaultdict(lambda: {
+        'NUR_UKG': {'I': 'Study', 'II': 'Study'},
+        'I_VIII':  {'I': 'Study', 'II': 'Study'}
+    })
+    
+    # Track days mapped to dates securely
+    date_to_day = {}
+
+    for slot in slots:
+        date_str = slot.date.strftime('%d-%m-%Y')
+        date_to_day[date_str] = slot.day
+        
+        for sched in slot.schedules.all():
+            matrix[date_str][sched.class_category][slot.shift] = sched.subject
+
+    # Flatten data structure for easy template looping
+    timetable_data = []
+    for date_str, categories in sorted(matrix.items(), key=lambda x: x[0]):
+        timetable_data.append({
+            'date': date_str,
+            'day': date_to_day[date_str],
+            'nursery_shift_1': categories['NUR_UKG'].get('I', 'Study'),
+            'nursery_shift_2': categories['NUR_UKG'].get('II', 'Study'),
+            'primary_shift_1': categories['I_VIII'].get('I', 'Study'),
+            'primary_shift_2': categories['I_VIII'].get('II', 'Study'),
+        })
+
+    return render(request, 'exam-schedule.html', {'timetable': timetable_data})

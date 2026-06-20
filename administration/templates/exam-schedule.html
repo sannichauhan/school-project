@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Annual Examination Time-Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        th, td { text-align: center; vertical-align: middle; font-size: 0.95rem; }
+        .header-title { font-weight: bold; color: #111; text-transform: uppercase; }
+        .shift-time { font-size: 0.8rem; font-weight: bold; color: #555; }
+        .study-text { color: #888; font-style: italic; }
+    </style>
+</head>
+<body class="bg-light py-5">
+
+<div class="container bg-white p-4">
+    <div class="text-center mb-4 pb-2">
+        <h2 class="header-title mb-1">NAV CHETANA PUBLIC SCHOOL CHHAHUN, KUSHINAGAR</h2>
+        <h4 class="text-muted">Annual Examination (Time-Table) 2026-27</h4>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th rowspan="3" style="width: 5%;">S.N.</th>
+                    <th rowspan="3" style="width: 12%;">Date</th>
+                    <th rowspan="3" style="width: 12%;">Day</th>
+                    <th colspan="2" class="text-center">Nursery/U.K.G.</th>
+                    <th colspan="2" class="text-center">I<sup>st</sup> to VIII<sup>th</sup></th>
+                </tr>
+                <tr>
+                    <th colspan="2" class="text-center text-primary py-1">Subject</th>
+                    <th colspan="2" class="text-center text-primary py-1">Subject</th>
+                </tr>
+                <tr>
+                    <th>I Shift <div class="shift-time">8:45AM-11:55AM</div></th>
+                    <th>II Shift <div class="shift-time">12:15PM-2:45PM</div></th>
+                    <th>I Shift <div class="shift-time">8:45AM-11:55AM</div></th>
+                    <th>II Shift <div class="shift-time">12:15PM-2:45PM</div></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in timetable %}
+                <tr>
+                    <td>{{ forloop.counter }}.</td>
+                    <td><strong>{{ row.date }}</strong></td>
+                    <td>{{ row.day }}</td>
+                    
+                    <td class="{% if row.nursery_shift_1 == 'Study' %}study-text{% endif %}">
+                        {{ row.nursery_shift_1 }}
+                    </td>
+                    <td class="{% if row.nursery_shift_2 == 'Study' %}study-text{% endif %}">
+                        {{ row.nursery_shift_2 }}
+                    </td>
+                    
+                    <td class="{% if row.primary_shift_1 == 'Study' %}study-text{% endif %}">
+                        {{ row.primary_shift_1 }}
+                    </td>
+                    <td class="{% if row.primary_shift_2 == 'Study' %}study-text{% endif %}">
+                        {{ row.primary_shift_2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No examination schedule records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 p-3 border rounded bg-light">
+        <p class="mb-0 text-danger font-weight-bold">
+            <strong>नोट:</strong> अभिभावक गण को सूचित किया जाता है कि अपने पाल्य को समय–सारणी के अनुसार वार्षिक परीक्षा के लिए आवश्यक सामग्री के साथ भेजें तथा इसके साथ ही पाल्य का अन्तिम किस्त जमा कर विद्यालय व्यवस्था में सहयोग प्रदान करें।
+        </p>
+        <div class="d-flex justify-content-between mt-4 pt-2">
+            <span class="fw-bold text-secondary">Class Teacher</span>
+            <span class="fw-bold text-dark">Principal</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

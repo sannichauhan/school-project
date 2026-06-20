@@ -13,4 +13,5 @@ urlpatterns = [
     path('transfer-certificate/<int:pk>/', tc_detail_view, name='tc-detail'),
     path('take-attendance/', take_attendance, name='take_attendance'),
     path('attendance-report/', attendance_report, name='attendance_report'),
+    path('exam-schedule/', views.exam_timetable_view, name='exam_timetable'),
 ]

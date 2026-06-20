@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from django.contrib import messages
 
@@ -13,6 +14,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentAcademicHistory
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
 from .services import promote_student_list
+
 
 class StudentClassViewSet(viewsets.ModelViewSet):
     queryset = StudentClass.objects.all()
@@ -97,7 +99,7 @@ class MarksViewSet(viewsets.ModelViewSet):
 
 
  
-
+@login_required
 def student_registration_view(request):
     if request.method == 'POST':
         # Create instances using POST data
@@ -159,7 +161,7 @@ def student_registration_view(request):
 
 ### Adding new class
 
-
+@login_required
 def add_class_view(request):
     if request.method == 'POST':
         form = StudentClassForm(request.POST)        
@@ -180,6 +182,7 @@ def add_class_view(request):
     
     
 ### View students
+@login_required
 def student_list_view(request):
     students = Student.objects.all()
     context = {
@@ -191,6 +194,7 @@ def student_list_view(request):
     }
     return render(request, 'student_list.html', context)
 
+@login_required
 def student_details_view(request, pk):
     students = Student.objects.get(pk=pk)
     context = {
@@ -199,7 +203,7 @@ def student_details_view(request, pk):
     return render(request, 'student-details.html', context)
 
 
-
+@login_required
 def update_student_view(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
@@ -270,7 +274,7 @@ def update_student_view(request, pk):
             "local_addr_form": local_addr_form,
         }
     )
-
+@login_required
 def add_student_marks_view(request):
 
     if request.method == "POST":
@@ -356,6 +360,7 @@ def add_student_marks_view(request):
     )
 
 
+@login_required
 def grade(percentage):
     
     if percentage >= 90:
@@ -374,6 +379,7 @@ def grade(percentage):
     return "F"
 
 ### Report card view for students
+@login_required
 def student_report_card_view(request, pk):
     student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
     
@@ -448,13 +454,13 @@ def student_report_card_view(request, pk):
         'grade' : grade(percentage),
     })
 
-
+@login_required
 def all_students_marksheet_view(request):
     students = Student.objects.all()    
     return render(request, 'all-student-marksheet.html', {'students': students})
 
 
-
+@login_required
 def student_promotion_view(request):
     # 1. 'UnboundLocalError' से बचने के लिए वेरिएबल्स को शुरुआत में ही डिफ़ॉल्ट None वैल्यू दें
     current_session_id = None
@@ -544,7 +550,7 @@ def student_promotion_view(request):
     }
 
     return render(request, "student-promotion.html", context)
-
+@login_required
 def create_subject_view(request):
     if request.method == "POST":
         form = SubjectForm(request.POST)
@@ -556,11 +562,14 @@ def create_subject_view(request):
 
     return render(request, 'subject_form.html', {'form': form})
 
+
+@login_required
 def subject_list_view(request):
     subjects = Subject.objects.select_related('student_class').all()
     return render(request, 'subject_list.html', {'subjects': subjects})
 
 # CREATE
+@login_required
 def exam_create_view(request):
     form = ExamForm(request.POST or None)
     if form.is_valid():
@@ -570,10 +579,12 @@ def exam_create_view(request):
 
 
 # LIST
+@login_required
 def exam_list_view(request):
     exams = Exam.objects.all().order_by('-id')
     return render(request, 'exam_list.html', {'exams': exams})
 
+@login_required
 def academic_session_create(request):
     if request.method == "POST":
         form = AcademicSessionForm(request.POST)
@@ -589,12 +600,14 @@ def academic_session_create(request):
     })
 
 
+@login_required
 def academic_session_list(request):
     sessions = AcademicSession.objects.all().order_by('-start_date')
     return render(request, 'session-list.html', {
         'sessions': sessions
     })
 
+@login_required
 def all_students_test_marksheet_view(request):
     marksheets = MarkSheet.objects.select_related('student', 'student_class', 'exam').all()    
     context = {
@@ -604,7 +617,7 @@ def all_students_test_marksheet_view(request):
 
 
 
-
+@login_required
 def test_report_card_view(request, pk):
     # सभी marksheets को fetch करना
     marksheet = get_object_or_404(
