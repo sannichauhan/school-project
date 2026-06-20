@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import TeacherForm
@@ -27,6 +28,7 @@ class SubjectAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = SubjectAssignmentSerializer
 
 
+@login_required
 def add_teacher_view(request):
 
     if request.method == "POST":
@@ -74,6 +76,7 @@ def add_teacher_view(request):
         context
     )
 
+@login_required
 def all_teacher_view(request):
      teacher = SubjectAssignment.objects.all()
      return render(request, 'all-teacher.html', {'teachers': teacher})
@@ -144,6 +147,7 @@ def update_teacher_view(request, pk):
         context
     )
 
+@login_required
 def teacher_details_view(request, pk):
      teacher = Teacher.objects.get(pk=pk)
      return render(request, 'teacher-details.html', {'teachers':teacher})

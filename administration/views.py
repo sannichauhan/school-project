@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -8,10 +9,11 @@ from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
 
-
+@login_required
 def administration(request):
-    return HttpResponse("Hello")       
-
+    return HttpResponse("Hello")  
+     
+@login_required
 def admit_card_view(request):
 
     class_id = request.GET.get("class_id")
@@ -44,8 +46,7 @@ def admit_card_view(request):
 
 
 
-
-
+@login_required
 def create_tc_view(request):
 
     if request.method == 'POST':
@@ -66,7 +67,7 @@ def create_tc_view(request):
         'form': form
     })
 
-
+@login_required
 def tc_list_view(request):
 
     certificates = TransferCertificate.objects.select_related(
@@ -77,7 +78,7 @@ def tc_list_view(request):
         'certificates': certificates
     })
 
-
+@login_required
 def tc_detail_view(request, pk):
 
     tc = get_object_or_404(
@@ -90,6 +91,7 @@ def tc_detail_view(request, pk):
         'tc': tc
     })
 
+@login_required
 def take_attendance(request):
 
     classes = StudentClass.objects.all()
@@ -151,6 +153,7 @@ def take_attendance(request):
         context
     )
 
+@login_required
 def attendance_report(request):
 
     records = Attendance.objects.select_related(
@@ -165,6 +168,7 @@ def attendance_report(request):
     )
 
 
+@login_required
 def create_admit_card_view(request):
     if request.method == 'POST':
         form = AdmitCardForm(request.POST)
@@ -183,7 +187,7 @@ def create_admit_card_view(request):
 
 
 
-
+@login_required
 def exam_timetable_view(request):
     slots = ExamSlot.objects.prefetch_related('schedules').all()
     
