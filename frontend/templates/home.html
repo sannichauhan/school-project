@@ -382,54 +382,60 @@
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Admission Inquiry</h3>
                 <p class="text-sm text-gray-500 mb-6">Share your details and we will guide you through the next steps.</p>
                 
-                <form action="#" method="POST" class="space-y-4">
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Parent's Name</label>
-                            <input type="text" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="John Doe">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Contact Number</label>
-                            <input type="tel" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="+91 XXXXX XXXXX">
-                        </div>
-                    </div>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Email Address</label>
-                            <input type="email" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="parent@example.com">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Student's Name</label>
-                            <input type="text" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="Child's Name">
-                        </div>
+                <form action="" method="POST" class="space-y-4">
+                {% csrf_token %}
+                
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Parent's Name</label>
+                        <input type="text" name="parent_name" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="John Doe" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Class Applying For</label>
-                        <select class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white">
-                            <option value="">Select Class</option>
-                            <option value="nursery">Nursery</option>
-                            <option value="lkg">LKG</option>
-                            <option value="ukg">UKG</option>
-                            <option value="class1">Class 1</option>
-                            <option value="class2">Class 2</option>
-                            <option value="class3">Class 3</option>
-                            <option value="class4">Class 4</option>
-                            <option value="class5">Class 5</option>
-                            <option value="class5">Class 6</option>
-                            <option value="class5">Class 7</option>
-                            <option value="class5">Class 8</option>
-                            <option value="class5">Class 9</option>
-                            <option value="class5">Class 10</option>
-                            <option value="class5">Class 11</option>
-                            <option value="class5">Class 12</option>
-                        </select>
+                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Contact Number</label>
+                        <input type="tel" name="contact_number" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="+91 XXXXX XXXXX" required>
+                    </div>
+                </div>
+                
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Email Address</label>
+                        <input type="email" name="email_address" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="parent@example.com" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Message</label>
-                        <textarea rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="Any specific requirements or queries..."></textarea>
+                        <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Student's Name</label>
+                        <input type="text" name="student_name" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="Child's Name" required>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition tracking-wide text-sm">Submit Inquiry</button>
-                </form>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Class Applying For</label>
+                    <select name="class_applying_for" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" required>
+                        <option value="">Select Class</option>
+                        <option value="nursery">Nursery</option>
+                        <option value="lkg">LKG</option>
+                        <option value="ukg">UKG</option>
+                        <option value="class1">Class 1</option>
+                        <option value="class2">Class 2</option>
+                        <option value="class3">Class 3</option>
+                        <option value="class4">Class 4</option>
+                        <option value="class5">Class 5</option>
+                        <option value="class6">Class 6</option>
+                        <option value="class7">Class 7</option>
+                        <option value="class8">Class 8</option>
+                        <option value="class9">Class 9</option>
+                        <option value="class10">Class 10</option>
+                        <option value="class11">Class 11</option>
+                        <option value="class12">Class 12</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1 tracking-wider">Message</label>
+                    <textarea name="message" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:bg-white" placeholder="Any specific requirements or queries..."></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition tracking-wide text-sm">Submit Inquiry</button>
+            </form>
             </div>
         </div>
     </section>
