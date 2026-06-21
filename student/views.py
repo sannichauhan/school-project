@@ -360,7 +360,7 @@ def add_student_marks_view(request):
     )
 
 
-@login_required
+
 def grade(percentage):
     
     if percentage >= 90:
