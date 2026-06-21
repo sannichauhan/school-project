@@ -4,8 +4,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.mail import send_mail
 from django.conf import settings
-
-from .models import AdmissionInquiry
+from django.contrib import messages
+from .forms import AdmissionInquiryForm  # Form import kiya
 
 # =====================================================================
 # 1. GENERAL & AUTHENTICATION VIEWS
@@ -44,59 +44,59 @@ def logout_view(request):
 
 def admission_inquiry_view(request):
     if request.method == 'POST':
-        # 1. Capture HTML data using input 'name' tags
-        parent_name = request.POST.get('parent_name')
-        contact_number = request.POST.get('contact_number')
-        email_address = request.POST.get('email_address')
-        student_name = request.POST.get('student_name')
-        class_applying_for = request.POST.get('class_applying_for')
-        message = request.POST.get('message')
-
-        # 2. Save data straight to the Database
-        inquiry = AdmissionInquiry.objects.create(
-            parent_name=parent_name,
-            contact_number=contact_number,
-            email_address=email_address,
-            student_name=student_name,
-            class_applying_for=class_applying_for,
-            message=message
-        )
-
-        # 3. Formulate Notification Email
-        # .upper() handles case safety if strings come back lowercase
-        class_display = class_applying_for.upper() if class_applying_for else "NOT SPECIFIED"
-        subject = f"New Admission Inquiry: {student_name} ({class_display})"
+        form = AdmissionInquiryForm(request.POST)
         
-        email_message = f"""
-        Hello Administration,
+        if form.is_valid():
+            # 1. Database mein save kiya
+            form.save()
+            
+            # 2. Cleaned data nikalna email ke liye
+            parent_name = form.cleaned_data['parent_name']
+            contact_number = form.cleaned_data['contact_number']
+            email_address = form.cleaned_data['email_address']
+            student_name = form.cleaned_data['student_name']
+            class_applying_for = form.cleaned_data['class_applying_for']
+            message = form.cleaned_data['message']
 
-        You have received a new admission inquiry form request.
+            # 3. Email Sendout Logic
+            class_display = class_applying_for.upper() if class_applying_for else "NOT SPECIFIED"
+            subject = f"New Admission Inquiry: {student_name} ({class_display})"
+            
+            email_message = f"""
+            Hello Administration,
+            You have received a new admission inquiry form request.
 
-        Parent's Name: {parent_name}
-        Contact Number: {contact_number}
-        Email Address: {email_address}
-        Student's Name: {student_name}
-        Class Selected: {class_display}
+            Parent's Name: {parent_name}
+            Contact Number: {contact_number}
+            Email Address: {email_address}
+            Student's Name: {student_name}
+            Class Selected: {class_display}
+            
+            Additional Notes:
+            {message if message else "None Provided"}
+            """
+            try:
+                send_mail(
+                    subject=subject,
+                    message=email_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL, email_address],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"SMTP Server Error: {e}")
+
+            # 🔴 4. Success Message set karein jo Home page par dikhega
+            messages.success(request, "Thank you! Your admission inquiry has been submitted successfully.")
+            
+            # Wapas home page par hi bhej rahe hain
+            return redirect('main_home_page') # Aapke home page ka jo bhi URL name hai yahan likhein
+            
+        else:
+            messages.error(request, "Please correct the errors in the form below.")
+            return render(request, 'home.html', {'form': form})
+
+    else:
+        form = AdmissionInquiryForm()
         
-        Additional Notes:
-        {message if message else "None Provided"}
-
-        ---
-        Automated system update.
-        """
-
-        # 4. Trigger the email sendout
-        try:
-            send_mail(
-                subject=subject,
-                message=email_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.DEFAULT_FROM_EMAIL, email_address], # Notifies both school admin & the applicant
-                fail_silently=False,
-            )
-        except Exception as e:
-            print(f"SMTP Server Error: {e}")
-
-        return render(request, 'success.html')
-
-    return render(request, 'admission_form.html')
+    return render(request, 'home.html', {'form': form})
