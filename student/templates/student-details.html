@@ -99,7 +99,7 @@
                             <div class="col-12 col-md-auto text-center text-md-start mb-3 mb-md-0">
                                 <div class="profile-avatar-wrapper">
                                     {% if students.student_photo %}
-                                        <img src="{{ students.student_photo.path }}" alt="{{ students.name }}" width="140" height="140">
+                                        <img src="{{ students.student_photo.url }}" alt="{{ students.name }}" width="140" height="140">
                                     {% else %}
                                         <img src="/static/img/figure/parents.jpg" alt="Student" width="140" height="140">
                                     {% endif %}
