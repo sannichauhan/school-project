@@ -82,6 +82,7 @@ class TransferCertificate(models.Model):
         null=True,
         blank=True
     ) 
+    
 
        
 

@@ -62,10 +62,16 @@ def create_tc_view(request):
     else:
 
         form = TransferCertificateForm()
+        context = {
+            'page_title': 'Create Transfer Certificate',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Create Transfer Certificate', 'url': ''},
+            ]
+        }
 
-    return render(request, 'create_tc.html', {
-        'form': form
-    })
+    return render(request, 'create_tc.html', context)
 
 @login_required
 def tc_list_view(request):
@@ -74,9 +80,17 @@ def tc_list_view(request):
         'student'
     ).all()
 
-    return render(request, 'tc_list.html', {
-        'certificates': certificates
-    })
+
+    context = {
+            'page_title': 'All Transfer Certificate',
+            'certificates': certificates,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'All Transfer Certificate', 'url': ''},
+            ]
+    }
+
+    return render(request, 'tc_list.html', context)
 
 @login_required
 def tc_detail_view(request, pk):
@@ -86,10 +100,7 @@ def tc_detail_view(request, pk):
         pk=pk
     )
 
-
-    return render(request, 'tc_detail.html', {
-        'tc': tc
-    })
+    return render(request, 'tc_detail.html', {'tc': tc})
 
 @login_required
 def take_attendance(request):
@@ -144,7 +155,12 @@ def take_attendance(request):
         'classes': classes,
         'students': students,
         'selected_class': selected_class,
-        'today': date.today()
+        'today': date.today(),
+        'page_title': 'Mark Attendance',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Mark Attendance', 'url': ''},
+        ]
     }
 
     return render(
@@ -161,11 +177,16 @@ def attendance_report(request):
         'student_class'
     )
 
-    return render(
-        request,
-        'attendance_report.html',
-        {'records': records}
-    )
+    context = {
+        'records': records,
+        'page_title': 'Attendance Report',        
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Attendance Report', 'url': ''},
+        ]
+    }
+
+    return render(request, 'attendance_report.html', context)
 
 
 @login_required
@@ -182,8 +203,17 @@ def create_admit_card_view(request):
                 form.add_error(None, "An Admit Card already exists for this student in this academic session.")
     else:
         form = AdmitCardForm()
+
+        context = {
+            'page_title': 'Generate New Admit Card',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Generate New Admit Card', 'url': ''},
+            ]
+        }
         
-    return render(request, 'create_admit_card.html', {'form': form})
+    return render(request, 'create_admit_card.html', context)
 
 
 

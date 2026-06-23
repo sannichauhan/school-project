@@ -150,10 +150,11 @@ def student_registration_view(request):
         'student_form': student_form,
         'perm_addr_form': perm_addr_form,
         'local_addr_form': local_addr_form,
+        'page_title': 'Add New Students',
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
             {'name': 'Students', 'url': '/students/'},
-            {'name': 'Add Student', 'url': ''},
+            {'name': 'Add New Students', 'url': ''},
         ]
     }
     return render(request, 'registration_form.html', context)
@@ -174,11 +175,18 @@ def add_class_view(request):
     
     # Fetch all classes to show them on the same page
     all_classes = StudentClass.objects.all().order_by('name')
-    
-    return render(request, 'add_class.html', {
+
+    context = {
         'form': form,
-        'all_classes': all_classes
-    })
+        'all_classes': all_classes,
+        'page_title': 'Add New Class',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add New Class', 'url': ''},
+        ]
+    }
+    
+    return render(request, 'add_class.html', context)
     
     
 ### View students
@@ -186,6 +194,7 @@ def add_class_view(request):
 def student_list_view(request):
     students = Student.objects.all()
     context = {
+        'page_title': 'All Students',
         'students': students,
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
@@ -199,6 +208,11 @@ def student_details_view(request, pk):
     students = Student.objects.get(pk=pk)
     context = {
         'students': students,
+        'page_title': 'Details of Students',        
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Details of Students', 'url': ''},
+        ]
     }
     return render(request, 'student-details.html', context)
 
@@ -265,15 +279,18 @@ def update_student_view(request, pk):
             instance=student.local_address
         )
 
-    return render(
-        request,
-        "registration_form.html",
-        {
+        context = {
             "student_form": form,
             "perm_addr_form": perm_addr_form,
-            "local_addr_form": local_addr_form,
+            "local_addr_form": local_addr_form,            
+            'page_title': 'Update Student Details',
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Update Student Details', 'url': ''},
+            ]
         }
-    )
+
+    return render(request, "registration_form.html", context)
 @login_required
 def add_student_marks_view(request):
 
@@ -349,15 +366,18 @@ def add_student_marks_view(request):
     exams = Exam.objects.all()
     sessions = AcademicSession.objects.all()
 
-    return render(
-        request,
-        "student-marks.html",
-        {
-            "classes": classes,
-            "exams": exams,
-            "sessions": sessions,
-        },
-    )
+    context = {
+        "classes": classes,
+        "exams": exams,
+        "sessions": sessions,
+        'page_title': 'Add Student Marks',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add Student Marks', 'url': ''},
+        ]
+    }
+
+    return render(request, "student-marks.html", context)
 
 
 
@@ -456,8 +476,16 @@ def student_report_card_view(request, pk):
 
 @login_required
 def all_students_marksheet_view(request):
-    students = Student.objects.all()    
-    return render(request, 'all-student-marksheet.html', {'students': students})
+    students = Student.objects.all()
+    context = {
+        'page_title': 'All Student Result List',
+        'students': students,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Student Result List', 'url': ''},
+        ]
+    }    
+    return render(request, 'all-student-marksheet.html', context)
 
 
 @login_required
@@ -547,6 +575,11 @@ def student_promotion_view(request):
         'has_students': has_students,
         'current_session_id': current_session_id,
         'from_class_id': from_class_id,
+        'page_title': 'Student Promotion',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Student Promotion', 'url': ''},
+        ]
     }
 
     return render(request, "student-promotion.html", context)
@@ -560,13 +593,31 @@ def create_subject_view(request):
     else:
         form = SubjectForm()
 
-    return render(request, 'subject_form.html', {'form': form})
+        context = {
+            'page_title': 'Add New Subject',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Add New Subject', 'url': ''},
+            ]
+        }
+
+    return render(request, 'subject_form.html', context)
 
 
 @login_required
 def subject_list_view(request):
     subjects = Subject.objects.select_related('student_class').all()
-    return render(request, 'subject_list.html', {'subjects': subjects})
+    context = {
+            'subjects': subjects,
+            'page_title': 'Subject List',            
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Subject List', 'url': ''},
+            ]
+    }
+    
+    return render(request, 'subject_list.html', context)
 
 # CREATE
 @login_required
@@ -575,14 +626,30 @@ def exam_create_view(request):
     if form.is_valid():
         form.save()
         return redirect('exam_list')
-    return render(request, 'exam_form.html', {'form': form})
+    context = {
+        'form': form,
+        'page_title': 'Add New Exam & Academic Session',            
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add New Exam & Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'exam_form.html', context)
 
 
 # LIST
 @login_required
 def exam_list_view(request):
     exams = Exam.objects.all().order_by('-id')
-    return render(request, 'exam_list.html', {'exams': exams})
+    context = {
+        'exams': exams,
+        'page_title': 'Exam List & Academic Session',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Exam List & Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'exam_list.html', context)
 
 @login_required
 def academic_session_create(request):
@@ -595,23 +662,40 @@ def academic_session_create(request):
     else:
         form = AcademicSessionForm()
 
-    return render(request, 'session-create.html', {
-        'form': form
-    })
+    context = {
+        'form': form,
+        'page_title': 'Add Academic Session',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'session-create.html', context)
 
 
 @login_required
 def academic_session_list(request):
     sessions = AcademicSession.objects.all().order_by('-start_date')
-    return render(request, 'session-list.html', {
-        'sessions': sessions
-    })
+    context = {
+        'sessions': sessions,
+        'page_title': 'Academic Sessions',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Academic Sessions', 'url': ''},
+        ]
+    }
+    return render(request, 'session-list.html', context)
 
 @login_required
 def all_students_test_marksheet_view(request):
     marksheets = MarkSheet.objects.select_related('student', 'student_class', 'exam').all()    
     context = {
-        'marksheets': marksheets
+        'page_title': 'All Student Test Result List',
+        'marksheets': marksheets,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Student Test Result List', 'url': ''},
+        ]
     }   
     return render(request, 'all-student-test-marksheet.html', context)
 

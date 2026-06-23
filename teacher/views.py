@@ -68,25 +68,31 @@ def add_teacher_view(request):
     context = {
         "teacher_form": teacher_form,
         "address_form": address_form,
+        'page_title': 'Add New Teacher',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add New Teacher', 'url': ''},
+        ]
     }
 
-    return render(
-        request,
-        "add-teacher.html",
-        context
-    )
+    return render(request, "add-teacher.html", context)
 
 @login_required
 def all_teacher_view(request):
      teacher = SubjectAssignment.objects.all()
-     return render(request, 'all-teacher.html', {'teachers': teacher})
+     context = {
+        'page_title': 'All Teachers',
+        'teachers': teacher,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Teachers', 'url': ''},
+        ]
+    }
+     return render(request, 'all-teacher.html', context)
 
 def update_teacher_view(request, pk):
 
-    teacher = get_object_or_404(
-        Teacher,
-        pk=pk
-    )
+    teacher = get_object_or_404(Teacher, pk=pk)
 
     address = teacher.address
 
@@ -129,25 +135,27 @@ def update_teacher_view(request, pk):
         )
 
     context = {
-
         "teacher_form": teacher_form,
-
         "address_form": address_form,
-
         "teacher": teacher,
-
         "page_title": "Update Teacher",
-
-        "breadcrumb": "Update Teacher",
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Update Teacher Data', 'url': ''},
+        ]
     }
 
-    return render(
-        request,
-        "add-teacher.html",
-        context
-    )
+    return render(request, "add-teacher.html", context)
 
 @login_required
 def teacher_details_view(request, pk):
      teacher = Teacher.objects.get(pk=pk)
-     return render(request, 'teacher-details.html', {'teachers':teacher})
+     context = {
+        'page_title': 'All Teachers Data',
+        'teachers':teacher,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Teachers Data', 'url': ''},
+        ]
+    }
+     return render(request, 'teacher-details.html', context)

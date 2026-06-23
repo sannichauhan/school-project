@@ -1,5 +1,40 @@
 {% extends 'base2.html' %} 
 {% block content %}
+
+<style>
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding-bottom:0px
+        }
+        .card-header {
+            background-color: #343a40;
+            color: #ffffff;
+            font-weight: 600;
+            border-top-left-radius: 8px !important;
+            border-top-right-radius: 8px !important;
+        }
+       .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 12px;
+        }
+        .table th {
+            border-top: none;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+        }
+    </style>
     <div id="wrapper" class="wrapper bg-ash">
        <!-- Header Menu Area Start Here -->
         {% include "tags/header.html" %}
@@ -15,17 +50,17 @@
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
                  
-
-               <div class="container py-5">
+            <div class="row">
+               <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="card shadow">
-                                <div class="card-header bg-dark text-white">Add New Class</div>
+                                <div class="card-header  text-white py-3"><i class="fas fa-plus-circle mr-2"></i> {{page_title}}</div>
                                 <div class="card-body">
                                     <form method="post">
                                         {% csrf_token %}
                                         {{ form.as_p }}
-                                        <button type="submit" class="btn btn-primary w-100">Save Class</button>
+                                        <button type="submit" class="btn btn-primary btn-block btn-lg mt-4"><i class="fas fa-save mr-2"></i> Save Class</button>
                                     </form>
                                 </div>
                             </div>
@@ -33,23 +68,28 @@
 
                         <div class="col-md-8">
                             <div class="card shadow">
-                                <div class="card-header bg-secondary text-white">Existing Classes</div>
+                                <div class="card-header  text-white py-3"><i class="fas fa-list mr-2"></i> Existing Classes</div>
                                 <div class="card-body">
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
                                                 <th>Class Name</th>
                                                 <th>Section</th>
-                                                <th>Actions</th>
+                                                <th class="text-right pr-4">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for cls in all_classes %}
                                             <tr>
                                                 <td>{{ cls.name }}</td>
-                                                <td>{{ cls.section|default:"-" }}</td>
-                                                <td>
-                                                    <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                                                <td>{{ cls.section|default:"N/A" }}</td>
+                                                <td class="text-right">
+                                                    <button class="btn btn-outline-primary btn-action mr-1" title="Edit Class">
+                                                        <i class="fas fa-edit mr-1"></i> Edit
+                                                    </button>
+                                                    <button class="btn btn-outline-danger btn-action" title="Delete Class">
+                                                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                                                    </button>
                                                 </td>
                                             </tr>
                                             {% empty %}
@@ -62,6 +102,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
                 
                 <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}

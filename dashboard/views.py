@@ -20,13 +20,17 @@ def dashboard(request):
 
     teachers = Teacher.objects.all()
 
-
     context = {
         'total_students': total_students,
         'male_students': male_students,
         'female_students': female_students,
         'total_teachers': total_teachers,
         'teachers': teachers,
+        'page_title': 'Admin Dashboard',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Admin', 'url': ''},
+        ]
     }
 
     return render(request, 'index.html', context)

@@ -6331,3 +6331,8 @@ ul {
   margin-right: 30px;
 }
 /* test */
+.profile-avatar-wrapper img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+}

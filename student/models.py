@@ -63,8 +63,6 @@ class TransportRoute(models.Model):
     def __str__(self):
         return self.route_name
     
-# मान लेते हैं कि ये मॉडल्स पहले से इम्पोर्टेड या डिफाइंड हैं:
-# StudentClass, Section, AcademicSession, Address, TransportRoute, Marks, StudentAcademicHistory
 
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
