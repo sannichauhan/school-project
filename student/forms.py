@@ -2,7 +2,7 @@ from django import forms
 
 from django.forms import modelformset_factory
 
-from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
+from .models import Section, Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
 
 class AddressForm(forms.ModelForm):
     class Meta:
