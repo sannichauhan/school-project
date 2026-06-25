@@ -11,7 +11,7 @@
                     <div class="card-body">
                         <div class="heading-layout1">
                             <div class="item-title">
-                                <h3>All Students Data</h3>
+                                <h3>{{page_title}}</h3>
                             </div>
                         </div>
                         <form class="mg-b-20">
@@ -38,7 +38,6 @@
                                         <th>#</th>
                                         <th>Student</th>
                                         <th>Class</th>
-                                        <th>Percentage</th>
                                         <th>Exam Term</th>
                                         <th>Actions</th>
                                     </tr>
@@ -49,13 +48,22 @@
                                         <td>{{ forloop.counter }}</td>
                                         <td>{{ item.student.name }}</td>
                                         
-                                        <td>{{ item.student.admission_class.name }}</td>
+                                        <td>{{ item.student.admission_class }}</td>
                                         
-                                        <td>{{ item.percentage }}%</td>
                                         
-                                        <td>{{ item.exam_name.name }}</td>
+                                        
                                         <td>
-                                            <a href="{% url 'student_test_report_card' item.pk %}" class="btn btn-md btn-info">View result</a>
+                                            {% if item.exam.name == "Quaterly" %}
+                                                First Unit Test
+                                            {% elif item.exam.name == "Half Yearly" %}
+                                                Second Unit Test
+                                            {% elif item.exam.name == "Annual" %}
+                                                Third Unit Test
+                                            {% else %}
+                                                {{ item.exam.name }}  {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url "test_report_card" item.pk %}" class="btn btn-md btn-info">View result</a>
                                         </td>
                                     </tr>
                                 {% empty %}

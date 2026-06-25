@@ -1,134 +1,210 @@
 {% extends 'base2.html' %} 
 {% block content %}
-    <div id="wrapper" class="wrapper bg-ash">
-       <!-- Header Menu Area Start Here -->
-        {% include "tags/header.html" %}
-        <!-- Header Menu Area End Here -->
-         
-        <!-- Page Area Start Here -->
-        <div class="dashboard-page-one">
-            <!-- Sidebar Area Start Here -->
-            {% include "tags/sidebar.html" %}
-            <!-- Sidebar Area End Here -->
-            <div class="dashboard-content-one">
-                <!-- Breadcubs Area Start Here -->
-                {% include "tags/breadcrumb.html" %}
-                <!-- Breadcubs Area End Here -->
+    <style>
+        .profile-top-header p {
+            color: #fff;
+        }
+        .profile-top-header {
+            background: linear-gradient(135deg, #1e88e5, #22456e);
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .profile-avatar-wrapper img {
+            border: 4px solid #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            object-fit: cover;
+        }
+        .info-block {
+            background: #ffffff;
+            border: 1px solid #e1e6eb;
+            border-radius: 8px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .info-block-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #212529;
+            border-bottom: 2px solid #021933;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .detail-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px dashed #d2d2d2;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            width: 40%;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .detail-value {
+            width: 60%;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .badge-info-custom {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        /* एडिट बटन के लिए कस्टम स्टाइलिंग */
+        .btn-edit-profile {
+            background-color: #ffffff;
+            color: #1e88e5;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 6px 18px;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-edit-profile:hover {
+            background-color: #f8fafc;
+            color: #3f51b5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+    </style>
 
-               <!-- Student Details Area Start Here -->
-                <div class="card height-auto">
-                    <div class="card-body">
-                        <div class="heading-layout1">
-                            <div class="item-title">
-                                <h3>About Me</h3>
+    <div id="wrapper" class="wrapper bg-ash">
+        {% include "tags/header.html" %}
+        <div class="dashboard-page-one">
+            {% include "tags/sidebar.html" %}
+            <div class="dashboard-content-one">
+                {% include "tags/breadcrumb.html" %}
+                <div class="container-fluid p-0">
+                    
+                    <div class="profile-top-header">
+                        <div class="row align-items-center">
+                            <div class="col-12 col-md-auto text-center text-md-start mb-3 mb-md-0">
+                                <div class="profile-avatar-wrapper">
+                                    {% if students.student_photo %}
+                                        <img src="{{ students.student_photo.url }}" alt="{{ students.name }}" width="140" height="140">
+                                    {% else %}
+                                        <img src="/static/img/figure/parents.jpg" alt="Student" width="140" height="140">
+                                    {% endif %}
+                                </div>
                             </div>
-                           
-                        </div>
-                        <div class="single-info-details">
-                            {% if student.student_photo %}
-                                <img src="{{ student.student_photo.url }}" alt="Student Photo">
-                            {% else %}
-                                <img src="/static/img/figure/parents.jpg" alt="No Photo">
-                            {% endif %}
-                            <div class="item-content">
-                                <div class="header-inline item-header">
-                                    <h3 class="text-dark-medium font-medium">{{ students.name|capfirst }}</h3>
+                            <div class="col-12 col-md text-md-start d-flex flex-column flex-md-row justify-content-md-between align-items-md-start">
+                                <div>
+                                    <h2 class="text-white font-medium mb-1" style="font-weight: 700;">{{ students.name|upper }}</h2>
+                                    <div class="mb-2">
+                                        <span class="badge-info-custom">Class: {{ students.admission_class }}</span>
+                                        <span class="badge-info-custom">Session: {{ students.session }}</span>
+                                    </div>                                
+                                    <p class="mb-0 opacity-75">Roll Number: <strong>{{ students.roll_number }}</strong></p>
                                 </div>
                                 
-                                <div class="info-table table-responsive">
-                                    <table class="table text-nowrap">
-                                        <tbody>
-                                                <tr>
-                                                    <td>Name:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.name|capfirst }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Gender:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.gender }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Father Name:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.father_name }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Father Occupation:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.father_occupation }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Mother Name:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.mother_name }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Mother Occupation:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.mother_occupation }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Date Of Birth:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.date_of_birth }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Religion:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.religion }}</td>
-                                                </tr>                                                
-                                            
-                                                <tr>
-                                                    <td>Admission Date:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.date_of_application }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Class:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.admission_class }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Section:</td>
-                                                    <td class="font-medium text-dark-medium">{{students.admission_class.section}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Roll:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.roll_number }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Address:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.permanent_address }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Adhaar Number:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.adhaar_number }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>PEN Number:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.pen_number }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Conveyance facility:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.conveyance_facility }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Session:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.session }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Last institution:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.last_institution }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Phone:</td>
-                                                    <td class="font-medium text-dark-medium">{{ students.contact_number }}</td>
-                                                </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="mt-3 mt-md-0 text-center text-md-end">
+                                    <a href="{% url "student-update" students.pk %}" class="btn-edit-profile">
+                                        <i class="fas fa-edit"></i> Edit Profile
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="row g-4">
+                        
+                        <div class="col-12 col-lg-6 mb-4">
+                            <div class="info-block">
+                                <div class="info-block-title">
+                                    <i class="fas fa-user-graduate text-primary mr-2"></i> Personal Details
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <div class="detail-label">Full Name</div>
+                                    <div class="detail-value">{{ students.name|capfirst }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Gender</div>
+                                    <div class="detail-value">{{ students.gender }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Date of Birth</div>
+                                    <div class="detail-value">{{ students.date_of_birth }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Religion</div>
+                                    <div class="detail-value">{{ students.religion }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Aadhaar Number</div>
+                                    <div class="detail-value">{{ students.adhaar_number|default:"-" }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Father's Name</div>
+                                    <div class="detail-value">{{ students.father_name }} <span class="text-muted small">({{ students.father_occupation }})</span></div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Mother's Name</div>
+                                    <div class="detail-value">{{ students.mother_name }} <span class="text-muted small">({{ students.mother_occupation }})</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 mb-4">
+                            <div class="info-block">
+                                <div class="info-block-title">
+                                    <i class="fas fa-school text-primary mr-2"></i> Academic & Facilities
+                                </div>
+                                
+                                <div class="detail-row">
+                                    <div class="detail-label">Admission Date</div>
+                                    <div class="detail-value">{{ students.date_of_application }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">PEN Number</div>
+                                    <div class="detail-value">{{ students.pen_number|default:"-" }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Conveyance Facility</div>
+                                    <div class="detail-value">
+                                        {% if students.conveyance_facility %}
+                                            <span class="badge badge-success text-white px-2 py-1" style="background-color: #28a745;">Available</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary text-white px-2 py-1" style="background-color: #6c757d;">Not Available</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Last Institution</div>
+                                    <div class="detail-value">{{ students.last_institution|default:"-" }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Contact Number</div>
+                                    <div class="detail-value">{{ students.contact_number }}</div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-label">Permanent Address</div>
+                                    <div class="detail-value">{{ students.permanent_address }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> 
                 </div>
-                <!-- Student Details Area End Here -->
-                
-                <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
-                <!-- Footer Area End Here -->
             </div>
         </div>
-        <!-- Page Area End Here -->
     </div>
 {% endblock content %}

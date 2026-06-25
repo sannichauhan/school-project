@@ -1,16 +1,19 @@
+from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.contrib import messages
-from .models import AdmitCard, TransferCertificate, Attendance, AcademicFee, FeeReceipt, StudentFeeDue
-from .forms import TransferCertificateForm, AcademicFeeForm, FeeReceiptForm, AdmitCardForm
+from collections import defaultdict
+from .models import AdmitCard, TransferCertificate, Attendance, ExamSlot, ExamSchedule
+from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
 
+@login_required
 def administration(request):
-    return HttpResponse("Hello")       
-
+    return HttpResponse("Hello")  
+     
+@login_required
 def admit_card_view(request):
 
     class_id = request.GET.get("class_id")
@@ -31,6 +34,7 @@ def admit_card_view(request):
         'student__admission_class__name',
         'student__name'
     )
+    
 
     return render(
         request,
@@ -42,8 +46,7 @@ def admit_card_view(request):
 
 
 
-
-
+@login_required
 def create_tc_view(request):
 
     if request.method == 'POST':
@@ -59,23 +62,37 @@ def create_tc_view(request):
     else:
 
         form = TransferCertificateForm()
+        context = {
+            'page_title': 'Create Transfer Certificate',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Create Transfer Certificate', 'url': ''},
+            ]
+        }
 
-    return render(request, 'create_tc.html', {
-        'form': form
-    })
+    return render(request, 'create_tc.html', context)
 
-
+@login_required
 def tc_list_view(request):
 
     certificates = TransferCertificate.objects.select_related(
         'student'
     ).all()
 
-    return render(request, 'tc_list.html', {
-        'certificates': certificates
-    })
 
+    context = {
+            'page_title': 'All Transfer Certificate',
+            'certificates': certificates,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'All Transfer Certificate', 'url': ''},
+            ]
+    }
 
+    return render(request, 'tc_list.html', context)
+
+@login_required
 def tc_detail_view(request, pk):
 
     tc = get_object_or_404(
@@ -83,11 +100,9 @@ def tc_detail_view(request, pk):
         pk=pk
     )
 
+    return render(request, 'tc_detail.html', {'tc': tc})
 
-    return render(request, 'tc_detail.html', {
-        'tc': tc
-    })
-
+@login_required
 def take_attendance(request):
 
     classes = StudentClass.objects.all()
@@ -140,7 +155,12 @@ def take_attendance(request):
         'classes': classes,
         'students': students,
         'selected_class': selected_class,
-        'today': date.today()
+        'today': date.today(),
+        'page_title': 'Mark Attendance',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Mark Attendance', 'url': ''},
+        ]
     }
 
     return render(
@@ -149,6 +169,7 @@ def take_attendance(request):
         context
     )
 
+@login_required
 def attendance_report(request):
 
     records = Attendance.objects.select_related(
@@ -156,122 +177,19 @@ def attendance_report(request):
         'student_class'
     )
 
-    return render(
-        request,
-        'attendance_report.html',
-        {'records': records}
-    )
-
-def academic_fee_create(request):
-
-    form = AcademicFeeForm(request.POST or None)
-
-    if form.is_valid():
-        form.save()
-        return redirect('academic-fee-list')
-
-    return render(
-        request,
-        'academic_fee_form.html',
-        {'form': form}
-    )
-
-def academic_fee_list(request):
-
-    new_fees = AcademicFee.objects.filter(
-        student_type='NEW'
-    )
-
-    old_fees = AcademicFee.objects.filter(
-        student_type='OLD'
-    )
-
     context = {
-        'new_fees': new_fees,
-        'old_fees': old_fees,
+        'records': records,
+        'page_title': 'Attendance Report',        
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Attendance Report', 'url': ''},
+        ]
     }
 
-    return render(
-        request,
-        'academic_fee_list.html',
-        context
-    )
-
-def fee_receipt_create(request):
-
-    if request.method == 'POST':
-        form = FeeReceiptForm(request.POST)
-
-        if form.is_valid():
-            try:
-                form.save()
-                return redirect('fee_receipt_list')
-            except Exception as e:
-                return HttpResponse(str(e))
+    return render(request, 'attendance_report.html', context)
 
 
-    else:
-        form = FeeReceiptForm()
-
-    return render(
-        request,
-        'fee_receipt_create.html',
-        {'form': form}
-    )
-
-
-def get_installment_amount(request):
-
-    fee_id = request.GET.get('fee_id')
-    installment = request.GET.get('installment')
-
-    amount = 0
-
-    try:
-        fee = AcademicFee.objects.get(id=fee_id)
-
-        if installment == 'FIRST':
-            amount = fee.first_installment
-
-        elif installment == 'SECOND':
-            amount = fee.second_installment
-
-        elif installment == 'THIRD':
-            amount = fee.third_installment
-
-    except AcademicFee.DoesNotExist:
-        pass
-
-    return JsonResponse({
-        'amount': str(amount)
-    })
-
-
-def fee_receipt_list(request):
-    receipts = FeeReceipt.objects.all().order_by('-id')
-
-    return render(request, 'fee_receipt_list.html', {
-        'receipts': receipts
-    })
-
-
-def fee_receipt_details(request, pk):
-    receipt = get_object_or_404(FeeReceipt, pk=pk)
-
-    return render(request, 'fee_receipt_details.html', {
-        'receipt': receipt
-    })
-
-def student_fee_due_list(request):
-
-    dues = StudentFeeDue.objects.all()
-
-    return render(
-        request,
-        'student_fee_due_list.html',
-        {'dues': dues}
-    )
-
+@login_required
 def create_admit_card_view(request):
     if request.method == 'POST':
         form = AdmitCardForm(request.POST)
@@ -285,5 +203,50 @@ def create_admit_card_view(request):
                 form.add_error(None, "An Admit Card already exists for this student in this academic session.")
     else:
         form = AdmitCardForm()
+
+        context = {
+            'page_title': 'Generate New Admit Card',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Generate New Admit Card', 'url': ''},
+            ]
+        }
         
-    return render(request, 'create_admit_card.html', {'form': form})
+    return render(request, 'create_admit_card.html', context)
+
+
+
+@login_required
+def exam_timetable_view(request):
+    slots = ExamSlot.objects.prefetch_related('schedules').all()
+    
+    # Process and structure data to match the image grid
+    matrix = defaultdict(lambda: {
+        'NUR_UKG': {'I': 'Study', 'II': 'Study'},
+        'I_VIII':  {'I': 'Study', 'II': 'Study'}
+    })
+    
+    # Track days mapped to dates securely
+    date_to_day = {}
+
+    for slot in slots:
+        date_str = slot.date.strftime('%d-%m-%Y')
+        date_to_day[date_str] = slot.day
+        
+        for sched in slot.schedules.all():
+            matrix[date_str][sched.class_category][slot.shift] = sched.subject
+
+    # Flatten data structure for easy template looping
+    timetable_data = []
+    for date_str, categories in sorted(matrix.items(), key=lambda x: x[0]):
+        timetable_data.append({
+            'date': date_str,
+            'day': date_to_day[date_str],
+            'nursery_shift_1': categories['NUR_UKG'].get('I', 'Study'),
+            'nursery_shift_2': categories['NUR_UKG'].get('II', 'Study'),
+            'primary_shift_1': categories['I_VIII'].get('I', 'Study'),
+            'primary_shift_2': categories['I_VIII'].get('II', 'Study'),
+        })
+
+    return render(request, 'exam-schedule.html', {'timetable': timetable_data})

@@ -1,11 +1,14 @@
 <div class="breadcrumbs-area">
-  <h3>Admin Dashboard</h3>
-  <ul>
-    <li>
-      <a href="/">Home</a>
-    </li>
-    <li>Admin</li>
-  </ul>
+    <h3>{{ page_title }}</h3>
+    <ul>
+        {% for crumb in breadcrumbs %}
+            <li>
+                {% if crumb.url %}
+                    <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                {% else %}
+                    {{ crumb.name }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
 </div>
-
-

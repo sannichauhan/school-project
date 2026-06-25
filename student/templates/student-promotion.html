@@ -1,45 +1,39 @@
 {% extends 'base2.html' %} 
 {% block content %}
     <div id="wrapper" class="wrapper bg-ash">
-       <!-- Header Menu Area Start Here -->
-        {% include "tags/header.html" %}
-        <!-- Header Menu Area End Here -->
-         
-        <!-- Page Area Start Here -->
+       {% include "tags/header.html" %}
         <div class="dashboard-page-one">
-            <!-- Sidebar Area Start Here -->
             {% include "tags/sidebar.html" %}
-            <!-- Sidebar Area End Here -->
             <div class="dashboard-content-one">
-                <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
-                <!-- Breadcubs Area End Here -->
-
-               <!-- Student Promotion Area Start Here -->
                 <div class="card height-auto">
                     <div class="card-body">
                         <div class="heading-layout1">
                             <div class="item-title">
-                                <h3>Search Student Promotion</h3>
+                                <h3>{{page_title}}</h3>
                             </div>
-                           <div class="dropdown">
-                                <a class="dropdown-toggle" href="#" role="button" 
-                                data-toggle="dropdown" aria-expanded="false">...</a>
-        
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-times text-orange-red"></i>Close</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
-                                </div>
-                            </div>
+                          
                         </div>
+
                         {% if messages %}
                             {% for message in messages %}
-                                <div class="alert alert-success">
+                                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                                     {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
                             {% endfor %}
                         {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
                         <form method="POST">
                             {% csrf_token %}
                             <div class="row">
@@ -53,6 +47,9 @@
                                         </option>
                                         {% endfor %}
                                     </select>
+                                    {% if form.current_session.errors %}
+                                        <span class="text-danger small">{{ form.current_session.errors.0 }}</span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="col-xl-3 col-lg-6 col-12 form-group">
@@ -65,6 +62,9 @@
                                         </option>
                                         {% endfor %}
                                     </select>
+                                    {% if form.promotion_from_class.errors %}
+                                        <span class="text-danger small">{{ form.promotion_from_class.errors.0 }}</span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="col-xl-6 col-12 form-group mg-t-30">
@@ -89,35 +89,48 @@
                                         {% for checkbox in form.students %}
                                         <div class="custom-control custom-checkbox profile-chk mg-b-5">
                                             {{ checkbox.tag }}
-                                            <label class="custom-control-label">{{ checkbox.choice_label }}</label>
+                                            <label class="custom-control-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
                                         </div>
                                         {% endfor %}
                                     </div>
+                                    {% if form.students.errors %}
+                                        <span class="text-danger small">{{ form.students.errors.0 }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
-                            {% elif request.POST or request.GET.current_session %}
-                            <p class="text-danger">No active students found matching the selected class and session.</p>
+                            {% elif request.POST and 'fetch_students' in request.POST %}
+                            <p class="text-danger font-bold mg-b-20">No active students found matching the selected class and session.</p>
                             {% endif %}
 
                             <div class="row">
                                 <div class="col-xl-3 col-lg-6 col-12 form-group">
                                     <label>Promote Session *</label>
-                                    <select name="promote_session" class="select2" required>
+                                    <select name="promote_session" id="id_promote_session" class="select2" required>
                                         <option value="">Select Session</option>
                                         {% for session in sessions %}
-                                        <option value="{{ session.id }}">{{ session }}</option>
+                                        <option value="{{ session.id }}" {% if form.promote_session.value|stringformat:"s" == session.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ session }}
+                                        </option>
                                         {% endfor %}
                                     </select>
+                                    {% if form.promote_session.errors %}
+                                        <span class="text-danger small"><strong>{{ form.promote_session.errors.0 }}</strong></span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="col-xl-3 col-lg-6 col-12 form-group">
                                     <label>Promotion To Class *</label>
-                                    <select name="promotion_to_class" class="select2" required>
+                                    <select name="promotion_to_class" id="id_to_class" class="select2" required>
                                         <option value="">Select Class</option>
                                         {% for cls in classes %}
-                                        <option value="{{ cls.id }}">{{ cls }}</option>
+                                        <option value="{{ cls.id }}" {% if form.promotion_to_class.value|stringformat:"s" == cls.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ cls }}
+                                        </option>
                                         {% endfor %}
                                     </select>
+                                    {% if form.promotion_to_class.errors %}
+                                        <span class="text-danger small">{{ form.promotion_to_class.errors.0 }}</span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="col-12 form-group mg-t-8">
@@ -129,21 +142,20 @@
                         </form>
                     </div>
                 </div>
-                <!-- Student Promotion Area End Here -->
-                
-                <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
-                <!-- Footer Area End Here -->
-                    <script>
-                        document.getElementById('selectAllStudents')?.addEventListener('change', function() {
-                            const checkboxes = document.querySelectorAll('.student-checkbox');
-                            checkboxes.forEach(cb => cb.checked = this.checked);
-                        });
-                    </script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const selectAll = document.getElementById('selectAllStudents');
+                        if (selectAll) {
+                            selectAll.addEventListener('change', function() {
+                                // Django CheckboxSelectMultiple हमेशा इनपुट पर 'student-checkbox' नहीं लगाता, इसलिए नाम या टाइप से ढूंढना सुरक्षित है
+                                const checkboxes = document.querySelectorAll('.student-checkbox, input[name="students"]');
+                                checkboxes.forEach(cb => cb.checked = this.checked);
+                            });
+                        }
+                    });
+                </script>
             </div>
         </div>
-        <!-- Page Area End Here -->
-    </div>
-
- 
+        </div>
 {% endblock content %}

@@ -16,15 +16,25 @@
 
       <!-- Admit Form Area Start Here -->
        
-
+      {% if messages %}
+          {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+                  {{ message }}
+                  <button type="button" class="close" data-dismiss="alert">
+                      <span>&times;</span>
+                  </button>
+              </div>
+          {% endfor %}
+      {% endif %}
       <div class="card height-auto">
         <div class="card-body">
           <div class="heading-layout1">
             <div class="item-title">
-              <h3>Add New Students</h3>
+              <h3>{{page_title}}</h3>
             </div>
           </div>
-          <div class="container new-added-form">
+          <div class="row">
+          <div class="container-fluid new-added-form">
             <form method="post" enctype="multipart/form-data">
               {% csrf_token %}
 
@@ -51,7 +61,64 @@
                     <div class="card-header bg-secondary text-white">
                       Address
                     </div>
-                    <div class="card-body">{{ perm_addr_form.as_p }}</div>
+                    {% comment %} <div class="card-body">{{ perm_addr_form.as_p }}</div> {% endcomment %}
+                     <div class="card-body">
+
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.address_line.label_tag }}
+                              {{ perm_addr_form.address_line }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.address_line.errors }}
+                              </small>
+                          </div>
+
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.post_office.label_tag }}
+                              {{ perm_addr_form.post_office }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.post_office.errors }}
+                              </small>
+                          </div>
+                      </div>
+
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.district.label_tag }}
+                              {{ perm_addr_form.district }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.district.errors }}
+                              </small>
+                          </div>
+
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.pin_code.label_tag }}
+                              {{ perm_addr_form.pin_code }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.pin_code.errors }}
+                              </small>
+                          </div>
+                      </div>
+
+                      <div class="row">
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.state.label_tag }}
+                              {{ perm_addr_form.state }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.state.errors }}
+                              </small>
+                          </div>
+
+                          <div class="col-md-6 mb-3">
+                              {{ perm_addr_form.nationality.label_tag }}
+                              {{ perm_addr_form.nationality }}
+                              <small class="text-danger">
+                                  {{ perm_addr_form.nationality.errors }}
+                              </small>
+                          </div>
+                      </div>
+
+                  </div>
                   </div>
                 </div>
                 <div class="col-md-12 form-group">
@@ -71,7 +138,45 @@
                     <div class="card-header bg-secondary text-white">
                       Local Address
                     </div>
-                    <div class="card-body">{{ local_addr_form.as_p }}</div>
+                    {% comment %} <div class="card-body">{{ local_addr_form.as_p }}</div> {% endcomment %}
+                     <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.address_line.label_tag }}
+                                {{ local_addr_form.address_line }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.post_office.label_tag }}
+                                {{ local_addr_form.post_office }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.district.label_tag }}
+                                {{ local_addr_form.district }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.pin_code.label_tag }}
+                                {{ local_addr_form.pin_code }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.state.label_tag }}
+                                {{ local_addr_form.state }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ local_addr_form.nationality.label_tag }}
+                                {{ local_addr_form.nationality }}
+                            </div>
+                        </div>
+
+                    </div>
                   </div>
                 </div>
               </div>
@@ -82,6 +187,7 @@
                 </button>
               </div>
             </form>
+          </div>
           </div>
         </div>
       </div>
@@ -103,6 +209,7 @@
         // Copy fields from 'perm' prefix to 'local' prefix
         const fields = [
           "address_line",
+          "post_office",
           "district",
           "pin_code",
           "state",

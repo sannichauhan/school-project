@@ -2,56 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Fee Payment</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    
+    <style>
+        /* Centering container structure using vanilla CSS over Bootstrap body minimum height */
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .payment-card {
+            max-width: 450px;
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            background: #ffffff;
+        }
+        .label-uppercase-xs {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+<body class="p-3">
 
-    <div class="bg-white max-w-md w-full rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div class="bg-blue-600 p-6 text-white">
-            <h2 class="text-xl font-bold">Collect Student Fee</h2>
-            <p class="text-blue-100 text-sm mt-1">Processing payment for {{ ledger.student.first_name }} {{ ledger.student.last_name }}</p>
+    <div class="payment-card shadow-lg">
+        <div class="bg-primary p-4 text-white">
+            <h2 class="h5 font-weight-bold mb-1">Collect Student Fee</h2>
+            <p class="text-light small mb-0">Processing payment for {{ ledger.student.first_name }} {{ ledger.student.last_name }}</p>
         </div>
 
-        <form method="POST" class="p-6 space-y-4">
+        <form method="POST" class="p-4" action="{% url 'collect_fee' ledger.id %}">
             {% csrf_token %}
             
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm space-y-1.5">
-                <p class="text-gray-500">Component: <span class="font-semibold text-gray-800">{{ ledger.description }}</span></p>
-                <p class="text-gray-500">Net Due Amount: <span class="font-bold text-rose-600 text-base">₹{{ ledger.remaining_amount }}</span></p>
+            <div class="alert alert-light border card-body p-3 mb-4 rounded-lg text-secondary small">
+                <p class="mb-2">Component: <span class="font-weight-bold text-dark">{{ ledger.description }}</span></p>
+                <p class="mb-0">Net Due Amount: <span class="font-weight-bold text-danger h5 d-inline-block mb-0">₹{{ ledger.remaining_amount }}</span></p>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Amount to Pay (₹)</label>
+            <div class="form-group mb-3">
+                <label class="label-uppercase-xs mb-1">Amount to Pay (₹)</label>
                 <input type="number" step="0.01" name="amount_paid" max="{{ ledger.remaining_amount }}" value="{{ ledger.remaining_amount }}" 
-                       class="w-full border border-gray-300 rounded-lg p-2.5 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden" required>
+                       class="form-control font-weight-bold text-dark" required>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Payment Mode</label>
-                <select name="payment_mode" class="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-hidden" required>
+            <div class="form-group mb-3">
+                <label class="label-uppercase-xs mb-1">Payment Mode</label>
+                <select name="payment_mode" class="form-control text-secondary" required>
                     <option value="CASH">Cash</option>
                     <option value="ONLINE">Online / UPI</option>
                     <option value="CHEQUE">Cheque</option>
                 </select>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Transaction ID / Reference (Optional)</label>
-                <input type="text" name="transaction_id" placeholder="e.g., TXN1298493" 
-                       class="w-full border border-gray-300 rounded-lg p-2.5 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+            <div class="form-group mb-4">
+                <label class="label-uppercase-xs mb-1">Transaction ID / Reference (Optional)</label>
+                <input type="text" name="transaction_id" placeholder="e.g., TXN1298493" class="form-control text-secondary">
             </div>
 
-            <div class="pt-2 flex gap-3">
-                <a href="{% url 'student_fee_dashboard' ledger.student.id %}" class="w-1/2 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg font-semibold transition text-sm">
-                    Cancel
-                </a>
-                <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-semibold shadow-md transition text-sm">
-                    Submit Payment
-                </button>
+            <div class="form-row pt-2">
+                <div class="col-6">
+                    <a href="{% url 'student_fee_dashboard' ledger.student.id %}" class="btn btn-light btn-block font-weight-bold text-secondary border">
+                        Cancel
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button type="submit" class="btn btn-success btn-block font-weight-bold shadow-sm">
+                        Submit Payment
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-</body>
-</html>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>

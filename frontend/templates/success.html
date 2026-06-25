@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquiry Submitted Successfully</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome for the checkmark icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Success Card Container -->
+    <div class="bg-white p-8 rounded-2xl shadow-md max-w-md w-full text-center border border-gray-100">
+        
+        <!-- Animated Green/Blue Checkmark Circle -->
+        <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl animate-bounce">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+        <!-- Heading -->
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">
+            Inquiry Submitted!
+        </h2>
+        
+        <!-- Description -->
+        <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+            Thank you for reaching out. Your admission inquiry data has been securely saved, and a confirmation email has been sent to your registered address.
+        </p>
+
+        <!-- Information Box -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left border border-gray-100">
+            <h4 class="text-xs font-bold uppercase text-gray-500 mb-2 tracking-wider">Next Steps:</h4>
+            <ul class="text-xs text-gray-600 space-y-2 list-disc list-inside">
+                <li>Check your Email Inbox (and Spam folder).</li>
+                <li>Our admission counselor will review your inquiry.</li>
+                <li>Expect a callback or response within 24-48 hours.</li>
+            </ul>
+        </div>
+
+        <!-- Back to Form Button -->
+        <a href="{% url 'admission_inquiry' %}" class="inline-block w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition tracking-wide text-sm shadow-sm">
+            Go Back to Form
+        </a>
+    </div>
+
+</body>
+</html>

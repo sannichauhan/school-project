@@ -306,16 +306,16 @@
     <!-- Metadata Details -->
     <div class="info-grid">
         <div class="info-block">
-            <p><strong>Student Name:</strong> {{ receipt.student.name }}</p> 
-            <p><strong>Father's Name:</strong> {{ receipt.student.father_name }}</p>
-            <p><strong>Payment Mode:</strong> {{receipt.payment_mode}}</p>
-            <p><strong>Class / Section:</strong> {{ receipt.student.admission_class }}</p>
+            <p><strong>Student Name:</strong> {{ transaction.ledger.student.name }}</p> 
+            <p><strong>Father's Name:</strong> {{ transaction.ledger.student.father_name }}</p>
+            <p><strong>Payment Mode:</strong> {{transaction.payment_mode}}</p>
+            <p><strong>Class / Section:</strong> {{ transaction.ledger.student.current_class }}</p>
         </div>
         <div class="info-block">
-            <p><strong>Roll No:</strong> {{ receipt.student.roll_number }}</p>
-            <p><strong>Receipt No:</strong> {{ receipt.receipt_no }}</p>
-            <p><strong>Date:</strong> {{ receipt.payment_date|date:"d/m/Y" }}</p>
-            <p><strong>Session:</strong> {{ receipt.student.session }}</p>
+            <p><strong>Roll No:</strong> {{ transaction.ledger.student.roll_number }}</p>
+            <p><strong>Receipt No:</strong> {{ transaction.transaction_id }}</p>
+            <p><strong>Date:</strong> {{ transaction.payment_date|date:"d/m/Y h:i A" }}</p>
+            <p><strong>Session:</strong> {{ transaction.ledger.student.session }}</p>
         </div>
     </div>
 
@@ -330,7 +330,7 @@
         <tbody>
             <tr>
                 <td>Pay Fess for {{receipt.installment}} Installment</td>
-                <td class="text-right">{{ receipt.paid_amount }}</td>
+                <td class="text-right">₹ {{ transaction.amount_paid }}</td>
             </tr>
         </tbody>
     </table>

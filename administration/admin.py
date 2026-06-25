@@ -4,10 +4,8 @@ from .models import (
     AdmitCard,
     TransferCertificate,
     Attendance,
-    AcademicFee,
-    FeeReceipt,
-    StudentFeeDue,
-    VanFee
+    ExamSlot, 
+    ExamSchedule
 )
 
 # Register your models here.
@@ -55,60 +53,16 @@ class AttendanceAdmin(admin.ModelAdmin):
     date_hierarchy = 'attendance_date'
 
 
-@admin.register(AcademicFee)
-class AcademicFeeAdmin(admin.ModelAdmin):
-    list_display = (
-        'student_type',
-        'class_group',
-        'annual_fee',
-        'first_installment',
-        'second_installment',
-        'third_installment',
-    )
-
-    list_filter = (
-        'student_type',
-        'class_group',
-    )
-
-    search_fields = (
-        'student_type',
-        'class_group',
-    )
-
-@admin.register(FeeReceipt)
-class FeeReceiptAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'receipt_no',
-        'student',
-        'installment',
-        'amount',
-        'payment_date'
-    )
-
-    search_fields = (
-        'receipt_no',
-        'student__name'
-    )
-
-@admin.register(StudentFeeDue)
-class StudentFeeDueAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'student',
-        'total_fee',
-        'paid_amount',
-        'due_amount'
-    )
-
-    search_fields = (
-        'student__name',
-    )
 
 
 
-@admin.register(VanFee)
-class VanFeeAdmin(admin.ModelAdmin):
-    list_display = ('route_group', 'annual_fee', 'first_installment', 'second_installment')
+class ExamScheduleInline(admin.TabularInline):
+    model = ExamSchedule
+    extra = 2  # Pre-populates rows for both class categories automatically
+    max_num = 2
 
+@admin.register(ExamSlot)
+class ExamSlotAdmin(admin.ModelAdmin):
+    list_display = ('date', 'day', 'shift')
+    list_filter = ('date', 'shift')
+    inlines = [ExamScheduleInline]

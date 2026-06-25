@@ -3,8 +3,9 @@ from pyexpat.errors import messages
 from django.contrib import admin
 
 from fee.models import FeeLedger
-from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark
+from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .services import promote_student_list
+from .forms import AcademicSessionForm
 
 # --- Inlines for a better UI ---
 
@@ -15,24 +16,38 @@ class AddressInline(admin.StackedInline):
 class MarksInline(admin.TabularInline):
     model = Marks
     extra = 1
+    
+    # 1. Fields list me wahi naam aayenge jo niche defined hain
     fields = [
         'subject',
         'test_marks',
         'max_test_marks',
         'written_marks',
         'max_written_marks',
-        'obtained_total',
-        'max_total',
+        'display_obtained_total',  # Custom method name
+        'display_max_total',       # Custom method name
     ]
 
+    # 2. Jo bhi properties ya custom methods hain, unhe readonly banana zaroori hai
     readonly_fields = [
-        'obtained_total',
-        'max_total',
+        'display_obtained_total',
+        'display_max_total',
     ]
 
-    def total_display(self, obj):
-        return obj.total_marks
-    total_display.short_description = "Total"
+    # 3. Obtained Total dikhane ke liye custom method
+    def display_obtained_total(self, obj):
+        if obj.id: # Agar object database me save hai tabhi total dikhaye
+            return obj.obtained_total
+        return "-"
+    display_obtained_total.short_description = "Obtained Total"
+
+    # 4. Max Total dikhane ke liye custom method
+    def display_max_total(self, obj):
+        if obj.id:
+            return obj.max_total
+        return "-"
+    display_max_total.short_description = "Max Total"
+
 
 # --- Main Admin Classes ---
 
@@ -48,9 +63,40 @@ class SectionAdmin(admin.ModelAdmin):
 
 @admin.register(AcademicSession)
 class AcademicSessionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'start_date', 'end_date')
-    search_fields = ('start_date', 'end_date')
-    ordering = ('-start_date',)
+    # एडमिन में ऊपर बनाए गए फॉर्म का ही उपयोग करें (ताकि डेट वैलिडेशन यहाँ भी चले)
+    form = AcademicSessionForm
+    
+    # टेबल लिस्ट व्यू में दिखने वाले कॉलम्स
+    list_display = ('name', 'start_date', 'end_date', 'is_active_status')
+    
+    # किन कॉलम्स पर क्लिक करके खोला जा सकता है
+    list_display_links = ('name',)
+    
+    # साइडबार में क्विक फ़िल्टर लगाने के लिए
+    list_filter = ('is_active', 'start_date', 'end_date')
+    
+    # सर्च बार के लिए फ़ील्ड्स
+    search_fields = ('name',)
+    
+    # एडमिन लिस्ट पेज से ही डायरेक्ट ऐक्टिव/इनऐक्टिव टॉगल करने के लिए
+    list_editable = () # यदि आप चाहें तो यहाँ 'is_active' डाल सकते हैं
+    
+    # नया सेशन बनाते समय दिखने वाले सेक्शन्स (UI Layout)
+    fieldsets = (
+        ('Session Identity', {
+            'fields': ('name', 'is_active'),
+            'description': 'Enter the name of the academic year.'
+        }),
+        ('Duration / Dates', {
+            'fields': ('start_date', 'end_date'),
+            'description': 'Specify the operational dates for this session.'
+        }),
+    )
+
+    # UI Improvement: एक्टिव स्टेटस के लिए सुंदर टिक/क्रॉस दिखाने के लिए
+    @admin.display(boolean=True, description='Is Active?')
+    def is_active_status(self, obj):
+        return obj.is_active
 
 class FeeLedgerInline(admin.TabularInline):
     model = FeeLedger
@@ -117,37 +163,29 @@ class SubjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'student_class', 'max_test_marks', 'max_written_marks')
     list_filter = ('student_class',)
 
-@admin.register(MarkSheet)
-class MarkSheetAdmin(admin.ModelAdmin):
-    list_display = ('student', 'exam', 'student_class')
-    list_filter = ('exam', 'student_class')
-    inlines = [MarksInline] # Allows entering marks directly inside the marksheet
-
-    
-
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'academic_year')
+    # 'academic_year' ko badal kar 'academic_session' kar dein
+    list_display = ('name', 'academic_session', 'term') 
+    
+    # Agar aapne list_filter ya search_fields me bhi use kiya hai, toh wahan bhi badlein:
+    list_filter = ('academic_session', 'term')
+    search_fields = ('name',)
 
 # We register Address separately just in case you need to edit an address independently
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     list_display = ('district', 'pin_code', 'state')
 
+@admin.register(MarkSheet)
+class MarkSheetAdmin(admin.ModelAdmin):
+    list_display = ('student', 'exam', 'student_class')
+    list_filter = ('exam', 'student_class')
+    search_fields = ('student__name', 'student__roll_number') # Search bar ke liye (Optional par useful)
+    inlines = [MarksInline]  # Ab ye sahi se kaam karega
 
-# Test MArksheet
-class TestSubjectMarkInline(admin.TabularInline):
-    model = TestSubjectMark
-    extra = 0
+    
 
-@admin.register(TestMarkSheet)
-class TestMarkSheetAdmin(admin.ModelAdmin):
 
-    list_display = (
-        'student',
-        'student_class',
-        'exam_name',
-        'percentage'
-    )
 
-    inlines = [TestSubjectMarkInline]
+

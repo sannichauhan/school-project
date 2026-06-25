@@ -15,6 +15,24 @@
                 <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
                 <!-- Breadcubs Area End Here -->
+                 {% if messages %}
+                 <div class="row">
+                    <div class="container-fluid mt-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+                                role="alert">
+
+                                {{ message }}
+
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 <div class="bg-color-mark">
                 <form method="post" id="marks-form">
     {% csrf_token %}
@@ -22,50 +40,64 @@
 
     <div class="header-selection">
         <div class="row">
-        <div class="col-xl-4">
+            <div class="col-xl-3">
+                <label>Select Session:</label>
+            <select name="academic_session" class="form-control">
+                <option value="">Select Session</option>
+                {% for session in sessions %}
+                    <option value="{{ session.id }}">
+                        {{ session.name }}
+                    </option>
+                {% endfor %}
+        </select>
+        </div>
+        <div class="col-xl-3">
         <label>Select Class:</label>
         
 
-<select id="class-select" name="student_class" class="form-control">
-    <option value="">Select Class</option>
+        <select id="class-select" name="student_class" class="form-control">
+            <option value="">Select Class</option>
 
-    {% for class in classes %}
-        <option value="{{ class.id }}">
-            {{ class.name }}
-        </option>
-    {% endfor %}
-</select>
-</div>
-<div class="col-xl-4">
-<label>Select Student:</label>
+            {% for class in classes %}
+                <option value="{{ class.id }}">
+                    {{ class.name }}
+                </option>
+            {% endfor %}
+        </select>
+        </div>
+        <div class="col-xl-3">
+        <label>Select Student:</label>
 
-<select id="student-select" name="student" class="form-control">
+        <select id="student-select" name="student" class="form-control">
 
-    <option value="">
-        Select Student Name
-    </option>
-
-    {% for class in classes %}
-
-        {% for student in class.students.all %}
-
-            <option
-                value="{{ student.id }}"
-                data-class="{{ class.id }}"
-            >
-                {{ student.name }}
+            <option value="">
+                Select Student Name
             </option>
 
-        {% endfor %}
+            {% for class in classes %}
 
-    {% endfor %}
+                {% for student in class.students.all %}
 
-</select>
-</div>
+                    <option
+                        value="{{ student.id }}"
+                        data-class="{{ class.id }}"
+                    >
+                        {{ student.name }}
+                    </option>
 
-       <div class="col-xl-4">
+                {% endfor %}
+
+            {% endfor %}
+
+        </select>
+        </div>
+
+       <div class="col-xl-3">
          <label>Select Exam:</label>
         <select name="exam" class="form-control">
+            <option value="">
+                Select Exam
+            </option>
             {% for e in exams %}
                 <option value="{{ e.id }}">{{ e.name }}</option>
             {% endfor %}

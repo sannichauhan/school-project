@@ -6325,8 +6325,14 @@ ul {
   background-color: #fff;
   padding: 20px 20px 30px;
 }
-.single-info-details img {
+.single-info-details > img {
   object-fit: contain;
   object-position: top;
   margin-right: 30px;
+}
+/* test */
+.profile-avatar-wrapper img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
 }

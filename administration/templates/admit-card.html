@@ -6,14 +6,14 @@
     <title>Admit Card - NCPS</title>
     <style>
         @page {
-            size: A4;
+            size: A4 landscape;
             margin: 3mm 5mm;
         }
 
         .page {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
+            gap: 15px;
             max-width: 100%;
             margin: auto;
         }
@@ -25,7 +25,7 @@
             justify-content: center;
             align-items: center;
             margin: 0;
-            padding:0;
+            padding: 0;
         }
 
         .admit-card-container {
@@ -35,30 +35,13 @@
             position: relative;
         }
 
-        /* Top tear line indicator */
-        .tear-line {
-            text-align: center;
-            font-size: 11px;
-            color: #555;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .tear-line::before, .tear-line::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            border-top: 1px dashed #444;
-        }
-        .tear-line::before { left: 0; }
-        .tear-line::after { right: 0; }
-
         /* Main Border Box */
         .card-border {
             border: 2px solid #000;
             border-radius: 12px;
             padding: 15px;
             position: relative;
+            background-color: #fff;
         }
 
         /* Header Section */
@@ -68,18 +51,15 @@
             justify-content: center;
             border-bottom: 2px solid #000;
             padding-bottom: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .logo-placeholder {
             width: 50px;
             height: 50px;
-            border: 1px dashed #000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
             margin-right: 15px;
         }
         .logo-placeholder img {
@@ -98,7 +78,7 @@
             letter-spacing: 0.5px;
         }
         .header-text p {
-            font-size: 14px;
+            font-size: 13px;
             margin: 3px 0 0 0;
             font-weight: bold;
             color: #333;
@@ -111,27 +91,34 @@
             font-size: 13px;
             margin-bottom: 15px;
             letter-spacing: .5px;
+            text-transform: uppercase;
         }
 
-        /* Content Area layout */
-        .main-content {
+        /* Three-Column Horizontal Layout */
+        .three-column-main {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 15px;
         }
 
-        /* Details Column */
+        /* Column 1: Student Details */
+        .student-info-col {
+            width: 40%;
+        }
         .details-table {
-            width: 70%;
+            width: 100%;
             border-collapse: collapse;
         }
         .details-table td {
-            padding: 5px 4px;
+            padding: 6px 2px;
             vertical-align: top;
-            font-size: 14px;
+            font-size: 13px;
         }
         .label {
             color: #444;
-            width: 35%;
+            width: 40%;
         }
         .separator {
             width: 5%;
@@ -139,60 +126,77 @@
         }
         .value {
             font-weight: bold;
-            width: 60%;
+            width: 55%;
         }
 
-        /* Masked data styling */
-        .masked-box {
-            display: inline-block;
-            background-color: #000;
-            height: 16px;
-            vertical-align: middle;
+        /* Column 2: Timetable (Subject first, then Date) */
+        .timetable-col {
+            width: 40%;
         }
-        .roll-mask { width: 130px; }
-        .cat-mask { width: 30px; }
+        .timetable-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 2px;
+        }
+        .timetable-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .timetable-table th, .timetable-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        .timetable-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
 
-        /* Right Side Photo & Signature Area */
-        .photo-sig-area {
-            width: 25%;
+        /* Column 3: Photo & Signature */
+        .photo-sig-col {
+            width: 15%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
         .photo-box {
-            width: 130px;
-            height: 130px;
-            border: 1px solid #444;
+            width: 110px;
+            height: 110px;
+            border: 1px solid #000;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: #fafafa;
-            font-size: 12px;
+            font-size: 11px;
             color: #777;
         }
         .photo-box img {
-            width: 130px;
+            width: 110px;
+            height: 110px;
             object-fit: cover;
-            border: 1px solid #000;
-            height: 130px;
         }
         .signature-box {
-            width: 130px;
-            height: 30px;
+            width: 110px;
+            height: 25px;
             margin-top: 5px;
             border: 1px dashed #aaa;
             background-color: #fdfdfd;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            color: #88px;
+            font-size: 10px;
             font-style: italic;
         }
 
-        /* Footer Authority Sign */
+        /* Footer Signatures */
         .footer-sign {
-            margin-top: 30px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
         }
@@ -203,8 +207,9 @@
             padding-top: 4px;
             font-size: 12px;
             font-weight: bold;
-            width: 240px;
+            width: 200px;
         }
+        
         .toolbar {
             text-align: center;
             margin: 20px;
@@ -214,131 +219,121 @@
         }
 
         @media print{
-
-            .no-print{
-                display:none;
-            }
-
-            body{
-                margin:0;
-            }
-
-            .page{
-                gap:8px;
-            }
-
-            .card{
-                page-break-inside:avoid;
-            }
+            .no-print{ display:none; }
+            body{ margin:0; background-color: #fff; }
+            .card-border{ page-break-inside:avoid; }
         }
     </style>
 </head>
 <body>
-    <div style="width: 100%;max-width: 1140px;">
+    <div style="width: 100%; max-width: 1140px;">
         <div class="toolbar no-print">
-
-    <a href="{% url 'admit-card-generate' %}"
-       style="
-       text-decoration:none;
-       padding:10px 20px;
-       background:#6c757d;
-       color:white;
-       border-radius:5px;
-       ">
-       Back
-    </a>
-
-    <button onclick="window.print()"
-        style="
-        padding:10px 20px;
-        background:#28a745;
-        color:white;
-        border:none;
-        border-radius:5px;
-        cursor:pointer;
-        ">
-        Print / Save PDF
-    </button>
-
-</div>
-<div class="page">
-{% for admit_card in admit_cards %}
-<div class="admit-card-container">
-    <div class="card-border">        
-        <div class="header">
-            <div class="logo-placeholder">
-               <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
-            </div>
-            <div class="header-text">
-                <h1>Nav Chetana Public School</h1>
-                <p>CHHAHUN, KUSHINAGAR, SESSION: {{ admit_card.session }}</p>
-            </div>
+            <a href="{% url 'admit-card-generate' %}" style="text-decoration:none; padding:10px 20px; background:#6c757d; color:white; border-radius:5px;">Back</a>
+            <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Print / Save PDF</button>
         </div>
 
-        <div class="exam-title">
-            ADMIT CARD FOR {{ admit_card.exam_type|upper }} EXAMINATION
-        </div>
-
-        <div class="main-content">            
-            <table class="details-table">                <tr>
-                    <td class="label">Name of the Student</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ admit_card.student.name }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Father's  Name</td>
-                    <td class="separator">:</td>
-                    <td class="value">Mr. {{ admit_card.student.father_name }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Mother's  Name</td>
-                    <td class="separator">:</td>
-                    <td class="value">Mrs. {{ admit_card.student.mother_name }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Class</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ admit_card.student.admission_class.name }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Roll Number</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ admit_card.student.roll_number }}</td>
-                </tr>
+        <div class="page">
+        {% for admit_card in admit_cards %}
+        <div class="admit-card-container">
+            <div class="card-border">        
                 
-                <tr>
-                    <td class="label">Exam Start and End Date</td>
-                    <td class="separator">:</td>
-                    <td class="value">{{ admit_card.exam_start_date|date:"d/m/y" }} to {{ admit_card.exam_end_date|date:"d/m/y" }}</td>
-                </tr>
-            </table>
-
-            <div class="photo-sig-area">
-                <div class="photo-box">
-                    {% if admit_card.student and admit_card.student.student_photo %}
-                        <img src="{{ admit_card.student.student_photo.url }}" alt="Student">
-                    {% else %}
-                        <p>No Photo Available</p>
-                    {% endif %}
+                <div class="header">
+                    <div class="logo-placeholder">
+                       <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
+                    </div>
+                    <div class="header-text">
+                        <h1>{{admit_card.student.choose_school}}</h1>
+                        <p>CHHAHUN, KUSHINAGAR, 274303 </p>
+                    </div>
                 </div>
-                <div class="signature-box">Candidate Signature</div>
-            </div>
 
+                <div class="exam-title">
+                    ADMIT CARD FOR {{ admit_card.exam_type.name|upper }} EXAMINATION {{ admit_card.session }}
+                </div>
+
+                <div class="three-column-main"> 
+                    
+                    <div class="student-info-col">
+                        <table class="details-table">
+                            <tr>
+                                <td class="label">Name of Student</td>
+                                <td class="separator">:</td>
+                                <td class="value">{{ admit_card.student.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Father's Name</td>
+                                <td class="separator">:</td>
+                                <td class="value">Mr. {{ admit_card.student.father_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Mother's Name</td>
+                                <td class="separator">:</td>
+                                <td class="value">Mrs. {{ admit_card.student.mother_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Class</td>
+                                <td class="separator">:</td>
+                                <td class="value">{{ admit_card.student.admission_class.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Roll Number</td>
+                                <td class="separator">:</td>
+                                <td class="value">{{ admit_card.student.roll_number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Exam Date</td>
+                                <td class="separator">:</td>
+                                <td class="value">{{ admit_card.exam_start_date|date:"d/m/y" }} to {{ admit_card.exam_end_date|date:"d/m/y" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    {% comment %} <div class="timetable-col">
+                        <div class="timetable-title">Examination Timetable</div>
+                        <table class="timetable-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60%;">Subject Name</th>
+                                    <th style="width: 40%;">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for schedule in admit_card.schedules %}
+                                <tr>
+                                    <td>{{ schedule.subject.name }}</td>
+                                    <td>{{ schedule.date|date:"d/m/y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" style="text-align: center; color: #666; font-size: 11px;">No schedule available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div> {% endcomment %}
+
+                    <div class="photo-sig-col">
+                        <div class="photo-box">
+                            {% if admit_card.student and admit_card.student.student_photo %}
+                                <img src="{{ admit_card.student.student_photo.url }}" alt="Student">
+                            {% else %}
+                                <p style="margin:0; font-size:10px;">No Photo</p>
+                            {% endif %}
+                        </div>
+                        <div class="signature-box">Candidate Signature</div>
+                    </div>
+
+                </div>
+
+                <div class="footer-sign">
+                    <div class="controller-sign-line">Class Teacher</div>
+                    <div class="controller-sign-line">Principal</div>
+                </div>
+
+            </div>
         </div>
-
-        <div class="footer-sign">
-            <div class="controller-sign-line">
-                Class Teacher
-            </div>
-            <div class="controller-sign-line">
-                Principal
-            </div>
+        {% endfor %}
         </div>
-
     </div>
-</div>
-{% endfor %}
-</div>
-</div>
 </body>
 </html>

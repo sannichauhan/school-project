@@ -1,8 +1,8 @@
+from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
-from django.http import JsonResponse
 from django.contrib import messages
+
 from django.db import transaction
-from django.db.models import Sum
 from .serializers import (
     StudentClassSerializer, AddressSerializer, StudentSerializer,
     SubjectSerializer, ExamSerializer, MarkSheetSerializer, MarksSerializer,
@@ -11,8 +11,9 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, TestMarkSheet, TestSubjectMark, AcademicSession, StudentAcademicHistory, StudentPromotionLog
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentAcademicHistory
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
+from .services import promote_student_list
 
 
 class StudentClassViewSet(viewsets.ModelViewSet):
@@ -48,6 +49,7 @@ class StudentViewSet(viewsets.ModelViewSet):
                 "test": mark.test_marks,
                 "written": mark.written_marks
             }
+            
         
         # 3. Construct the final object
         report_data = {
@@ -97,7 +99,7 @@ class MarksViewSet(viewsets.ModelViewSet):
 
 
  
-
+@login_required
 def student_registration_view(request):
     if request.method == 'POST':
         # Create instances using POST data
@@ -120,6 +122,11 @@ def student_registration_view(request):
                     student.local_address = local_address
                     student.save()
 
+                    messages.success(
+                        request,
+                        f"Student '{student.name}' registered successfully."
+                    )
+
                     
                     
                     return redirect(request.path) # Change to your list view
@@ -128,6 +135,12 @@ def student_registration_view(request):
                 print(e)
                 
                 student_form.add_error(None, f"Database Error: {e}")
+        else:
+            messages.error(
+                request,
+                "Please correct the errors below and try again."
+            )
+
     else:
         student_form = StudentAllInOneForm()
         perm_addr_form = AddressForm(prefix='perm')
@@ -137,10 +150,11 @@ def student_registration_view(request):
         'student_form': student_form,
         'perm_addr_form': perm_addr_form,
         'local_addr_form': local_addr_form,
+        'page_title': 'Add New Students',
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
             {'name': 'Students', 'url': '/students/'},
-            {'name': 'Add Student', 'url': ''},
+            {'name': 'Add New Students', 'url': ''},
         ]
     }
     return render(request, 'registration_form.html', context)
@@ -148,7 +162,7 @@ def student_registration_view(request):
 
 ### Adding new class
 
-
+@login_required
 def add_class_view(request):
     if request.method == 'POST':
         form = StudentClassForm(request.POST)        
@@ -161,17 +175,26 @@ def add_class_view(request):
     
     # Fetch all classes to show them on the same page
     all_classes = StudentClass.objects.all().order_by('name')
-    
-    return render(request, 'add_class.html', {
+
+    context = {
         'form': form,
-        'all_classes': all_classes
-    })
+        'all_classes': all_classes,
+        'page_title': 'Add New Class',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add New Class', 'url': ''},
+        ]
+    }
+    
+    return render(request, 'add_class.html', context)
     
     
 ### View students
+@login_required
 def student_list_view(request):
     students = Student.objects.all()
     context = {
+        'page_title': 'All Students',
         'students': students,
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
@@ -180,39 +203,55 @@ def student_list_view(request):
     }
     return render(request, 'student_list.html', context)
 
+@login_required
 def student_details_view(request, pk):
     students = Student.objects.get(pk=pk)
     context = {
         'students': students,
+        'page_title': 'Details of Students',        
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Details of Students', 'url': ''},
+        ]
     }
     return render(request, 'student-details.html', context)
 
 
-
+@login_required
 def update_student_view(request, pk):
-
     student = get_object_or_404(Student, pk=pk)
 
     if request.method == "POST":
-        form = StudentAllInOneForm(request.POST, request.FILES, instance=student)
-        perm_addr_form = AddressForm(request.POST, prefix='perm', instance=student.permanent_address)
-        local_addr_form = AddressForm(request.POST, prefix='local', instance=student.local_address)
+        form = StudentAllInOneForm(
+            request.POST,
+            request.FILES,
+            instance=student
+        )
+
+        perm_addr_form = AddressForm(
+            request.POST,
+            prefix='perm',
+            instance=student.permanent_address
+        )
+
+        local_addr_form = AddressForm(
+            request.POST,
+            prefix='local',
+            instance=student.local_address
+        )
+
         if (
             form.is_valid()
             and perm_addr_form.is_valid()
             and local_addr_form.is_valid()
         ):
-            
-            # Save address first
+
             permanent_address = perm_addr_form.save()
             local_address = local_addr_form.save()
 
-            # Save student
             student_obj = form.save(commit=False)
-
             student_obj.permanent_address = permanent_address
             student_obj.local_address = local_address
-
             student_obj.save()
 
             messages.success(
@@ -220,49 +259,52 @@ def update_student_view(request, pk):
                 "Student updated successfully!"
             )
 
-            return redirect(
-                'student-update',
-                pk=student.pk
-            )
+            return redirect('student-list')
+
         else:
-            print("error")
+            print("Student Errors:", form.errors)
+            print("Perm Errors:", perm_addr_form.errors)
+            print("Local Errors:", local_addr_form.errors)
+
     else:
-        form = StudentAllInOneForm(
-            request.POST or None,
-            request.FILES or None,
-            instance=student
-        )
+        form = StudentAllInOneForm(instance=student)
 
         perm_addr_form = AddressForm(
-            request.POST or None, prefix='perm',
+            prefix='perm',
             instance=student.permanent_address
         )
 
         local_addr_form = AddressForm(
-            request.POST or None,
-            prefix="local",
+            prefix='local',
             instance=student.local_address
         )
-        return render(
-            request,
-            "registration_form.html",
-            {
-                "student_form": form,
-                "perm_addr_form": perm_addr_form,
-                "local_addr_form": local_addr_form,
-            }
-        )
 
+        context = {
+            "student_form": form,
+            "perm_addr_form": perm_addr_form,
+            "local_addr_form": local_addr_form,            
+            'page_title': 'Update Student Details',
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Update Student Details', 'url': ''},
+            ]
+        }
+
+    return render(request, "registration_form.html", context)
+@login_required
 def add_student_marks_view(request):
 
     if request.method == "POST":
 
+        academic_session_id = request.POST.get("academic_session")
         student_class_id = request.POST.get("student_class")
         student_id = request.POST.get("student")
         exam_id = request.POST.get("exam")
 
+
         # Check duplicate marksheet
         if MarkSheet.objects.filter(
+            academic_session_id=academic_session_id,
             student_id=student_id,
             exam_id=exam_id
         ).exists():
@@ -276,13 +318,14 @@ def add_student_marks_view(request):
 
         # Create parent marksheet
         marksheet = MarkSheet.objects.create(
+            academic_session_id=academic_session_id,
             student_class_id=student_class_id,
             student_id=student_id,
             exam_id=exam_id,
         )
 
         # Save subjects marks
-        for i in range(9):
+        for i in range(20):
             
             subject_id = request.POST.get(f"form-{i}-subject")
 
@@ -321,15 +364,21 @@ def add_student_marks_view(request):
     ).all()
 
     exams = Exam.objects.all()
+    sessions = AcademicSession.objects.all()
 
-    return render(
-        request,
-        "student-marks.html",
-        {
-            "classes": classes,
-            "exams": exams,
-        },
-    )
+    context = {
+        "classes": classes,
+        "exams": exams,
+        "sessions": sessions,
+        'page_title': 'Add Student Marks',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add Student Marks', 'url': ''},
+        ]
+    }
+
+    return render(request, "student-marks.html", context)
+
 
 
 def grade(percentage):
@@ -350,64 +399,67 @@ def grade(percentage):
     return "F"
 
 ### Report card view for students
+@login_required
 def student_report_card_view(request, pk):
     student = get_object_or_404(Student.objects.select_related('admission_class'), pk=pk)
     
     # 1. Get all subjects for this class
     subjects = Subject.objects.filter(student_class=student.admission_class)
     
-    # 2. Get all distinct exams that have marks for this student
+    # 2. Get all distinct exams
     exams = Exam.objects.filter(marksheet__student=student).distinct().order_by('id')
     
-    # 3. Fetch all marks and pre-calculate row totals
+    # 3. Fetch all marks in a single query
     marks_list = Marks.objects.filter(
         marksheet__student=student
     ).select_related('subject', 'marksheet__exam')
 
+    # Optimization: Convert QuerySet into a Python Dictionary for instant lookup
+    # Key format: (subject_id, exam_id) -> mark_object
+    marks_dict = {
+        (m.subject_id, m.marksheet.exam_id): m for m in marks_list
+    }
+
     report_matrix = {}
     subject_totals = {}
-    # marksheet = MarkSheet.objects.filter(student=student)
+
+    
     
     for sub in subjects:
         report_matrix[sub.id] = {}
         row_total = 0
         for exam in exams:
-            mark = marks_list.filter(subject=sub, marksheet__exam=exam).first()
+            # Memory se fast lookup bina database ko hit kiye
+            mark = marks_dict.get((sub.id, exam.id))
             report_matrix[sub.id][exam.id] = mark
+            
             if mark:
                 row_total += (mark.test_marks or 0) + (mark.written_marks or 0)
+        
         subject_totals[sub.id] = row_total
 
-    # 5. Calculate the Final Grand Total (Bottom Right Cell)
-    # Final Grand Total
+    # Final Grand Total Calculation
     total_score = sum(subject_totals.values())
+    
+    max_marks = 0
 
-    # Total Maximum Marks
-    max_marks = sum(
-        mark.max_total for mark in marks_list
-    )
+    for mark in marks_list:
+        exam_name = mark.marksheet.exam.name.lower()
+        
+        # Dono type ki spellings check kar rahe hain (safe side)
+        if 'quaterly' in exam_name or 'quarterly' in exam_name:
+            max_marks += (mark.max_test_marks or 0)
+        else:
+            max_marks += (
+                (mark.max_test_marks or 0) +
+                (mark.max_written_marks or 0)
+            )
 
     # Percentage
-    percentage = round(
-        (total_score / max_marks) * 100,
-        2
-    ) if max_marks > 0 else 0
-
+    percentage = round((total_score / max_marks) * 100, 2) if max_marks > 0 else 0
 
     # Total exam columns
-    if exams.count() == 1:
-        total_exam_columns = 4
-
-    elif exams.count() == 2:
-        total_exam_columns = 6
-
-    elif exams.count() == 3:
-        total_exam_columns = 8
-
-    else:
-        total_exam_columns = exams.count() * 2
-
-    
+    total_exam_columns = exams.count() * 2 if exams.count() > 3 else {1:4, 2:6, 3:8}.get(exams.count(), 0)
 
     return render(request, 'report_card.html', {
         'student': student,
@@ -422,28 +474,39 @@ def student_report_card_view(request, pk):
         'grade' : grade(percentage),
     })
 
-
-
-
+@login_required
 def all_students_marksheet_view(request):
-    students = Student.objects.all()    
-    return render(request, 'all-student-marksheet.html', {'students': students})
+    students = Student.objects.all()
+    context = {
+        'page_title': 'All Student Result List',
+        'students': students,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Student Result List', 'url': ''},
+        ]
+    }    
+    return render(request, 'all-student-marksheet.html', context)
 
 
-
+@login_required
 def student_promotion_view(request):
+    # 1. 'UnboundLocalError' से बचने के लिए वेरिएबल्स को शुरुआत में ही डिफ़ॉल्ट None वैल्यू दें
+    current_session_id = None
+    from_class_id = None
 
-    # Standardize fetching parameters from both POST and GET
-    current_session_id = request.POST.get('current_session') or request.GET.get('current_session')
-    from_class_id = request.POST.get('promotion_from_class') or request.GET.get('promotion_from_class')
+    # 2. POST और GET दोनों से रॉ डेटा सुरक्षित रूप से निकालें
+    raw_session = request.POST.get('current_session') or request.GET.get('current_session')
+    raw_class = request.POST.get('promotion_from_class') or request.GET.get('promotion_from_class')
 
-    # Ensure IDs are converted to integers safely if they exist
+    # 3. सुरक्षित रूप से इंटीजर (Integer) में कन्वर्ट करें
     try:
-        current_session_id = int(current_session_id) if current_session_id else None
-        from_class_id = int(from_class_id) if from_class_id else None
-    except ValueError:
-        current_session_id = None
-        from_class_id = None
+        if raw_session:
+            current_session_id = int(raw_session)
+        if raw_class:
+            from_class_id = int(raw_class)
+    except (ValueError, TypeError):
+        # यदि कन्वर्शन फेल होता है, तो वैल्यू पहले से ही None सेट है
+        pass
 
     if request.method == 'POST':
         form = StudentPromotionForm(
@@ -452,17 +515,17 @@ def student_promotion_view(request):
             from_class_id=from_class_id
         )
         
+        # यदि यूज़र ने सिर्फ 'Load Students List' बटन दबाया है
         if 'fetch_students' in request.POST:
-            # Force re-evaluation of the form with initial values to show dropdown selections
             form = StudentPromotionForm(
                 current_session_id=current_session_id, 
                 from_class_id=from_class_id, 
                 initial=request.POST
             )
+        
+        # यदि यूज़र ने 'Execute Promotion Flow' सबमिट किया है और फॉर्म वैलिड है
         elif form.is_valid():
-            curr_session = form.cleaned_data['current_session']
             prom_session = form.cleaned_data['promote_session']
-            from_cls = form.cleaned_data['promotion_from_class']
             to_cls = form.cleaned_data['promotion_to_class']
             selected_histories = form.cleaned_data['students']
 
@@ -470,41 +533,33 @@ def student_promotion_view(request):
                 messages.error(request, "Please select at least one student to promote.")
             else:
                 try:
-                    with transaction.atomic():
-                        promoted_count = 0
-                        for history in selected_histories:
-                            if StudentAcademicHistory.objects.filter(student=history.student, session=prom_session).exists():
-                                continue
+                    # सिलेक्टेड स्टूडेंट हिस्ट्री रिकॉर्ड्स से छात्र की IDs निकालें
+                    student_ids = [history.student_id for history in selected_histories]
+                    
+                    # यूजर का नाम ट्रैक करें
+                    user_name = str(request.user if request.user.is_authenticated else "Admin")
+                    
+                    # महा-ऑप्टिमाइज्ड फ़ंक्शन को कॉल करें
+                    promoted_count = promote_student_list(
+                        student_ids=student_ids,
+                        target_class_id=to_cls.id,
+                        target_session_id=prom_session.id,
+                        user_name=user_name
+                    )
 
-                            history.promoted_status = 'PROMOTED'
-                            history.save()
-
-                            StudentAcademicHistory.objects.create(
-                                student=history.student,
-                                session=prom_session,
-                                student_class=to_cls,
-                                is_active=True,
-                                promoted_status='PENDING'
-                            )
-
-                            StudentPromotionLog.objects.create(
-                                student=history.student,
-                                from_session=curr_session,
-                                to_session=prom_session,
-                                from_class=from_cls,
-                                to_class=to_cls,
-                                promoted_by=str(request.user if request.user.is_authenticated else "Admin")
-                            )
-                            promoted_count += 1
-
-                    messages.success(request, f"Successfully promoted {promoted_count} students.")
-                    return redirect('promote_students')
+                    if promoted_count > 0:
+                        messages.success(request, f"Successfully promoted {promoted_count} students.")
+                    else:
+                        messages.warning(request, "No new students were promoted (they might have been promoted already).")
+                        
+                    return redirect('promote_students')  # अपनी सही URL नाम/नेमस्पेस यहाँ डालें
+                    
                 except Exception as e:
-                    messages.error(request, f"An error occurred: {str(e)}")
+                    messages.error(request, f"An error occurred during promotion: {str(e)}")
     else:
         form = StudentPromotionForm(current_session_id=current_session_id, from_class_id=from_class_id)
 
-    # Re-evaluate queryset verification dynamically for the template logic
+    # 4. टेम्पलेट में टेबल या ड्रॉपडाउन दिखाने के लिए वेरिफिकेशन लॉजिक
     has_students = False
     if current_session_id and from_class_id:
         has_students = StudentAcademicHistory.objects.filter(
@@ -520,14 +575,15 @@ def student_promotion_view(request):
         'has_students': has_students,
         'current_session_id': current_session_id,
         'from_class_id': from_class_id,
+        'page_title': 'Student Promotion',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Student Promotion', 'url': ''},
+        ]
     }
 
-    return render(
-        request,
-        "student-promotion.html",
-        context
-    )
-
+    return render(request, "student-promotion.html", context)
+@login_required
 def create_subject_view(request):
     if request.method == "POST":
         form = SubjectForm(request.POST)
@@ -537,26 +593,65 @@ def create_subject_view(request):
     else:
         form = SubjectForm()
 
-    return render(request, 'subject_form.html', {'form': form})
+        context = {
+            'page_title': 'Add New Subject',
+            'form': form,
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Add New Subject', 'url': ''},
+            ]
+        }
 
+    return render(request, 'subject_form.html', context)
+
+
+@login_required
 def subject_list_view(request):
     subjects = Subject.objects.select_related('student_class').all()
-    return render(request, 'subject_list.html', {'subjects': subjects})
+    context = {
+            'subjects': subjects,
+            'page_title': 'Subject List',            
+            'breadcrumbs': [
+                {'name': 'Home', 'url': '/'},
+                {'name': 'Subject List', 'url': ''},
+            ]
+    }
+    
+    return render(request, 'subject_list.html', context)
 
 # CREATE
+@login_required
 def exam_create_view(request):
     form = ExamForm(request.POST or None)
     if form.is_valid():
         form.save()
         return redirect('exam_list')
-    return render(request, 'exam_form.html', {'form': form})
+    context = {
+        'form': form,
+        'page_title': 'Add New Exam & Academic Session',            
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add New Exam & Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'exam_form.html', context)
 
 
 # LIST
+@login_required
 def exam_list_view(request):
     exams = Exam.objects.all().order_by('-id')
-    return render(request, 'exam_list.html', {'exams': exams})
+    context = {
+        'exams': exams,
+        'page_title': 'Exam List & Academic Session',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Exam List & Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'exam_list.html', context)
 
+@login_required
 def academic_session_create(request):
     if request.method == "POST":
         form = AcademicSessionForm(request.POST)
@@ -567,179 +662,82 @@ def academic_session_create(request):
     else:
         form = AcademicSessionForm()
 
-    return render(request, 'session-create.html', {
-        'form': form
-    })
+    context = {
+        'form': form,
+        'page_title': 'Add Academic Session',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Add Academic Session', 'url': ''},
+        ]
+    }
+    return render(request, 'session-create.html', context)
 
 
+@login_required
 def academic_session_list(request):
     sessions = AcademicSession.objects.all().order_by('-start_date')
+    context = {
+        'sessions': sessions,
+        'page_title': 'Academic Sessions',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Academic Sessions', 'url': ''},
+        ]
+    }
+    return render(request, 'session-list.html', context)
 
-    return render(request, 'session-list.html', {
-        'sessions': sessions
-    })
+@login_required
+def all_students_test_marksheet_view(request):
+    marksheets = MarkSheet.objects.select_related('student', 'student_class', 'exam').all()    
+    context = {
+        'page_title': 'All Student Test Result List',
+        'marksheets': marksheets,
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'All Student Test Result List', 'url': ''},
+        ]
+    }   
+    return render(request, 'all-student-test-marksheet.html', context)
 
-# Test Marksheet
 
-def get_subjects_view(request):
 
-    class_id = request.GET.get('student_class')
-
-    subjects = Subject.objects.filter(
-        student_class_id=class_id
+@login_required
+def test_report_card_view(request, pk):
+    # सभी marksheets को fetch करना
+    marksheet = get_object_or_404(
+        MarkSheet.objects.select_related('student', 'student_class', 'exam').prefetch_related('subject_marks'), 
+        pk=pk
     )
+    marks = marksheet.subject_marks.filter(max_test_marks__gt=0)
+    total_obtained = sum(mark.test_marks or 0 for mark in marks)
+    total_max = sum(mark.max_test_marks or 0 for mark in marks)
+    percentage = round((total_obtained / total_max) * 100, 2) if total_max else 0
 
-    data = []
-
-    for subject in subjects:
-        data.append({
-            "id": subject.id,
-            "name": subject.name,
-        })
-
-    return JsonResponse(data, safe=False)
-
-def test_marks_entry_view(request):
-
-    classes = StudentClass.objects.all()
-    exams = Exam.objects.all()
-
-    if request.method == "POST":
-
-        class_id = request.POST.get("student_class")
-        student_id = request.POST.get("student")
-        exam_id = request.POST.get("exam")
-
-        if not class_id or not student_id or not exam_id:
-
-            messages.error(
-                request,
-                "Please select Class, Student and Exam."
-            )
-
-            return redirect("test_marks_entry")
-
-        marksheet, created = TestMarkSheet.objects.get_or_create(
-            student_class_id=class_id,
-            student_id=student_id,
-            exam_name_id=exam_id
-        )
-
-        if not created:
-            messages.error(
-                request,
-                "Marks already entered for this student."
-            )
-            return redirect("test_marks_entry")
-
-        total_forms = int(
-            request.POST.get(
-                "form-TOTAL_FORMS",
-                0
-            )
-        )
-
-        for i in range(total_forms):
-
-            subject_id = request.POST.get(
-                f"form-{i}-subject"
-            )
-
-            obtained_marks = request.POST.get(
-                f"form-{i}-obtained_marks"
-            ) or 0
-
-            remarks = request.POST.get(
-                f"form-{i}-remarks"
-            ) or ""
-
-            max_marks = request.POST.get(
-                f"form-{i}-max_marks"
-            ) or 15
-
-            if subject_id:
-
-                TestSubjectMark.objects.create(
-                    marksheet=marksheet,
-                    subject_id=subject_id,
-                    obtained_marks=obtained_marks,
-                    max_marks=max_marks,
-                    remarks=remarks
-                )
-
-        messages.success(
-            request,
-            "Marks Saved Successfully."
-        )
-
-        return redirect("test_marks_entry")
-
-    return render(
-        request,
-        "test_marks_entry.html",
-        {
-            "classes": classes,
-            "exams": exams,
-        }
-    )
-
-def student_test_report_card_view(request, pk):
-    marksheet = get_object_or_404(TestMarkSheet.objects.select_related('student', 'student__admission_class'), pk=pk)
-    student = marksheet.student
-    marksheet = get_object_or_404(TestMarkSheet, pk=pk)
-    marks = TestSubjectMark.objects.filter(marksheet=marksheet)
-    exams = Exam.objects.filter(testmarksheet__student=student).distinct().order_by('id')
-
-    # Calculate totals dynamically
-    total_max = marks.aggregate(Sum('max_marks'))['max_marks__sum'] or 0
-    total_obtained = marks.aggregate(Sum('obtained_marks'))['obtained_marks__sum'] or 0
-    
-    # Calculate percentage safely
-    percentage = (total_obtained / total_max * 100) if total_max > 0 else 0
-
-    # 1. Determine Status (Pass/Fail) - e.g., passing mark is 33%
-    if percentage >= 33:
-        status = "PASS"
-    else:
-        status = "FAIL"
-
-    # 2. Determine Grade based on standard school metrics
-    if percentage >= 91:
-        grade = "A1"
-    elif percentage >= 81:
-        grade = "A2"
-    elif percentage >= 71:
-        grade = "B1"
-    elif percentage >= 61:
-        grade = "B2"
-    elif percentage >= 51:
-        grade = "C1"
-    elif percentage >= 41:
-        grade = "C2"
+    # Grade
+    if percentage >= 90:
+        grade = "A+"
+    elif percentage >= 80:
+        grade = "A"
+    elif percentage >= 70:
+        grade = "B+"
+    elif percentage >= 60:
+        grade = "B"
+    elif percentage >= 50:
+        grade = "C"
     elif percentage >= 33:
         grade = "D"
     else:
-        grade = "E (Essential Repeat)"
+        grade = "F"
 
+    # Result Status
+    result_status = "Pass" if percentage >= 33 else "Fail"
     context = {
-        "marksheet": marksheet,
-        "marks": marks,
-        "total_max": total_max,
-        'exams': exams,
-        'student': student,
-        "total_obtained": total_obtained,
-        "percentage": round(percentage, 2),
-        "status": status,
-        "grade": grade,
-    }
-
-    return render(request, "test_report_card.html", context)
-
-# def all_student_test_marksheet(request):
-#     students = Student.objects.all()    
-#     return render(request, 'all-student-test-marksheet.html', {'students': students})
-
-def all_student_test_marksheet(request):
-    marksheets = TestMarkSheet.objects.select_related('student', 'student__admission_class', 'exam_name').all()
-    # The key here MUST match the template loop variable
-    return render(request, 'all-student-test-marksheet.html', {'marksheets': marksheets})
+        'marksheet': marksheet,
+        'marks': marks,
+        'total_obtained': total_obtained,
+        'total_max': total_max,
+        'percentage': percentage,
+        'grade': grade,
+        'result_status': result_status,
+    }   
+    return render(request, 'test_report_card.html', context)

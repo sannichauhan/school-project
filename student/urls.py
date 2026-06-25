@@ -5,7 +5,7 @@ from teacher import views
 from .views import (
     StudentClassViewSet, AddressViewSet, StudentViewSet,
     SubjectViewSet, ExamViewSet, MarkSheetViewSet, MarksViewSet, add_class_view, student_list_view, student_registration_view,
-    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, test_marks_entry_view, get_subjects_view, academic_session_list, academic_session_create, student_test_report_card_view, all_student_test_marksheet
+    student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, academic_session_list, academic_session_create, all_students_test_marksheet_view, test_report_card_view
 )
 
 
@@ -30,14 +30,12 @@ urlpatterns = [
     path('add-student-marks/', add_student_marks_view, name="add-students-marks"),
     path('student-result/report-card/<int:pk>/', student_report_card_view, name='student-report-card'),
     path('all-student-marksheet/', all_students_marksheet_view, name="all-student-marksheet"),
+    path('all-student-test-marksheet/', all_students_test_marksheet_view, name="all-student-test-marksheet"),
+    path('student-result/test-report-card/<int:pk>/', test_report_card_view, name="test_report_card"),
     path('subjects-create/', create_subject_view, name='create_subject'),
     path('subjects-list/', subject_list_view, name='subject_list'),    
     path('exams-create/', exam_create_view, name='exam_create'),
-    path('exams-list/', exam_list_view, name='exam_list'),    
-    path('get-subjects/', get_subjects_view, name='get_subjects'),
+    path('exams-list/', exam_list_view, name='exam_list'),
     path('academic-session/', academic_session_list, name='academic_session_list'),
     path('academic-session/add/', academic_session_create, name='academic_session_create'),
-    path('test-marks-entry/', test_marks_entry_view, name='test_marks_entry'),
-    path('all-student-test-marksheet/', all_student_test_marksheet, name='all_student_test_marksheet'),
-    path('student-result/test-report-card/<int:pk>/', student_test_report_card_view, name='student_test_report_card'),
 ]
