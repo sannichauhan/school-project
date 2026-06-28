@@ -3,8 +3,8 @@ from pyexpat.errors import messages
 from django.contrib import admin
 
 from fee.models import FeeLedger
-from .models import Section, StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession
-from .services import promote_student_list
+from fee.services import promote_student_with_ledger
+from .models import Section, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .forms import AcademicSessionForm
 
 # --- Inlines for a better UI ---
@@ -53,8 +53,9 @@ class MarksInline(admin.TabularInline):
 
 @admin.register(StudentClass)
 class StudentClassAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'serial')
     search_fields = ('name',)
+    list_editable = ('serial',)
     
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
@@ -122,13 +123,7 @@ class StudentAdmin(admin.ModelAdmin):
         try:
             target_class_id = 2   # e.g., ID of 'Grade 2'
             target_session_id = 2 # e.g., ID of '2026-2027'
-            
-            promote_student_list(
-                student_ids=student_ids,
-                target_class_id=target_class_id,
-                target_session_id=target_session_id,
-                user_name=request.user.username
-            )
+        
             
             self.message_user(
                 request, 
@@ -184,8 +179,25 @@ class MarkSheetAdmin(admin.ModelAdmin):
     search_fields = ('student__name', 'student__roll_number') # Search bar ke liye (Optional par useful)
     inlines = [MarksInline]  # Ab ye sahi se kaam karega
 
-    
+@admin.action(description="Promote selected students to next session")
+def perform_promotion(modeladmin, request, queryset):
+    # For demonstration, pulling the target configurations. 
+    # In a custom view, you'd pull these from a form dropdown selection.
+    target_class = StudentClass.objects.filter(name="Class 6").first() 
+    new_session = AcademicSession.objects.filter(is_current=True).first()
 
+    if not target_class or not new_session:
+        modeladmin.message_user(request, "Target class or current session configuration missing.", messages.ERROR)
+        return
 
+    count = 0
+    for student in queryset:
+        promote_student_with_ledger(student, target_class, new_session)
+        count += 1
 
+    modeladmin.message_user(request, f"Successfully promoted {count} students and balanced their ledgers.", messages.SUCCESS)
 
+@admin.register(StudentEnrollment)
+class StudentEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('student', 'from_class', 'to_class', 'academic_year', 'is_active')
+    actions = [perform_promotion]

@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from django.contrib import messages
@@ -11,9 +13,8 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentAcademicHistory
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
-from .services import promote_student_list
 
 
 class StudentClassViewSet(viewsets.ModelViewSet):
@@ -540,7 +541,7 @@ def student_promotion_view(request):
                     user_name = str(request.user if request.user.is_authenticated else "Admin")
                     
                     # महा-ऑप्टिमाइज्ड फ़ंक्शन को कॉल करें
-                    promoted_count = promote_student_list(
+                    promoted_count = promote_students(
                         student_ids=student_ids,
                         target_class_id=to_cls.id,
                         target_session_id=prom_session.id,
@@ -741,3 +742,47 @@ def test_report_card_view(request, pk):
         'result_status': result_status,
     }   
     return render(request, 'test_report_card.html', context)
+
+@login_required
+def promote_students(request, class_id=None, session_id=None):
+
+    from .services import bulk_promote_students_with_ledger
+    if request.method == 'POST':
+        student_ids = request.POST.getlist('student_ids')
+        from_class_id = request.POST.get('from_class_id')
+        target_session_id = request.POST.get('target_session_id')
+        
+        target_class = get_object_or_404(StudentClass, id=from_class_id)
+        target_session = get_object_or_404(AcademicSession, id=target_session_id)
+
+        promoted_count = 0
+
+        try:
+            with transaction.atomic():
+                created = bulk_promote_students_with_ledger(
+                    academic_year_id=target_session.id,
+                    student_ids=student_ids,
+                    from_class_id=target_class.id
+                )
+                
+                if created > 0:
+                    promoted_count += len(student_ids)
+                    messages.success(request,f"Students are promoted successfully.")
+                    return redirect(request.path)
+                else:
+                    messages.warning(request, f"No new students were promoted (they might have been promoted already).")
+                    return redirect(request.path)
+        except Exception as e:
+            messages.error(request, f"An error occurred during promotion: {str(e)}")
+            return redirect(request.path)
+    else:
+        context = {
+        'page_title': 'Bulk Student Promotion',
+        'all_classes': StudentClass.objects.all(),
+        'all_sessions': AcademicSession.objects.all(),
+        'students': Student.objects.filter(current_class_id=class_id) if class_id and session_id else [],
+        'selected_class': StudentClass.objects.filter(id=class_id).first() if class_id else StudentClass.objects.first(),
+        'selected_session': AcademicSession.objects.filter(id=session_id).first() if session_id else AcademicSession.objects.first(),
+    }
+    return render(request, 'promote_student.html', context)
+        

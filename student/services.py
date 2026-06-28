@@ -1,91 +1,107 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from .models import Student, StudentClass, AcademicSession, StudentAcademicHistory, StudentPromotionLog
+from django.utils import timezone
+from .models import StudentClass, Student, StudentEnrollment, AcademicSession
+from fee.models import FeeLedger 
 
-def promote_student_list(student_ids, target_class_id, target_session_id, user_name=None):
-    """
-    Safely promotes a batch of students to the next class and new session,
-    optimized with bulk lookups to completely eliminate N+1 queries.
-    """
-    if not student_ids:
-        return 0
-
-    # सुनिश्चित करें कि सभी IDs Integer फॉर्मेट में हों ताकि डिक्शनरी मैपिंग में गड़बड़ न हो
-    student_ids = [int(sid) for sid in student_ids]
-
-    # 1. लूप के बाहर टारगेट ऑब्जेक्ट्स और वैलिडेशन फ़ेच करें (सिर्फ 2 क्वेरी)
-    target_class = get_object_or_404(StudentClass, pk=target_class_id)
-    target_session = get_object_or_404(AcademicSession, pk=target_session_id)
+def bulk_promote_students_with_ledger(academic_year_id, from_class_id=None, student_ids=None):
+    target_session = get_object_or_404(AcademicSession, id=academic_year_id)
     
-    promoted_count = 0
+    if from_class_id and not student_ids:
+        current_class = get_object_or_404(StudentClass, id=from_class_id)
+        students_to_promote = Student.objects.filter(current_class=current_class)
+    elif student_ids:
+        students_to_promote = Student.objects.filter(id__in=student_ids)
+    else:
+        raise ValueError("Class or student IDs must be provided.")
+
+    all_classes = list(StudentClass.objects.order_by('serial'))
+    
+    enrollments_to_create = []
+    students_to_update = []
+    old_enrollments_to_deactivate = []
+    ledgers_to_create = []
 
     with transaction.atomic():
-        # 2. BULK CHECK: उन छात्रों की IDs निकालें जो इस टारगेट सेशन में पहले से ही मौजूद हैं (डुप्लिकेट प्रिवेंशन)
-        already_promoted_ids = set(
-            StudentAcademicHistory.objects.filter(
-                student_id__in=student_ids,
-                session=target_session
-            ).values_list('student_id', flat=True)
-        )
-
-        # 3. सभी छात्रों के करंट एक्टिव इतिहास रिकॉर्ड्स एक बार में लाएं
-        current_records = StudentAcademicHistory.objects.filter(
-            student_id__in=student_ids,
-            is_active=True
-        ).select_related('student', 'session', 'student_class')
-
-        # फ़ास्ट लुकअप के लिए डिक्शनरी मैपिंग {int_id: record_object}
-        history_map = {record.student_id: record for record in current_records}
-
-        # 4. जिन छात्रों का कोई एक्टिव इतिहास नहीं है, उनके स्टूडेंट ऑब्जेक्ट्स भी एक ही क्वेरी में निकालें
-        missing_history_ids = [sid for sid in student_ids if sid not in history_map and sid not in already_promoted_ids]
-        student_objects_map = {}
-        if missing_history_ids:
-            students = Student.objects.filter(pk__in=missing_history_ids)
-            student_objects_map = {s.id: s for s in students}
-
-        # ==================== मुख्य लूप (No Database Hits Inside) ====================
-        for student_id in student_ids:
+        for student in students_to_promote:
+            current_class = student.current_class
             
-            # पहले से प्रमोटेड छात्रों को बिना क्वेरी चलाए स्किप करें
-            if student_id in already_promoted_ids:
-                continue
+            next_class = None
+            if current_class:
+                try:
+                    current_index = all_classes.index(current_class)
+                    if current_index + 1 < len(all_classes):
+                        next_class = all_classes[current_index + 1]
+                except ValueError:
+                    pass
 
-            current_record = history_map.get(student_id)
+            previous_dues = 0.00
+            current_enrollment = StudentEnrollment.objects.filter(
+                student=student, is_active=True
+            ).first()
 
-            if current_record:
-                # पुराने रिकॉर्ड का स्टेटस बदलें
-                current_record.promoted_status = 'PROMOTED'
-                current_record.is_active = False
-                current_record.save()  # यह सिर्फ इस छात्र के रिकॉर्ड को अपडेट करेगा
-                
-                # लॉग जनरेट करें
-                StudentPromotionLog.objects.create(
-                    student=current_record.student,
-                    from_session=current_record.session,
-                    to_session=target_session,
-                    from_class=current_record.student_class,
-                    to_class=target_class,
-                    promoted_by=user_name
+            if current_enrollment:
+                old_session = current_enrollment.academic_year
+                unpaid_ledgers = FeeLedger.objects.filter(
+                    student=student,
+                    academic_year=old_session,
+                    status__in=['PENDING', 'PARTIALLY_PAID']
                 )
-                student_obj = current_record.student
-            else:
-                # बिना हिस्ट्री वाले छात्रों का ऑब्जेक्ट पहले से तैयार मैप से उठाएं
-                student_obj = student_objects_map.get(student_id)
-                if not student_obj:
-                    continue  # अगर छात्र डेटाबेस में ही नहीं है
+                for ledger in unpaid_ledgers:
+                    previous_dues += float(ledger.remaining_amount)
+                
+                current_enrollment.is_active = False
+                old_enrollments_to_deactivate.append(current_enrollment)
 
-            # 5. नया एक्टिव हिस्ट्री रिकॉर्ड बनाएं
-            # नोट: यहाँ .create() इस्तेमाल करना सही है क्योंकि यह आपके मॉडल के 
-            # कस्टम save() मेथड (रोल नंबर जनरेशन + ओल्ड एक्टिव डिसेबल) को ट्रिगर करेगा।
-            StudentAcademicHistory.objects.create(
-                student=student_obj,
-                session=target_session,
-                student_class=target_class,
-                is_active=True,
-                promoted_status='PENDING'
-            )
+            exists = StudentEnrollment.objects.filter(
+                student=student, academic_year=target_session, from_class=current_class, to_class=next_class
+            ).exists()
+
+            if not exists:
+                enrollments_to_create.append(
+                    StudentEnrollment(
+                        student=student,
+                        from_class=current_class,
+                        to_class=next_class,
+                        academic_year=target_session,
+                        status='PROMOTED' if next_class else 'GRADUATED',
+                        is_active=True
+                    )
+                )
+
+                if previous_dues > 0:
+                    ledgers_to_create.append(
+                        FeeLedger(
+                            student=student,
+                            academic_year=target_session,
+                            installment_number=0,
+                            category='ACADEMIC',
+                            description="Carried Forward Dues",
+                            total_amount=previous_dues,
+                            due_date=timezone.now(),
+                            status='PENDING'
+                        )
+                    )
+
+                student.session = target_session
+                student.current_class = next_class
+                students_to_update.append(student)
+
+        if old_enrollments_to_deactivate:
+            StudentEnrollment.objects.bulk_update(old_enrollments_to_deactivate, fields=['is_active'])
             
-            promoted_count += 1
+        if enrollments_to_create:
+            StudentEnrollment.objects.bulk_create(enrollments_to_create)
             
-    return promoted_count
+        if students_to_update:
+            Student.objects.bulk_update(students_to_update, fields=['session', 'current_class'])
+            
+        if ledgers_to_create:
+            FeeLedger.objects.bulk_create(ledgers_to_create)
+
+        # from fee.signals import auto_ledger_for_promoted_student
+        # for enrollment in enrollments_to_create:
+        #     # Signal function ko manually call kar rahe hain bypass/bulk ke baad aur recursion ka dar bhi nahi hai
+        #     auto_ledger_for_promoted_student(sender=StudentEnrollment, instance=enrollment, created=True)
+
+    return len(enrollments_to_create)
