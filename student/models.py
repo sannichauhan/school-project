@@ -26,6 +26,7 @@ class AcademicSession(models.Model):
 class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
     name = models.CharField(max_length=50)
+    serial = models.PositiveIntegerField(default=0, help_text="For ordering classes in the admin interface")
 
     class Meta:
         verbose_name = "Class"
@@ -98,6 +99,7 @@ class Student(models.Model):
 
     # Academic Info
     admission_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='students')
+    current_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='current_students', null=True, blank=True)
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True, blank=True)
     roll_number = models.IntegerField(default=0)
     
@@ -129,7 +131,6 @@ class Student(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
 
-        # अगर नया छात्र है या रोल नंबर नहीं है, तो ऑटो-जनरेट करें
         if not self.roll_number or self.roll_number == 0:
             last_student = Student.objects.filter(
                 admission_class=self.admission_class,
@@ -141,19 +142,8 @@ class Student(models.Model):
             else:
                 self.roll_number = 1001
 
-        # पैरेंट क्लास के save() को कॉल करें
         super().save(*args, **kwargs)
         
-        # नया छात्र होने पर ही पहली हिस्ट्री रो (Row) बनाएं
-        if is_new:
-            # Circular Import से बचने के लिए मॉडल को यहीं इम्पोर्ट करना सबसे सेफ है
-            from .models import StudentAcademicHistory
-            StudentAcademicHistory.objects.get_or_create(
-                student=self,
-                session=self.session,
-                student_class=self.admission_class,
-                defaults={'roll_number': self.roll_number, 'is_active': True}
-            )
 
     def __str__(self):
         return f"{self.name} ({self.roll_number})"
@@ -165,18 +155,13 @@ class Student(models.Model):
     def current_academic_record(self):
         # caching तकनीक का उपयोग ताकि एक ही रिक्वेस्ट में बार-बार क्वेरी न चले
         if not hasattr(self, '_cached_academic_record'):
-            self._cached_academic_record = self.academic_history.filter(is_active=True).first()
+            self._cached_academic_record = self.enrollments.filter(is_active=True).first()
         return self._cached_academic_record
-
-    @property
-    def current_class(self):
-        record = self.current_academic_record
-        return record.student_class if record else self.admission_class
 
     @property
     def current_session(self):
         record = self.current_academic_record
-        return record.session if record else self.session
+        return record.academic_year if record else self.session
 
     @property
     def calculate_percentage(self):
@@ -443,63 +428,63 @@ class Marks(models.Model):
         # Baaki sabhi exams ke liye dono ka sum
         return (self.max_test_marks or 0) + (self.max_written_marks or 0)
     
-class StudentAcademicHistory(models.Model):
-    """Tracks which class and section a student belonged to in any given session"""
-    student = models.ForeignKey(
-        'Student', 
-        on_delete=models.CASCADE, 
-        related_name='academic_history'
-    )
-    session = models.ForeignKey(
-        'AcademicSession', 
-        on_delete=models.CASCADE, 
-        related_name='student_enrollments'
-    )
-    student_class = models.ForeignKey(
-        'StudentClass', 
-        on_delete=models.CASCADE, 
-        related_name='class_enrollments'
-    )
-    roll_number = models.IntegerField()
-    is_active = models.BooleanField(
-        default=True, 
-        help_text="Designates if this is the student's current active session/class."
-    )
-    promoted_status = models.CharField(
-        max_length=20,
-        choices=[('PROMOTED', 'Promoted'), ('RETAINED', 'Retained'), ('PENDING', 'Pending')],
-        default='PENDING'
-    )
+# class StudentAcademicHistory(models.Model):
+#     """Tracks which class and section a student belonged to in any given session"""
+#     student = models.ForeignKey(
+#         'Student', 
+#         on_delete=models.CASCADE, 
+#         related_name='academic_history'
+#     )
+#     session = models.ForeignKey(
+#         'AcademicSession', 
+#         on_delete=models.CASCADE, 
+#         related_name='student_enrollments'
+#     )
+#     student_class = models.ForeignKey(
+#         'StudentClass', 
+#         on_delete=models.CASCADE, 
+#         related_name='class_enrollments'
+#     )
+#     roll_number = models.IntegerField()
+#     is_active = models.BooleanField(
+#         default=True, 
+#         help_text="Designates if this is the student's current active session/class."
+#     )
+#     promoted_status = models.CharField(
+#         max_length=20,
+#         choices=[('PROMOTED', 'Promoted'), ('RETAINED', 'Retained'), ('PENDING', 'Pending')],
+#         default='PENDING'
+#     )
 
-    class Meta:
-        unique_together = ['student', 'session']
-        verbose_name = "Student Academic History"
-        verbose_name_plural = "Student Academic Histories"
+#     class Meta:
+#         unique_together = ['student', 'session']
+#         verbose_name = "Student Academic History"
+#         verbose_name_plural = "Student Academic Histories"
 
-    def __str__(self):
-        return f"{self.student.name} - {self.student_class} ({self.session})"
+#     def __str__(self):
+#         return f"{self.student.name} - {self.student_class} ({self.session})"
 
-    def save(self, *args, **kwargs):
-        # 1. ऑटोमैटिक रोल नंबर जनरेशन (यदि पहले से मौजूद न हो या 0 हो)
-        if not self.roll_number or self.roll_number == 0:
-            last_record = StudentAcademicHistory.objects.filter(
-                student_class=self.student_class,
-                session=self.session
-            ).order_by('-roll_number').first()
+#     def save(self, *args, **kwargs):
+#         # 1. ऑटोमैटिक रोल नंबर जनरेशन (यदि पहले से मौजूद न हो या 0 हो)
+#         if not self.roll_number or self.roll_number == 0:
+#             last_record = StudentAcademicHistory.objects.filter(
+#                 student_class=self.student_class,
+#                 session=self.session
+#             ).order_by('-roll_number').first()
             
-            if last_record and last_record.roll_number:
-                self.roll_number = last_record.roll_number + 1
-            else:
-                self.roll_number = 1001
+#             if last_record and last_record.roll_number:
+#                 self.roll_number = last_record.roll_number + 1
+#             else:
+#                 self.roll_number = 1001
         
-        # 2. डेटाबेस इंटीग्रिटी: एक छात्र का एक समय पर सिर्फ एक ही रिकॉर्ड 'Active' होना चाहिए
-        if self.is_active:
-            StudentAcademicHistory.objects.filter(
-                student=self.student, 
-                is_active=True
-            ).exclude(pk=self.pk).update(is_active=False)
+#         # 2. डेटाबेस इंटीग्रिटी: एक छात्र का एक समय पर सिर्फ एक ही रिकॉर्ड 'Active' होना चाहिए
+#         if self.is_active:
+#             StudentAcademicHistory.objects.filter(
+#                 student=self.student, 
+#                 is_active=True
+#             ).exclude(pk=self.pk).update(is_active=False)
             
-        super().save(*args, **kwargs)
+#         super().save(*args, **kwargs)
 
 
 class StudentPromotionLog(models.Model):
@@ -538,3 +523,47 @@ class StudentPromotionLog(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
         
+class StudentEnrollment(models.Model):
+    STATUS_CHOICES = [
+        ('PROMOTED', 'Promoted'),
+        ('GRADUATED', 'Graduated'),
+        ('WITHDRAWN', 'Withdrawn'),
+    ]
+    # student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments')
+    from_class = models.ForeignKey(StudentClass, on_delete=models.PROTECT, related_name='enrollments')
+    
+    student=ChainedForeignKey(
+        Student, 
+        chained_field="from_class",
+        chained_model_field="current_class",
+        show_all=False,
+        auto_choose=True,
+        sort=True,
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    ) 
+    
+    to_class = models.ForeignKey(StudentClass, on_delete=models.PROTECT, related_name='to_enrollments', null=True, blank=True)
+    
+    academic_year = models.ForeignKey(AcademicSession, on_delete=models.PROTECT, related_name='enrollments')
+    enrollment_date = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PROMOTED')
+
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['student', 'academic_year', 'to_class', 'from_class'], name='unique_student_academic_year')
+    ]
+        ordering = ['-academic_year__start_date']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        student = self.student
+        if student:
+            student.session = self.academic_year
+            student.current_class = self.to_class
+            student.save(update_fields=['session', 'current_class'])
+        
+    def __str__(self):
+        return f"{self.student} - {self.to_class} ({self.academic_year.name})"

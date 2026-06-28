@@ -1,0 +1,184 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Header Menu Area Start Here -->
+  {% include "tags/header.html" %}
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      {% include "tags/breadcrumb.html" %}
+<div class="container-fluid my-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white p-3">
+            <h4 class="mb-0 text-white"><i class="bi bi-arrow-up-right-circle-fill me-2"></i> Student Promotion Control Panel</h4>
+        </div>
+        <div class="card-body">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if students is not None %}
+                <form method="POST" id="promotionForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3 bg-light p-3 rounded mb-4 border align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold text-secondary">Current Class (Promote From)</label>
+                    <select name="from_class_id" id="filter_class" class="form-select form-control">
+                        <option value="">-- Choose Class --</option>
+                        {% for cls in all_classes %}
+                            <option value="{{ cls.id }}" {% if selected_class.id == cls.id %}selected{% endif %}>{{ cls.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold text-secondary">Target Session (Promote To)</label>
+                    <select name="target_session_id" id="filter_session" class="form-select form-control">
+                        <option value="">-- Choose Session --</option>
+                        {% for sess in all_sessions %}
+                            <option value="{{ sess.id }}" {% if selected_session.id == sess.id %}selected{% endif %}>{{ sess.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" onclick="filterStudents()" class="btn btn-dark w-100 py-2 fw-bold">
+                        <i class="bi bi-funnel-fill me-1"></i> Load List
+                    </button>
+                </div>
+            </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded border">
+                        <h5 class="text-dark mb-0 ms-2">
+                            Students in: <span class="badge bg-secondary fs-6">{{ selected_class.name }}</span>
+                        </h5>
+                        
+                        {% if students %}
+                            <button type="submit" id="submitActionBtn" class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm" onclick="return confirmAction()">
+                                <i class="bi bi-box-arrow-in-up-right me-1"></i> Promote Class {{ selected_class.name }}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle shadow-sm" id="studentPromoteTable">
+                            <thead class="table-dark text-uppercase fs-7">
+                                <tr>
+                                    <th width="5%" class="text-center no-sort">
+                                        <input type="checkbox" id="selectAll" class="form-check-input border-secondary">
+                                    </th>
+                                    <th>Student ID</th>
+                                    <th>Full Name</th>
+                                    <th>Current Class</th>
+                                    <th>Current Session</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="student_ids" value="{{ student.id }}" class="form-check-input student-checkbox border-secondary">
+                                    </td>
+                                    <td><strong>#{{ student.id }}</strong></td>
+                                    <td>{{ student.name }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ student.current_class.name }}</span></td>
+                                    <td><span class="badge bg-info-subtle text-info-emphasis border border-info">{{ student.session.name }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i> Is class me koi active student nahi hai.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            {% else %}
+                <div class="text-center py-5 bg-light rounded border border-dashed">
+                    <i class="bi bi-arrow-up-right-square fs-1 text-primary d-block mb-3"></i>
+                    <h5 class="text-secondary">Promotion Data Loader</h5>
+                    <p class="text-muted small">Upar dropdown se Class aur Target Session chun kar bache list karein.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+    // 1. Data Loader Routing Function
+    function filterStudents() {
+        var classId = document.getElementById('filter_class').value;
+        var sessionId = document.getElementById('filter_session').value;
+        if (!classId || !sessionId) {
+            alert("Kripya Class aur Session dono select karein!");
+            return;
+        }
+        window.location.href = "/students/promote/" + classId + "/" + sessionId + "/";
+    }
+
+    // 2. Dynamic Button Behavior Manager
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectAll = document.getElementById('selectAll');
+        var checkboxes = document.querySelectorAll('.student-checkbox');
+        var actionBtn = document.getElementById('submitActionBtn');
+        var className = "{{ selected_class.name|escapejs }}";
+
+        function updateButtonUI() {
+            if (!actionBtn) return;
+            
+            // Pata lagao kitne checkboxes checked hain
+            var checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+            
+            if (checkedCount > 0) {
+                // Condition 2 UI State: Selected students mode
+                actionBtn.innerHTML = `<i class="bi bi-people-fill me-1"></i> Promote Selected Students (${checkedCount})`;
+                actionBtn.className = "btn btn-success text-white fw-bold px-4 py-2 shadow-sm";
+            } else {
+                // Condition 1 UI State: Whole class mode
+                actionBtn.innerHTML = `<i class="bi bi-box-arrow-in-up-right me-1"></i> Promote Class ${className}`;
+                actionBtn.className = "btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm";
+            }
+        }
+
+        // Toggle select all triggers
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+                updateButtonUI();
+            });
+        }
+
+        // Individual item selection listeners
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateButtonUI);
+        });
+    });
+
+    // 3. Confirmation Dialog Box Trigger
+    function confirmAction() {
+        var checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+        if (checkedCount > 0) {
+            return confirm(`Kya aap in ${checkedCount} selected students ko promote karna chahte hain?`);
+        } else {
+            return confirm("Aapne koi student select nahi kiya hai. Kya aap is CLASS KE SABHI STUDENTS ko ek sath promote karna chahte hain?");
+        }
+    }
+</script>
+{% endblock %}

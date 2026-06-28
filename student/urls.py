@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from teacher import views
 from .views import (
-    StudentClassViewSet, AddressViewSet, StudentViewSet,
+    StudentClassViewSet, AddressViewSet, StudentViewSet, promote_students,
     SubjectViewSet, ExamViewSet, MarkSheetViewSet, MarksViewSet, add_class_view, student_list_view, student_registration_view,
     student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, academic_session_list, academic_session_create, all_students_test_marksheet_view, test_report_card_view
 )
@@ -38,4 +38,5 @@ urlpatterns = [
     path('exams-list/', exam_list_view, name='exam_list'),
     path('academic-session/', academic_session_list, name='academic_session_list'),
     path('academic-session/add/', academic_session_create, name='academic_session_create'),
+    path('promote/<int:class_id>/<int:session_id>/', promote_students, name='promote_student_base'),
 ]

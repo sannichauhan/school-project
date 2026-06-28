@@ -5,7 +5,7 @@ from django.forms import modelformset_factory
 
 # from .models import Section, Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
 
-from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, AcademicSession, StudentAcademicHistory, Section
+from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, AcademicSession, Section
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -218,13 +218,6 @@ class StudentPromotionForm(forms.Form):
         widget=forms.Select(attrs={'class': 'select2', 'id': 'id_to_class'}),
         required=True,
         label="Promote To Class"
-    )
-    # छात्रों की लिस्ट के लिए फील्ड
-    students = forms.ModelMultipleChoiceField(
-        queryset=StudentAcademicHistory.objects.none(),
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'student-checkbox'}),
-        required=False,
-        help_text="Select the specific students you want to promote."
     )
 
     def __init__(self, *args, **kwargs):
