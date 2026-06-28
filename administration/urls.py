@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from .views import admit_card_view, create_tc_view, tc_list_view, tc_detail_view, take_attendance, attendance_report, create_admit_card_view
+from .views import admit_card_view, create_tc_view, tc_list_view, tc_detail_view, take_attendance, attendance_report, create_admit_card_view, id_cards_view
 
 
 urlpatterns = [
@@ -14,4 +14,5 @@ urlpatterns = [
     path('take-attendance/', take_attendance, name='take_attendance'),
     path('attendance-report/', attendance_report, name='attendance_report'),
     path('exam-schedule/', views.exam_timetable_view, name='exam_timetable'),
+    path('id-cards/', id_cards_view, name='id_cards'),
 ]

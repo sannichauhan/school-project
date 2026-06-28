@@ -25,16 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_mhg(98qj(+_ks!5@yy*c0hdcjn!5xkv(g04gy&@)ibii()joz"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-# ALLOWED_HOSTS = ["*"]
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
 
-DEBUG = False
-ALLOWED_HOSTS = [
-    "navchetanapublicschool.com",
-    "www.navchetanapublicschool.com",
-    "server17213-10344.hostingprovider.com",
-    "*"
-]
+# DEBUG = False
+# ALLOWED_HOSTS = [
+#     "navchetanapublicschool.com",
+#     "www.navchetanapublicschool.com",
+#     "server17213-10344.hostingprovider.com",
+#     "*"
+# ]
 
 LOGIN_URL = '/login/'
 
@@ -100,23 +100,23 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'navcheta_ncps_db',
-        'USER': 'navcheta_ncps_user',
-        'PASSWORD': '7Mshf.;[8O2Iun2h',
-        'HOST': 'localhost',
-        'PORT': '3306',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'navcheta_ncps_db',
+#         'USER': 'navcheta_ncps_user',
+#         'PASSWORD': '7Mshf.;[8O2Iun2h',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 
 # Password validation
@@ -154,8 +154,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_ROOT = '/home/navcheta/public_html/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = '/home/navcheta/public_html/static/'
 
 STATICFILES_DIRS = [
     os.path.join(os.path.normpath(BASE_DIR), "static")
@@ -163,3 +163,13 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Admission Enquiry Form
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'officencps9@gmail.com'
+EMAIL_HOST_PASSWORD = 'DWNzw#123@'  # Use a secure App Password, not your regular password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

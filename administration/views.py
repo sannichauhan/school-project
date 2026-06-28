@@ -205,8 +205,8 @@ def create_admit_card_view(request):
         form = AdmitCardForm()
 
         context = {
-            'page_title': 'Generate New Admit Card',
             'form': form,
+            'page_title': 'Generate New Admit Card',            
             'breadcrumbs': [
                 {'name': 'Home', 'url': '/'},
                 {'name': 'Generate New Admit Card', 'url': ''},
@@ -250,3 +250,13 @@ def exam_timetable_view(request):
         })
 
     return render(request, 'exam-schedule.html', {'timetable': timetable_data})
+
+
+@login_required
+def id_cards_view(request):
+    students = Student.objects.all()
+    context = {
+        'students' : students
+    }
+    return render(request, 'id-card.html', context)
+
