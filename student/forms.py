@@ -30,7 +30,7 @@ class StudentAllInOneForm(forms.ModelForm):
     class Meta:
         model = Student
         # We exclude the address fields because we handle them as separate form instances
-        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number', 'section']
+        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number', 'section', 'current_class']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_class': forms.Select(attrs={'class': 'select2'}),
