@@ -18,7 +18,7 @@ class BaseFeeStructure(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.fee_head.name}"
+        return f"{self.standard.name} - {self.fee_head.name}"
 
 class StudentFeeAllocation(models.Model):
     FEE_TYPE_CHOICES = [
