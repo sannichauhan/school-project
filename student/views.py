@@ -13,7 +13,7 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession
+from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession, StudentEnrollment
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
 
 
@@ -542,6 +542,7 @@ def student_promotion_view(request):
                     
                     # महा-ऑप्टिमाइज्ड फ़ंक्शन को कॉल करें
                     promoted_count = promote_students(
+                        request,
                         student_ids=student_ids,
                         target_class_id=to_cls.id,
                         target_session_id=prom_session.id,
@@ -561,13 +562,11 @@ def student_promotion_view(request):
         form = StudentPromotionForm(current_session_id=current_session_id, from_class_id=from_class_id)
 
     # 4. टेम्पलेट में टेबल या ड्रॉपडाउन दिखाने के लिए वेरिफिकेशन लॉजिक
-    has_students = False
-    if current_session_id and from_class_id:
-        has_students = StudentAcademicHistory.objects.filter(
-            session_id=current_session_id,
-            student_class_id=from_class_id,
-            is_active=True
-        ).exists()
+    has_students = StudentEnrollment.objects.filter(
+        academic_year_id=current_session_id,  # Badalkar academic_year_id kiya
+        from_class_id=from_class_id,         # Badalkar from_class_id kiya
+        is_active=True
+    ).exists()
 
     context = {
         'sessions': AcademicSession.objects.all(),
@@ -744,12 +743,17 @@ def test_report_card_view(request, pk):
     return render(request, 'test_report_card.html', context)
 
 @login_required
-def promote_students(request, class_id=None, session_id=None):
+def promote_students(request, student_ids, target_class_id, target_session_id, user_name, class_id=None, session_id=None):
 
     from .services import bulk_promote_students_with_ledger
     if request.method == 'POST':
+
+        print(request.POST)
+        print("from_class_id =", request.POST.get("from_class_id"))
+        print("target_class_id =", request.POST.get("target_class_id"))
+
         student_ids = request.POST.getlist('student_ids')
-        from_class_id = request.POST.get('from_class_id')
+        from_class_id = request.POST.get('promotion_from_class')
         target_session_id = request.POST.get('target_session_id')
         
         target_class = get_object_or_404(StudentClass, id=from_class_id)

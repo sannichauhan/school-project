@@ -5,7 +5,7 @@ from django.forms import modelformset_factory
 
 # from .models import Section, Student, Address, StudentClass, MarkSheet, Subject, Exam, TestSubjectMark, AcademicSession, StudentAcademicHistory
 
-from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, AcademicSession, Section
+from .models import Student, Address, StudentClass, MarkSheet, Subject, Exam, AcademicSession, Section, StudentEnrollment
 
 class AddressForm(forms.ModelForm):
     class Meta:
@@ -221,6 +221,13 @@ class StudentPromotionForm(forms.Form):
         label="Promote To Class"
     )
 
+    students = forms.ModelMultipleChoiceField(
+        queryset=StudentEnrollment.objects.none(), # Shuruat mein khali rahega
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'student-checkbox'}),
+        required=False,
+        label="Select Students for Promotion"
+    )
+
     def __init__(self, *args, **kwargs):
         # डायनेमिक फिल्टरिंग के लिए पैरामीटर्स निकालना
         current_session_id = kwargs.pop('current_session_id', None)
@@ -230,16 +237,17 @@ class StudentPromotionForm(forms.Form):
         
         # यदि दोनों IDs मौजूद हैं, तो डेटा फ़ेच करें
         if current_session_id and from_class_id:
-            # select_related('student') लगाने से N+1 क्वेरी की समस्या हल होती है
-            self.fields['students'].queryset = StudentAcademicHistory.objects.filter(
-                session_id=current_session_id,
-                student_class_id=from_class_id,
+            self.fields['students'].queryset = StudentEnrollment.objects.filter(
+                academic_year_id=current_session_id,  # Badalkar academic_year_id kiya
+                from_class_id=from_class_id,         # Badalkar from_class_id kiya
                 is_active=True
             ).select_related('student')
             
-            # UX Improvement: चेकबॉक्स के पास दिखने वाले नाम को कस्टमाइज़ करना
-            # अब टेम्पलेट में पूरा इतिहास दिखने के बजाय सिर्फ "Student Name (Roll: 1001)" दिखेगा
-            self.fields['students'].label_from_instance = lambda obj: f"{obj.student.name} (Roll: {obj.roll_number})"
+            
+        if 'students' in self.fields:
+            self.fields['students'].label_from_instance = lambda obj: f"{obj.student} (Roll: {getattr(obj, 'roll_number', 'N/A')})"
+
+        
 
     def clean(self):
         cleaned_data = super().clean()
@@ -248,7 +256,6 @@ class StudentPromotionForm(forms.Form):
 
         # वैलिडेशन: दोनों सेशन एक जैसे नहीं होने चाहिए
         if current_session and promote_session and current_session == promote_session:
-            # फील्ड स्पेसिफिक एरर ऐड करना (ताकि यह सीधे 'promote_session' ड्रॉपडाउन के नीचे लाल रंग में दिखे)
             self.add_error('promote_session', "Promote session cannot be the same as the current session.")
             
         return cleaned_data
