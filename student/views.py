@@ -573,7 +573,7 @@ def student_promotion_view(request):
         'sessions': AcademicSession.objects.all(),
         'classes': StudentClass.objects.all(),
         'form': form,
-        'has_students': has_students,
+        # 'has_students': has_students,
         'current_session_id': current_session_id,
         'from_class_id': from_class_id,
         'page_title': 'Student Promotion',
@@ -746,7 +746,7 @@ def test_report_card_view(request, pk):
 @login_required
 def promote_students(request, class_id=None, session_id=None):
 
-    from .services import bulk_promote_students_with_ledger
+    from .servicesOLd import bulk_promote_students_with_ledger
     if request.method == 'POST':
         student_ids = request.POST.getlist('student_ids')
         from_class_id = request.POST.get('from_class_id')
