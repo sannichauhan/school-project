@@ -4,6 +4,7 @@ from student.models import Student
 from teacher.models import Teacher
 
 from django.db.models import Sum
+from .services import get_current_academic_total_fees_and_due
 
 # Create your views here.
 
@@ -19,7 +20,7 @@ def dashboard(request):
     total_teachers = Teacher.objects.count()
 
     teachers = Teacher.objects.all()
-
+    total_fees, total_due = get_current_academic_total_fees_and_due()
     context = {
         'total_students': total_students,
         'male_students': male_students,
@@ -30,7 +31,9 @@ def dashboard(request):
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
             {'name': 'Admin', 'url': ''},
-        ]
+        ],
+        "total_due": total_due,
+        "total_fees": total_fees,
     }
 
     return render(request, 'index.html', context)

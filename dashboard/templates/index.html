@@ -61,7 +61,7 @@
                                 <div class="col-6">
                                     <div class="item-content">
                                         <div class="item-title">Total Fees</div>
-                                        <div class="item-number"><span>₹</span><span class="counter" data-num="0">0</span></div>
+                                        <div class="item-number"><span>₹</span><span class="counter" data-num="{{ total_fees|floatformat:2 }}">{{ total_fees|floatformat:2 }}</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -72,13 +72,13 @@
                             <div class="row align-items-center">
                                 <div class="col-6">
                                     <div class="item-icon bg-light-red">
-                                        <i class="flaticon-money text-red"></i>
+                                        <i class="flaticon-money text-red"></i> 
                                     </div>
-                                </div>
+                                </div>  
                                 <div class="col-6">
                                     <div class="item-content">
-                                        <div class="item-title">Due Fees</div>
-                                        <div class="item-number"><span>₹</span><span class="counter" data-num="0">0</span></div>
+                                        <div class="item-title">Due Fees</div> 
+                                        <div class="item-number"><span>₹</span><span class="counter" data-num="{{ total_due|floatformat:2 }}">{{ total_due|floatformat:2 }}</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -112,12 +112,12 @@
                                 <div class="earning-report">
                                     <div class="item-content">
                                         <div class="single-item pseudo-bg-blue">
-                                            <h4>Total Collections</h4>
-                                            <span>75,000</span>
+                                            <h4>Total Fees</h4>
+                                            <span>₹{{ total_fees|floatformat:2 }}</span>
                                         </div>
                                         <div class="single-item pseudo-bg-red">
-                                            <h4>Fees Collection</h4>
-                                            <span>15,000</span>
+                                            <h4>Fees Due</h4>
+                                            <span>₹{{ total_due|floatformat:2 }}</span>
                                         </div>
                                     </div>
                                     <div class="dropdown">
