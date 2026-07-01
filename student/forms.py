@@ -34,6 +34,7 @@ class StudentAllInOneForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_class': forms.Select(attrs={'class': 'select2'}),
+            'current_class': forms.Select(attrs={'class': 'select2'}),
             'section': forms.Select(attrs={'class': 'select2'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'gender': forms.Select(attrs={'class': 'select2'}),

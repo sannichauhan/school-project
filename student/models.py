@@ -428,64 +428,6 @@ class Marks(models.Model):
         # Baaki sabhi exams ke liye dono ka sum
         return (self.max_test_marks or 0) + (self.max_written_marks or 0)
     
-# class StudentAcademicHistory(models.Model):
-#     """Tracks which class and section a student belonged to in any given session"""
-#     student = models.ForeignKey(
-#         'Student', 
-#         on_delete=models.CASCADE, 
-#         related_name='academic_history'
-#     )
-#     session = models.ForeignKey(
-#         'AcademicSession', 
-#         on_delete=models.CASCADE, 
-#         related_name='student_enrollments'
-#     )
-#     student_class = models.ForeignKey(
-#         'StudentClass', 
-#         on_delete=models.CASCADE, 
-#         related_name='class_enrollments'
-#     )
-#     roll_number = models.IntegerField()
-#     is_active = models.BooleanField(
-#         default=True, 
-#         help_text="Designates if this is the student's current active session/class."
-#     )
-#     promoted_status = models.CharField(
-#         max_length=20,
-#         choices=[('PROMOTED', 'Promoted'), ('RETAINED', 'Retained'), ('PENDING', 'Pending')],
-#         default='PENDING'
-#     )
-
-#     class Meta:
-#         unique_together = ['student', 'session']
-#         verbose_name = "Student Academic History"
-#         verbose_name_plural = "Student Academic Histories"
-
-#     def __str__(self):
-#         return f"{self.student.name} - {self.student_class} ({self.session})"
-
-#     def save(self, *args, **kwargs):
-#         # 1. ऑटोमैटिक रोल नंबर जनरेशन (यदि पहले से मौजूद न हो या 0 हो)
-#         if not self.roll_number or self.roll_number == 0:
-#             last_record = StudentAcademicHistory.objects.filter(
-#                 student_class=self.student_class,
-#                 session=self.session
-#             ).order_by('-roll_number').first()
-            
-#             if last_record and last_record.roll_number:
-#                 self.roll_number = last_record.roll_number + 1
-#             else:
-#                 self.roll_number = 1001
-        
-#         # 2. डेटाबेस इंटीग्रिटी: एक छात्र का एक समय पर सिर्फ एक ही रिकॉर्ड 'Active' होना चाहिए
-#         if self.is_active:
-#             StudentAcademicHistory.objects.filter(
-#                 student=self.student, 
-#                 is_active=True
-#             ).exclude(pk=self.pk).update(is_active=False)
-            
-#         super().save(*args, **kwargs)
-
 
 class StudentPromotionLog(models.Model):
     """Logs the explicit transaction of moving students from one session/class to the next"""
@@ -530,7 +472,7 @@ class StudentEnrollment(models.Model):
         ('WITHDRAWN', 'Withdrawn'),
     ]
     # student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments')
-    from_class = models.ForeignKey(StudentClass, on_delete=models.PROTECT, related_name='enrollments')
+    from_class = models.ForeignKey(StudentClass, on_delete=models.PROTECT, related_name='enrollments', null=True, blank=True)
     
     student=ChainedForeignKey(
         Student, 
