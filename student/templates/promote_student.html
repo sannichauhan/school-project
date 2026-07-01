@@ -13,10 +13,23 @@
     <div class="dashboard-content-one">
       <!-- Breadcubs Area Start Here -->
       {% include "tags/breadcrumb.html" %}
-<div class="container-fluid my-4">
+
+      <style>
+        .form-check-input {
+            position: absolute;
+            margin-top: 0;
+            margin-left: -5px;
+            top: 14px;
+        }
+        .posRel{
+            position:relative;
+        }
+      </style>
+      <div class="row">
+<div class="container-fluid">
     <div class="card shadow border-0">
         <div class="card-header bg-primary text-white p-3">
-            <h4 class="mb-0 text-white"><i class="bi bi-arrow-up-right-circle-fill me-2"></i> Student Promotion Control Panel</h4>
+            <h4 class="mb-0 text-white"><i class="bi bi-arrow-up-right-circle-fill me-2"></i> Student Promotion</h4>
         </div>
         <div class="card-body">
             
@@ -53,13 +66,15 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button type="button" onclick="filterStudents()" class="btn btn-dark w-100 py-2 fw-bold">
+                    <button type="button" onclick="filterStudents()" class="btn btn-dark w-100 py-3 fw-bold">
                         <i class="bi bi-funnel-fill me-1"></i> Load List
                     </button>
                 </div>
             </div>
+
+            <div class="row">
                     
-                    <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-3 rounded border" style="width: 100%;">
                         <h5 class="text-dark mb-0 ms-2">
                             Students in: <span class="badge bg-secondary fs-6">{{ selected_class.name }}</span>
                         </h5>
@@ -75,7 +90,7 @@
                         <table class="table table-bordered table-hover align-middle shadow-sm" id="studentPromoteTable">
                             <thead class="table-dark text-uppercase fs-7">
                                 <tr>
-                                    <th width="5%" class="text-center no-sort">
+                                    <th width="5%" class="text-center no-sort posRel">
                                         <input type="checkbox" id="selectAll" class="form-check-input border-secondary">
                                     </th>
                                     <th>Student ID</th>
@@ -87,7 +102,7 @@
                             <tbody>
                                 {% for student in students %}
                                 <tr>
-                                    <td class="text-center">
+                                    <td class="text-center posRel">
                                         <input type="checkbox" name="student_ids" value="{{ student.id }}" class="form-check-input student-checkbox border-secondary">
                                     </td>
                                     <td><strong>#{{ student.id }}</strong></td>
@@ -105,6 +120,7 @@
                             </tbody>
                         </table>
                     </div>
+                
                 </form>
             {% else %}
                 <div class="text-center py-5 bg-light rounded border border-dashed">
@@ -115,7 +131,9 @@
             {% endif %}
 
         </div>
+        </div>
     </div>
+</div>
 </div>
 </div>
 </div>
