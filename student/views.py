@@ -102,7 +102,7 @@ class MarksViewSet(viewsets.ModelViewSet):
  
 @login_required
 def student_registration_view(request):
-    if request.method == 'POST':
+    if request.method == 'POST':        
         # Create instances using POST data
         student_form = StudentAllInOneForm(request.POST, request.FILES)
         perm_addr_form = AddressForm(request.POST, prefix='perm')

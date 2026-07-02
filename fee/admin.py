@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import FeeHead, BaseFeeStructure, StudentFeeAllocation, FeeLedger, Transaction
 from student.models import TransportRoute
+from .models import FeeInstallmentStructure
 
 @admin.register(FeeHead)
 class FeeHeadAdmin(admin.ModelAdmin):
@@ -34,3 +35,21 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('ledger', 'amount_paid', 'payment_mode', 'transaction_id', 'payment_date', 'collected_by')
     list_filter = ('payment_mode', 'payment_date')
     search_fields = ('transaction_id', 'ledger__student__student_name')
+
+
+
+
+# 1. Inline class taaki saari installments ek hi page par tabular form me dikhein
+class FeeInstallmentStructureInline(admin.TabularInline):
+    model = FeeInstallmentStructure
+    extra = 3  # By default 3 khali rows dikhayega naya data entry karne ke liye
+    min_num = 1
+    ordering = ('installment_number',)
+
+# 2. Main Admin configuration (Optional: Agar aap alag se bhi register karna chahein)
+@admin.register(FeeInstallmentStructure)
+class FeeInstallmentStructureAdmin(admin.ModelAdmin):
+    list_display = ('academic_year', 'standard', 'installment_number', 'amount', 'days_from_start')
+    list_filter = ('academic_year', 'standard')
+    search_fields = ('standard',)
+    ordering = ('academic_year', 'standard', 'installment_number')
