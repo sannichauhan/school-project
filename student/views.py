@@ -786,3 +786,15 @@ def promote_students(request, class_id=None, session_id=None):
     }
     return render(request, 'promote_student.html', context)
         
+def student_history_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    
+    # We flip the default model ordering to show oldest -> newest (chronological history)
+    enrollments = student.enrollments.all().select_related(
+        'from_class', 'to_class', 'academic_year'
+    ).order_by('academic_year__start_date', 'enrollment_date')
+    
+    return render(request, 'student_history.html', {
+        'student': student,
+        'enrollments': enrollments
+    })

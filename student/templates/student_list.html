@@ -84,7 +84,7 @@
                                             <a href="{% url 'student-details' student.pk %}" class="btn btn-sm btn-info">Details</a>
                                             <a href="{% url 'student-update' student.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                             <a href="{% url 'student_fee_dashboard' student.pk %}" class="btn btn-sm btn-warning">Fee</a>
-                                            <a class="bi bi-clock fs-3 text-warning"></a>
+                                            <a href="{% url 'student_history' student.pk %}" class="bi bi-clock fs-3 text-warning"></a>
                                         {% endif %}
                                     </td>
                                 </tr>
