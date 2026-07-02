@@ -27,10 +27,17 @@ class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
     name = models.CharField(max_length=50)
     serial = models.PositiveIntegerField(default=0, help_text="For ordering classes in the admin interface")
+    promotional_discount = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        default=0.00, 
+        help_text="Percentage discount applied to students promoted INTO this class."
+    )
 
     class Meta:
         verbose_name = "Class"
         verbose_name_plural = "Classes"
+        ordering = ['serial']
 
     def __str__(self):
         return f"{self.name}".strip()

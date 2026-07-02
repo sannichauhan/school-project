@@ -26,6 +26,16 @@ def calculate_transport_fee(student: Student, academic_year):
                 total_amount=transport_inst_amount,
                 due_date=academic_year.start_date + timedelta(days=t_intervals[j])
             )
+            
+def calculate_clean_installment(total_fee, total_installment = 3, standard_installment=2500):
+    array_installments = []
+    distribution =  total_fee - (standard_installment * (total_installment - 1))
+    array_installments.append(distribution)
+    rest_installments = (total_fee - distribution) / (total_installment - 1)
+    for i in range(total_installment - 1):
+        array_installments.append(rest_installments)
+    return tuple(array_installments)
+
 def create_fee_schedule_for_student(student, academic_year):
     """
     Kee bhi student ke liye specified Academic Year ka poora bill table ready karna.
@@ -51,6 +61,8 @@ def create_fee_schedule_for_student(student, academic_year):
             intervals = [0, 120, 240]
         else: # QUARTERLY
             intervals = [0, 90, 180, 270]
+            
+        installments = calculate_clean_installment(total_academic_fee, len(intervals))
 
         inst_count = len(intervals)
         academic_inst_amount = Decimal(total_academic_fee) / inst_count
@@ -62,7 +74,7 @@ def create_fee_schedule_for_student(student, academic_year):
                 installment_number=i + 1,
                 category='ACADEMIC',
                 description=f"Academic Fee - Installment {i + 1} ({student.get_fee_type_display()})",
-                total_amount=academic_inst_amount,
+                total_amount=installments[i],
                 due_date=academic_year.start_date + timedelta(days=intervals[i])
             )
 

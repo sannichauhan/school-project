@@ -60,13 +60,36 @@ class StudentAllInOneForm(forms.ModelForm):
 class StudentClassForm(forms.ModelForm):
     class Meta:
         model = StudentClass
-        fields = ['name']
+        fields = ['name', 'serial', 'promotional_discount']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'e.g. Class 10, Nursery, Grade 1'
             }),
+            'serial': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. 1, 2, 3'
+            }),
+            'promotional_discount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. 10, 20, 30'
+            }),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # We inject a display:block style to force it to a new line safely
+        if 'promotional_discount' in self.fields:
+            self.fields['promotional_discount'].help_text = (
+                '<small style="display: block; margin-top: 4px; color: #6c757d;">'
+                'Percentage discount applied to students promoted INTO this class.'
+                '</small>'
+            )
+        if 'serial' in self.fields:
+            self.fields['serial'].help_text = (
+                '<small style="display: block; margin-top: 4px; color: #6c757d;">'
+                'For ordering classes in the admin interface.'
+                '</small>'
+            )
         
 class SectionForm(forms.ModelForm):
     class Meta:

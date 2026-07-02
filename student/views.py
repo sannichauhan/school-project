@@ -164,18 +164,27 @@ def student_registration_view(request):
 ### Adding new class
 
 @login_required
-def add_class_view(request):
+def add_class_view(request, class_id=None):
+    if class_id:
+        student_class = get_object_or_404(StudentClass, id=class_id)
+    else:
+        student_class = None
     if request.method == 'POST':
-        form = StudentClassForm(request.POST)        
+        form = StudentClassForm(request.POST, instance=student_class)        
         if form.is_valid():
             form.save()
-            return redirect("class-list") # Redirect to a list of all classes
+            return redirect("class-list")
     
     else:
-        form = StudentClassForm()
+        if class_id:
+            # If class_id is provided, fetch the existing class for editing
+            class_instance = get_object_or_404(StudentClass, id=class_id)
+            form = StudentClassForm(instance=class_instance)
+        else:
+            form = StudentClassForm()
     
     # Fetch all classes to show them on the same page
-    all_classes = StudentClass.objects.all().order_by('name')
+    all_classes = StudentClass.objects.all().order_by('serial')
 
     context = {
         'form': form,

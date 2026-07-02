@@ -241,3 +241,4 @@ class ExamSchedule(models.Model):
 
     def __str__(self):
         return f"{self.class_category} - {self.subject} on {self.slot.date}"
+    
