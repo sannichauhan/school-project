@@ -14,9 +14,11 @@ def auto_allocate_new_student_fees(sender, instance, created, **kwargs):
                 brand_new_enrollment(instance, instance.admission_class, instance.session)
 
 
-@receiver(pre_save, sender=StudentEnrollment)
-def auto_ledger_for_promoted_student(sender, instance, **kwargs):
-    promote_student_with_ledger(instance.student, instance.to_class, instance.academic_year)
+@receiver(post_save, sender=StudentEnrollment)
+def auto_ledger_for_promoted_student(sender, instance, created, **kwargs):
+    #  promote_student_with_ledger(instance.student, instance.to_class, instance.academic_year)
+    if created:
+        create_fee_schedule_for_student(instance.student, instance.academic_year)
         
 @receiver(pre_save, sender=Student)
 def auto_allocate_promoted_student_fees(sender, instance, **kwargs):

@@ -42,7 +42,7 @@ class StudentFeeAllocation(models.Model):
 
 # --- UPDATED LEDGER MAPS DIRECTLY TO STUDENT & ACADEMIC YEAR ---
 class FeeLedger(models.Model):
-    STATUS_CHOICES = [('PENDING', 'Pending'), ('PARTIALLY_PAID', 'Partially Paid'), ('PAID', 'Paid')]
+    STATUS_CHOICES = [('PENDING', 'Pending'), ('PARTIALLY_PAID', 'Partially Paid'), ('PAID', 'Paid'), ('INACTIVE', 'Inactive')]
     CATEGORY_CHOICES = [('ACADEMIC', 'Academic Fee'), ('TRANSPORT', 'Transport Fee')]
     
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='ledgers', null=True, blank=True)

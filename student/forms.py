@@ -81,7 +81,7 @@ class StudentClassForm(forms.ModelForm):
         if 'promotional_discount' in self.fields:
             self.fields['promotional_discount'].help_text = (
                 '<small style="display: block; margin-top: 4px; color: #6c757d;">'
-                'Percentage discount applied to students promoted INTO this class.'
+                'Flat discount applied to students promoted INTO this class.'
                 '</small>'
             )
         if 'serial' in self.fields:

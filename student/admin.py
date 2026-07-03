@@ -106,7 +106,7 @@ class FeeLedgerInline(admin.TabularInline):
     
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
+    list_display = ('name','roll_number', 'admission_class','current_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
     list_filter = ('admission_class', 'gender', 'religion')
     search_fields = ('name', 'adhaar_number', 'contact_number')
     actions = ['bulk_promote_to_next_class']
@@ -143,7 +143,7 @@ class StudentAdmin(admin.ModelAdmin):
             'fields': ('name', 'student_photo', 'date_of_birth', 'gender', 'religion', 'category', 'adhaar_number', 'pen_number')
         }),
         ('Academic & Contact', {
-            'fields': ('admission_class','section', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility','transport_route')
+            'fields': ('admission_class', 'current_class', 'section', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility','transport_route')
         }),
         ('Addresses', {
             'fields': ('permanent_address', 'local_address')

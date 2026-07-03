@@ -22,16 +22,43 @@ class AcademicSession(models.Model):
     
     class  Meta:
         unique_together = ("start_date", "end_date")
+        
+    # --- COMPARISON METHODS ---
+
+    def __lt__(self, other):
+        """Checks if this session happens BEFORE another session."""
+        if not isinstance(other, AcademicSession):
+            return NotImplemented
+        return self.start_date < other.start_date
+
+    def __gt__(self, other):
+        """Checks if this session happens AFTER another session."""
+        if not isinstance(other, AcademicSession):
+            return NotImplemented
+        return self.start_date > other.start_date
+
+    @property
+    def duration_in_days(self):
+        """Calculates the total days in this academic session."""
+        if self.start_date and self.end_date:
+            return (self.end_date - self.start_date).days
+        return 0
+
+    def clean(self):
+        """Prevents bad data where end date is before start date."""
+        super().clean()
+        if self.start_date and self.end_date and self.start_date >= self.end_date:
+            raise ValidationError("The session end date must be after the start date.")
 
 class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
     name = models.CharField(max_length=50)
     serial = models.PositiveIntegerField(default=0, help_text="For ordering classes in the admin interface")
     promotional_discount = models.DecimalField(
-        max_digits=5, 
+        max_digits=10, 
         decimal_places=2, 
         default=0.00, 
-        help_text="Percentage discount applied to students promoted INTO this class."
+        help_text="Flat discount applied to students promoted INTO this class."
     )
 
     class Meta:
@@ -86,7 +113,7 @@ class Student(models.Model):
         ('KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
     FEE_TYPE_CHOICES = [
-        ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), ('THRICE','Thrice'),
+        ('THRICE','Thrice'), ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), 
     ]
     TRANSPORT_INSTALLMENT_CHOICES = [
         ('1_INSTALLMENT', 'Single Installment'), ('2_INSTALLMENT', 'Two Installments'),
@@ -131,7 +158,7 @@ class Student(models.Model):
     student_photo = models.ImageField(upload_to='students/', blank=True, null=True)
     conveyance_facility = models.BooleanField(default=False)
 
-    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='QUARTERLY')
+    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='THRICE')
     transport_route = models.ForeignKey('TransportRoute', on_delete=models.SET_NULL, null=True, blank=True)
     transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
 
