@@ -753,7 +753,7 @@ def test_report_card_view(request, pk):
     return render(request, 'test_report_card.html', context)
 
 @login_required
-def promote_students(request, class_id=None, session_id=None):
+def promote_students(request, class_id=None, session_id=None, from_session_id=None):
 
     from .servicesOLd import bulk_promote_students_with_ledger
     if request.method == 'POST':
@@ -762,11 +762,18 @@ def promote_students(request, class_id=None, session_id=None):
         target_session_id = request.POST.get('target_session_id')
         
         target_class = get_object_or_404(StudentClass, id=from_class_id)
+        if target_session_id is None or target_session_id == '' or target_session_id == '0':
+            messages.error(request, "Target session must be selected.")
+            return redirect(request.path)
         target_session = get_object_or_404(AcademicSession, id=target_session_id)
 
         promoted_count = 0
 
         try:
+            
+            if target_session.start_date <= AcademicSession.objects.get(id=from_session_id).start_date:
+                messages.error(request, "Target session must be after the 'from' session.")
+                return redirect(request.path)
             with transaction.atomic():
                 created = bulk_promote_students_with_ledger(
                     academic_year_id=target_session.id,
@@ -785,13 +792,16 @@ def promote_students(request, class_id=None, session_id=None):
             messages.error(request, f"An error occurred during promotion: {str(e)}")
             return redirect(request.path)
     else:
+        from_session = AcademicSession.objects.filter(id=from_session_id).first()
         context = {
         'page_title': 'Bulk Student Promotion',
         'all_classes': StudentClass.objects.all(),
-        'all_sessions': AcademicSession.objects.filter(is_active=True),
-        'students': Student.objects.filter(current_class_id=class_id) if class_id and session_id else [],
+        'session_promot_from': AcademicSession.objects.all(),
+        'all_sessions': AcademicSession.objects.filter(is_active=True, start_date__gt=from_session.start_date) if from_session else AcademicSession.objects.filter(is_active=True),
+        'students': Student.objects.filter(current_class_id=class_id, session_id=from_session_id) if class_id and from_session_id else [],
         'selected_class': StudentClass.objects.filter(id=class_id).first() if class_id else StudentClass.objects.first(),
         'selected_session': AcademicSession.objects.filter(id=session_id, is_active=True).first() if session_id else AcademicSession.objects.filter(is_active=True).first(),
+        'selected_from_session': from_session,
     }
     return render(request, 'promote_student.html', context)
         

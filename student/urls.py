@@ -41,7 +41,7 @@ urlpatterns = [
     path('exams-list/', exam_list_view, name='exam_list'),
     path('academic-session/', academic_session_list, name='academic_session_list'),
     path('academic-session/add/', academic_session_create, name='academic_session_create'),
-    path('promote/<int:class_id>/<int:session_id>/', promote_students, name='promote_student'),
+    path('promote/<int:class_id>/<int:session_id>/<int:from_session_id>/', promote_students, name='promote_student'),
     path('promote/', promote_students, name='promote_student_base'),
     path('academic-history/<int:student_id>/', student_history_view, name='student_history'),
 ]

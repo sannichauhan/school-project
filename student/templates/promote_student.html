@@ -35,7 +35,7 @@
             
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -56,6 +56,17 @@
                         {% endfor %}
                     </select>
                 </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-bold text-secondary">Session (Promote From)</label>
+                    <select name="from_session_id" id="from_session" class="form-select form-control">
+                        <option value="">-- Choose Session --</option>
+                        {% for sess in session_promot_from %}
+                            <option value="{{ sess.id }}" {% if selected_from_session and selected_from_session.id == sess.id %}selected{% endif %}>{{ sess.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="col-md-5">
                     <label class="form-label fw-bold text-secondary">Target Session (Promote To)</label>
                     <select name="target_session_id" id="filter_session" class="form-select form-control">
@@ -144,11 +155,15 @@
     function filterStudents() {
         var classId = document.getElementById('filter_class').value;
         var sessionId = document.getElementById('filter_session').value;
-        if (!classId || !sessionId) {
-            alert("Kripya Class aur Session dono select karein!");
+        var from_session = document.getElementById('from_session').value;
+        if (!classId || !from_session) {
+            alert("Please select class and from selection both for fetch students!");
             return;
         }
-        window.location.href = "/students/promote/" + classId + "/" + sessionId + "/";
+        if (!sessionId) {
+            sessionId=0
+        }
+        window.location.href = "/students/promote/" + classId + "/" + sessionId + "/" + from_session;
     }
 
     // 2. Dynamic Button Behavior Manager
@@ -193,9 +208,9 @@
     function confirmAction() {
         var checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
         if (checkedCount > 0) {
-            return confirm(`Kya aap in ${checkedCount} selected students ko promote karna chahte hain?`);
+            return confirm(`Do you want to promote these ${checkedCount} selected students?`);
         } else {
-            return confirm("Aapne koi student select nahi kiya hai. Kya aap is CLASS KE SABHI STUDENTS ko ek sath promote karna chahte hain?");
+            return confirm("You haven't selected any students. Do you want to promote all students of this class together?");
         }
     }
 </script>
