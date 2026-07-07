@@ -3,9 +3,21 @@
 {% block extra_css %}
 <style>
    .card {
-  background-color: #fff;
-  height:auto;
-}
+      background-color: #fff;
+      height:auto;
+   }
+   /* Floating actions styling for smooth user experience */
+   .bulk-pay-container {
+      transition: all 0.3s ease-in-out;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+   }
+   .bulk-pay-container.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+   }
 </style>
 {% endblock %}
 
@@ -61,6 +73,16 @@
             </div>
         </div>
 
+        <form id="collect_fee_form" action="{% url 'checkout_fee_page' %}" method="POST">
+            {% csrf_token %}
+        </form>
+
+        <div id="bulk-pay-bar" class="bulk-pay-container mb-3 text-right">
+            <button type="submit" form="collect_fee_form" class="btn btn-success btn-lg px-5 font-weight-bold shadow-sm rounded-pill">
+                🔒 Pay Selected Fees (<span id="selected-count">0</span>)
+            </button>
+        </div>
+
         <div class="mb-5">
             <h2 class="h3 font-weight-bold text-secondary mb-3">
                 📂 Academic Fee Schedule
@@ -70,6 +92,7 @@
                     <table class="table table-hover mb-0 text-left">
                         <thead class="bg-light text-secondary text-xxl font-weight-bold">
                             <tr>
+                                <th class="p-3 border-0">Select</th>
                                 <th class="p-3 border-0">Installment / Description</th>
                                 <th class="p-3 border-0">Due Date</th>
                                 <th class="p-3 border-0">Total Amount</th>
@@ -82,6 +105,13 @@
                         <tbody class="text-secondary text-xxl">
                             {% for ledger in academic_ledgers %}
                             <tr>
+                                <td class="p-3 align-middle">
+                                    {% if ledger.status != 'PAID' %}
+                                        <input type="checkbox" class="fee-checkbox" name="ledger_ids" value="{{ ledger.id }}" form="collect_fee_form">
+                                    {% else %}
+                                        <input type="checkbox" disabled class="text-muted">
+                                    {% endif %}
+                                </td>
                                 <td class="p-3 align-middle font-weight-bold text-dark">{{ ledger.description }}</td>
                                 <td class="p-3 align-middle text-muted">{{ ledger.due_date }}</td>
                                 <td class="p-3 align-middle font-weight-bold">₹{{ ledger.total_amount }}</td>
@@ -98,7 +128,11 @@
                                 </td>
                                 <td class="p-3 align-middle text-center">
                                     {% if ledger.status != 'PAID' %}
-                                        <a href="{% url 'collect_fee' ledger.id %}" class="btn btn-primary btn-sm px-3 shadow-sm font-weight-bold">Pay Fee</a>
+                                        <form action="{% url 'checkout_fee_page' %}" method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="ledger_ids" value="{{ ledger.id }}">
+                                            <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm font-weight-bold">Pay Fee</button>
+                                        </form>
                                     {% else %}
                                         <span class="text-muted small">Settled</span>
                                     {% endif %}
@@ -106,7 +140,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="p-4 text-center text-muted">No Academic fee generated. Double check Base Fee Structure.</td>
+                                <td colspan="8" class="p-4 text-center text-muted">No Academic fee generated. Double check Base Fee Structure.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -125,6 +159,7 @@
                     <table class="table table-hover mb-0 text-left">
                         <thead class="bg-light text-secondary text-xxl font-weight-bold">
                             <tr>
+                                <th class="p-3 border-0">Select</th>
                                 <th class="p-3 border-0">Installment / Description</th>
                                 <th class="p-3 border-0">Due Date</th>
                                 <th class="p-3 border-0">Total Amount</th>
@@ -137,6 +172,13 @@
                         <tbody class="text-secondary text-xxl">
                             {% for ledger in transport_ledgers %}
                             <tr>
+                                <td class="p-3 align-middle">
+                                    {% if ledger.status != 'PAID' %}
+                                        <input type="checkbox" class="fee-checkbox" name="ledger_ids" value="{{ ledger.id }}" form="collect_fee_form">
+                                    {% else %}
+                                        <input type="checkbox" disabled class="text-muted">
+                                    {% endif %}
+                                </td>
                                 <td class="p-3 align-middle font-weight-bold text-dark">{{ ledger.description }}</td>
                                 <td class="p-3 align-middle text-muted">{{ ledger.due_date }}</td>
                                 <td class="p-3 align-middle font-weight-bold">₹{{ ledger.total_amount }}</td>
@@ -153,7 +195,11 @@
                                 </td>
                                 <td class="p-3 align-middle text-center">
                                     {% if ledger.status != 'PAID' %}
-                                        <a href="{% url 'collect_fee' ledger.id %}" class="btn btn-primary btn-sm px-3 shadow-sm font-weight-bold">Pay Fee</a>
+                                        <form action="{% url 'checkout_fee_page' %}" method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="ledger_ids" value="{{ ledger.id }}">
+                                            <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm font-weight-bold">Pay Fee</button>
+                                        </form>
                                     {% else %}
                                         <span class="text-muted small">Settled</span>
                                     {% endif %}
@@ -161,7 +207,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="p-4 text-center text-muted">Transport schedule routing error.</td>
+                                <td colspan="8" class="p-4 text-center text-muted">Transport schedule routing error.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -169,7 +215,6 @@
                 </div>
             </div>
         </div>
-    </div>
         {% endif %}
     </div>
 
@@ -177,4 +222,26 @@
                 </div>
         </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const checkboxes = document.querySelectorAll('.fee-checkbox');
+                const bulkPayBar = document.getElementById('bulk-pay-bar');
+                const selectedCount = document.getElementById('selected-count');
+
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function () {
+                        const checkedCount = document.querySelectorAll('.fee-checkbox:checked').length;
+                        
+                        selectedCount.textContent = checkedCount;
+
+                        if (checkedCount > 0) {
+                            bulkPayBar.classList.add('show');
+                        } else {
+                            bulkPayBar.classList.remove('show');
+                        }
+                    });
+                });
+            });
+        </script>
 {% endblock content %}

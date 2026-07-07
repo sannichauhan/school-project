@@ -31,6 +31,6 @@ class FeeLedgerAdmin(admin.ModelAdmin):
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('ledger', 'amount_paid', 'payment_mode', 'transaction_id', 'payment_date', 'collected_by')
+    list_display = ('ledger', 'amount_paid', 'payment_mode', 'receipt_no', 'payment_date', 'collected_by')
     list_filter = ('payment_mode', 'payment_date')
     search_fields = ('transaction_id', 'ledger__student__student_name')

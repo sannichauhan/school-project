@@ -12,8 +12,6 @@
             --text-main: #2d3748;
         }
 
-      
-
         .dashboard-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -197,34 +195,27 @@
         .hidden-row {
             display: none !important;
         }
-    </style>
+</style>
+
     <div id="wrapper" class="wrapper bg-ash">
-       <!-- Header Menu Area Start Here -->
-        {% include "tags/header.html" %}
-        <!-- Header Menu Area End Here -->
+       {% include "tags/header.html" %}
          
-        <!-- Page Area Start Here -->
         <div class="dashboard-page-one">
-            <!-- Sidebar Area Start Here -->
             {% include "tags/sidebar.html" %}
-            <!-- Sidebar Area End Here -->
             <div class="dashboard-content-one">
-                <!-- Breadcubs Area Start Here -->
                 {% include "tags/breadcrumb.html" %}
-                <!-- Breadcubs Area End Here -->
                  
 <div class="row">
-               <div class="container-fluid">
+<div class="container-fluid">
     <div class="page-header">
         <div>
-            <h2>Fee Collection Receipts Logs</h2>
+            <h2>Grouped Fee Collection Receipts Logs</h2>
         </div>
-        
     </div>
 
     <div class="controls-row">
         <div class="search-box">
-            <input type="text" id="receiptSearchInput" onkeyup="filterReceiptsTable()" placeholder="Search by Student Name, Admission No, or Txn ID...">
+            <input type="text" id="receiptSearchInput" onkeyup="filterReceiptsTable()" placeholder="Search by Receipt No, Student Name, Roll No, or Txn ID...">
         </div>
         
         <div>
@@ -238,50 +229,41 @@
         <table class="receipt-log-table" id="receiptsLogTable">
             <thead>
                 <tr>
-                    <th style="width: 10%;">Receipt / Txn ID</th>
-                    <th style="width: 25%;">Student Name</th>
-                    <th style="width: 10%;">Class Range Structure</th>
-                    <th style="width: 13%;" class="text-right">Amount Collected</th>
-                    <th style="width: 15%;">Payment Mode</th>
+                    <th style="width: 15%;">Receipt No</th>
+                    <th style="width: 25%;">Student Details</th>
+                    <th style="width: 15%;">Transaction Online ID</th>
+                    <th style="width: 13%;" class="text-right">Grand Total Paid</th>
+                    <th style="width: 12%;">Payment Mode</th>
                     <th style="width: 12%;">Collection Date</th>
-                    <th style="width: 12%;" class="text-right">Action</th>
+                    <th style="width: 8%;" class="text-right">Action</th>
                 </tr>
             </thead>
             <tbody>
-                
-                {% for txn in transactions %}
+                {% for receipt in receipts %}
                 <tr class="receipt-data-row">
                     <td class="text-bold">
-                        {% if txn.transaction_id %}
-                            {{ txn.transaction_id }}
-                        {% else %}
-                            #{{ txn.id }}
-                        {% endif %}
+                        {{ receipt.receipt_no|default:"Legacy / Single" }}
                     </td>
                     
                     <td>
                         <span class="searchable-student-name" style="font-weight: 600; display: block; color: var(--primary-color);">
-                            {{ txn.ledger.student.name }}  </span>
-                        <small style="color: var(--secondary-color);">ID/Adm No: {{ txn.ledger.student.id }}</small>
+                            {{ receipt.student_name }}  
+                        </span>
+                        <small style="color: var(--secondary-color);">Roll No: {{ receipt.roll_number|default:"N/A" }}</small>
                     </td>
                     
-                    <td>
-                        <span style="display: block;">
-                            {{ txn.ledger.student.admission_class }} 
-                        </span>
-                        <small style="color: #888; font-style: italic;">
-                            {{ txn.ledger.get_category_display }}
-                        </small>
+                    <td class="text-monospace small text-muted">
+                        {{ receipt.tx_id|default:"-" }}
                     </td>
                     
                     <td class="text-right text-bold" style="color: var(--success-color);">
-                        ₹{{ txn.amount_paid }}
+                        ₹{{ receipt.total_amount }}
                     </td>
                     
                     <td>
-                        {% if txn.payment_mode == 'CASH' %}
+                        {% if receipt.mode_of_payment == 'CASH' %}
                             <span class="badge-mode badge-cash">Cash Counter</span>
-                        {% elif txn.payment_mode == 'ONLINE' %}
+                        {% elif receipt.mode_of_payment == 'ONLINE' %}
                             <span class="badge-mode badge-online">UPI / Online</span>
                         {% else %}
                             <span class="badge-mode badge-cheque">Cheque Clear</span>
@@ -289,14 +271,18 @@
                     </td>
                     
                     <td>
-                        <span style="display: block;">{{ txn.payment_date|date:"d M Y" }}</span>
-                        <small style="color: var(--secondary-color);">Time: {{ txn.payment_date|date:"h:i A" }}</small>
+                        <span style="display: block;">{{ receipt.latest_payment_date|date:"d M Y" }}</span>
+                        <small style="color: var(--secondary-color);">Time: {{ receipt.latest_payment_date|date:"h:i A" }}</small>
                     </td>
                     
                     <td>
-                        <a href="{% url 'fee_receipt_detail' transaction_id=txn.id %}" class="btn btn-success" style="float: right;padding: 6px 12px; font-size: 12px; border-radius: 4px;">
-                            Print Slips
-                        </a>
+                        {% if receipt.receipt_no %}
+                            <a href="{% url 'fee_receipt_detail' receipt.receipt_no %}" class="btn btn-success" style="float: right; padding: 6px 12px; font-size: 12px; border-radius: 4px;">
+                                Print Slip
+                            </a>
+                        {% else %}
+                            <span class="text-muted small d-block text-right">Non-Printable</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
@@ -314,6 +300,7 @@
     </div>
 </div>
 </div>
+
 <script>
 function filterReceiptsTable() {
     const input = document.getElementById("receiptSearchInput");
@@ -323,7 +310,6 @@ function filterReceiptsTable() {
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        // Scans row text nodes dynamically across Student Profile and Unique Token ID
         const textContent = row.textContent || row.innerText;
         
         if (textContent.toUpperCase().indexOf(filter) > -1) {
@@ -335,11 +321,8 @@ function filterReceiptsTable() {
 }
 </script>
                 
-                <!-- Footer Area Start Here -->
                 {% include "tags/footer.html" %}
-                <!-- Footer Area End Here -->
             </div>
         </div>
-        <!-- Page Area End Here -->
     </div>
 {% endblock content %}

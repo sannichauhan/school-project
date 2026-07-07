@@ -72,7 +72,10 @@ class FeeLedger(models.Model):
         return self.total_amount - paid
     
     def __str__(self):
-        return f"{self.student.name} - {self.academic_year} - Installment {self.installment_number} - {self.category}"
+        if self.installment_number == 0:
+            return f"{self.student.name} - {self.academic_year} - Carried Forward Dues - {self.category}"
+        else:
+            return f"{self.student.name} - {self.academic_year} - Installment {self.installment_number} - {self.category}"
 
 class Transaction(models.Model):
     PAYMENT_MODES = [('CASH', 'Cash'), ('ONLINE', 'Online / UPI'), ('CHEQUE', 'Cheque')]
@@ -82,3 +85,4 @@ class Transaction(models.Model):
     transaction_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
     payment_date = models.DateTimeField(auto_now_add=True)
     collected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    receipt_no = models.CharField(max_length=50, blank=True, null=True)
