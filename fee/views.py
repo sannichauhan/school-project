@@ -122,6 +122,8 @@ def fee_receipt_detail(request, transaction_id):
         id=transaction_id
     )
     
+    transaction.ledger.installment_number += 1
+    
     return render(request, 'fee_receipt.html', {'transaction': transaction})
 
 
@@ -132,5 +134,4 @@ def fee_receipt_list(request):
         'collected_by'
     ).order_by('-payment_date')[:100]
     
-    # Is return statement ke aage bhi exact 4 spaces ya 1 tab hona chahiye
     return render(request, 'fee_receipt_list.html', {'transactions': transactions})

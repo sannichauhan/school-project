@@ -16,6 +16,7 @@ class BaseFeeStructure(models.Model):
     standard = models.ForeignKey(StudentClass, on_delete=models.CASCADE, related_name='fees', null=True, blank=True)
     fee_head = models.ForeignKey(FeeHead, on_delete=models.CASCADE)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.standard.name} - {self.fee_head.name}"

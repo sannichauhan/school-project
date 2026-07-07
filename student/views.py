@@ -788,10 +788,10 @@ def promote_students(request, class_id=None, session_id=None):
         context = {
         'page_title': 'Bulk Student Promotion',
         'all_classes': StudentClass.objects.all(),
-        'all_sessions': AcademicSession.objects.all(),
+        'all_sessions': AcademicSession.objects.filter(is_active=True),
         'students': Student.objects.filter(current_class_id=class_id) if class_id and session_id else [],
         'selected_class': StudentClass.objects.filter(id=class_id).first() if class_id else StudentClass.objects.first(),
-        'selected_session': AcademicSession.objects.filter(id=session_id).first() if session_id else AcademicSession.objects.first(),
+        'selected_session': AcademicSession.objects.filter(id=session_id, is_active=True).first() if session_id else AcademicSession.objects.filter(is_active=True).first(),
     }
     return render(request, 'promote_student.html', context)
         

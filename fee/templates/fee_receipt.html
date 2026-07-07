@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -329,7 +330,7 @@
         </thead>
         <tbody>
             <tr>
-                <td>Pay Fess for {{receipt.installment}} Installment</td>
+                <td>Pay Fees for {{transaction.ledger.installment_number|ordinal}} Installment</td>
                 <td class="text-right">₹ {{ transaction.amount_paid }}</td>
             </tr>
         </tbody>
