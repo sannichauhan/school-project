@@ -10,7 +10,7 @@ def auto_allocate_new_student_fees(sender, instance, created, **kwargs):
         active_year = AcademicSession.objects.filter(is_active=True).first()
         if active_year:
             create_fee_schedule_for_student(instance, active_year)
-            if created:
+            if created and not instance.id:
                 brand_new_enrollment(instance, instance.admission_class, instance.session)
 
 

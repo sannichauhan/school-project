@@ -46,6 +46,8 @@ def create_fee_schedule_for_student(student, academic_year):
     elif student.conveyance_facility and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
         calculate_transport_fee(student, academic_year)
         return
+    elif not student.conveyance_facility  and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
+        return
 
     current_enrollment = StudentEnrollment.objects.filter(
             student=student, 
