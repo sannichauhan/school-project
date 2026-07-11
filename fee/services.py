@@ -92,9 +92,14 @@ def create_fee_schedule_for_student(student, academic_year):
         if admission_class and current_class and admission_class.serial < current_class.serial:
             # Agar student ko promote kiya gaya hai aur uska admission class current class se chhota hai, toh promotion discount apply karein
             promotional_discount = current_class.promotional_discount or 0.0
-            total_academic_fee = (total_academic_fee - promotional_discount)
+            total_academic_fee_after_discount = (total_academic_fee - promotional_discount)
             
-        installments = calculate_clean_installment(total_academic_fee, len(intervals))
+            installments = calculate_clean_installment(total_academic_fee_after_discount, len(intervals))
+        else:
+            
+            installments = calculate_clean_installment(total_academic_fee, len(intervals))
+        
+            
 
         inst_count = len(intervals)
 
