@@ -97,7 +97,7 @@ def student_fee_dashboard(request, student_id):
     """
     student = get_object_or_404(Student, id=student_id)
     
-    academic_ledgers = FeeLedger.objects.filter(student=student, category='ACADEMIC', academic_year=student.session).order_by('due_date')
+    academic_ledgers = FeeLedger.objects.filter(student=student, category='ACADEMIC', academic_year=student.session)
     transport_ledgers = FeeLedger.objects.filter(student=student, category='TRANSPORT', academic_year=student.session).order_by('due_date')
     
     total_due = sum(l.remaining_amount for l in FeeLedger.objects.filter(student=student, academic_year=student.session))

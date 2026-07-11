@@ -7,11 +7,10 @@ from .services import create_fee_schedule_for_student, promote_student_with_ledg
 @receiver(post_save, sender=Student)
 def auto_allocate_new_student_fees(sender, instance, created, **kwargs):
     if created or instance.id:
-        active_year = AcademicSession.objects.filter(is_active=True).first()
-        if active_year:
-            create_fee_schedule_for_student(instance, active_year)
-            if created:
-                brand_new_enrollment(instance, instance.admission_class, instance.session)
+        # active_year = AcademicSession.objects.filter(is_active=True).order_by('start_date').first()
+        create_fee_schedule_for_student(instance, instance.session)
+        if created:
+            brand_new_enrollment(instance, instance.admission_class, instance.session)
 
 
 @receiver(post_save, sender=StudentEnrollment)

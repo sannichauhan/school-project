@@ -49,26 +49,25 @@ def create_fee_schedule_for_student(student, academic_year):
     elif not student.conveyance_facility  and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
         return
 
-    current_enrollment = StudentEnrollment.objects.filter(
-            student=student, 
-            is_active=True,
-            academic_year__lt=academic_year
-        ).order_by('-academic_year').first()
+    # current_enrollment = StudentEnrollment.objects.filter(
+    #         student=student,
+    #         academic_year__start_date__lt=academic_year.start_date
+    #     ).order_by('-academic_year').first()
     
-    previous_dues = 0.00
+    # previous_dues = 0.00
     
-    if current_enrollment:
-        old_session = current_enrollment.academic_year
-        unpaid_ledgers = FeeLedger.objects.filter(
-            student=student,
-            academic_year=old_session,
-            status__in=['PENDING', 'PARTIALLY_PAID']
-        )
-        for ledger in unpaid_ledgers:
-            previous_dues += float(ledger.remaining_amount)
+    # if current_enrollment:
+    #     old_session = current_enrollment.academic_year
+    #     unpaid_ledgers = FeeLedger.objects.filter(
+    #         student=student,
+    #         academic_year=old_session,
+    #         status__in=['PENDING', 'PARTIALLY_PAID']
+    #     )
+    #     for ledger in unpaid_ledgers:
+    #         previous_dues += float(ledger.remaining_amount)
         
-        current_enrollment.is_active = False
-        current_enrollment.save()
+    #     current_enrollment.is_active = False
+    #     current_enrollment.save()
 
     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
     total_academic_fee = sum(fee.total_amount for fee in base_fees)
@@ -90,7 +89,6 @@ def create_fee_schedule_for_student(student, academic_year):
         admission_class = student.admission_class
         current_class = student.current_class
         if admission_class and current_class and admission_class.serial < current_class.serial:
-            # Agar student ko promote kiya gaya hai aur uska admission class current class se chhota hai, toh promotion discount apply karein
             promotional_discount = current_class.promotional_discount or 0.0
             total_academic_fee_after_discount = (total_academic_fee - promotional_discount)
             
@@ -99,8 +97,6 @@ def create_fee_schedule_for_student(student, academic_year):
             
             installments = calculate_clean_installment(total_academic_fee, len(intervals))
         
-            
-
         inst_count = len(intervals)
 
         for i in range(inst_count):

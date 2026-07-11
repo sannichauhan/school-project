@@ -37,7 +37,7 @@ def bulk_promote_students_with_ledger(academic_year_id, from_class_id=None, stud
 
             previous_dues = 0.00
             current_enrollment = StudentEnrollment.objects.filter(
-                student=student, is_active=True
+                student=student, is_active=True, academic_year__start_date__lt=target_session.start_date
             ).first()
 
             if current_enrollment:
