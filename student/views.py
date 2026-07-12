@@ -51,12 +51,16 @@ class StudentViewSet(viewsets.ModelViewSet):
                 "written": mark.written_marks
             }
             
-        
+        mark_sheet_list = MarkSheet.objects.filter(studen=student)
+        mark_sheet = None
+        if mark_sheet_list:
+            mark_sheet = mark_sheet_list.first()
         # 3. Construct the final object
         report_data = {
             "student_name": student.name,
             "admission_class": student.admission_class.name,
-            "subjects": list(subject_map.values())
+            "subjects": list(subject_map.values()),
+            "mark_sheet": mark_sheet,
         }
         
         serializer = StudentReportCardSerializer(report_data)

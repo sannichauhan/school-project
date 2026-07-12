@@ -133,7 +133,9 @@
 			<div>
 				<h2>{{student.choose_school}}</h2>
 				<h3>Chhahun Kushinagar (U.P)</h3>
-				<h3>Academic Session - {{student.session}}</h3>
+				{% if mark_sheet %}
+          <h3>Academic Session - {{mark_sheet.academic_session}}</h3>
+        {% endif %}
 			</div>
 		</div>
 
