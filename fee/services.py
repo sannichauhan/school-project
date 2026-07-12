@@ -72,9 +72,7 @@ def create_fee_schedule_for_student(student, academic_year):
     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
     total_academic_fee = sum(fee.total_amount for fee in base_fees)
     
-    if student.current_class.serial > student.admission_class.serial:
-        promotional_discount = student.current_class.promotional_discount or 0.0
-        total_academic_fee = (total_academic_fee - promotional_discount)
+    
 
     if total_academic_fee > 0:
         if student.fee_type == 'YEARLY':
