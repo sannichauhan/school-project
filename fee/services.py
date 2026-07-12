@@ -28,13 +28,36 @@ def calculate_transport_fee(student: Student, academic_year):
                 due_date=academic_year.start_date + timedelta(days=t_intervals[j])
             )
             
-def calculate_clean_installment(total_fee, total_installment = 3, standard_installment=2500):
+def calculate_clean_installment(total_fee, total_installment=3, standard_installment=2500):
     array_installments = []
-    distribution =  total_fee - (standard_installment * (total_installment - 1))
+    
+    distribution = total_fee - (standard_installment * (total_installment - 1))
+    if distribution < standard_installment:
+        if total_fee <= standard_installment:
+            array_installments.append(total_fee)
+            for _ in range(total_installment - 1):
+                array_installments.append(0.0)
+            return tuple(array_installments)
+        
+        distribution = standard_installment
+        array_installments.append(distribution)
+        
+        remaining_fee = total_fee - distribution
+        rest_installments = remaining_fee / (total_installment - 1)
+        if distribution < rest_installments:
+            distribution = total_fee / total_installment + 100
+            array_installments = [distribution]
+            rest_installments = (total_fee - distribution) / (total_installment - 1)
+            
+        for _ in range(total_installment - 1):
+            array_installments.append(rest_installments)
+            
+        return tuple(array_installments)
     array_installments.append(distribution)
     rest_installments = (total_fee - distribution) / (total_installment - 1)
     for i in range(total_installment - 1):
         array_installments.append(rest_installments)
+        
     return tuple(array_installments)
 
 def create_fee_schedule_for_student(student, academic_year):
