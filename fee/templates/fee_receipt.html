@@ -265,7 +265,7 @@
         <div class="info-block">
             <p><strong>Roll No:</strong> {{ student.roll_number|default:"N/A" }}</p>
             <p><strong>Receipt No:</strong> {{ receipt_no }}</p>
-            <p><strong>Date:</strong> {{ payment_date|date:"d/m/Y h:i A" }}</p>
+            <p><strong>Date:</strong> {{ payment_date|date:"d/m/Y" }}</p>
             <p><strong>Session:</strong> {{ student.session|default:"-" }}</p>
         </div>
     </div>
