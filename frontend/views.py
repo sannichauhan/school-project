@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
 from .forms import AdmissionInquiryForm  # Form import kiya
+from student.models import AcademicSession, StudentClass, MarkSheet, Marks
 
 # =====================================================================
 # 1. GENERAL & AUTHENTICATION VIEWS
@@ -100,3 +101,55 @@ def admission_inquiry_view(request):
         form = AdmissionInquiryForm()
         
     return render(request, 'home.html', {'form': form})
+
+
+
+def student_result(request):
+    # Fetch options for dropdowns
+    sessions = AcademicSession.objects.filter(is_active=True).order_by('-start_date')
+    classes = StudentClass.objects.all().order_by('serial')
+
+    # Extract search parameters from GET request
+    session_id = request.GET.get('session')
+    class_id = request.GET.get('class')
+    roll_no = request.GET.get('roll_no')
+
+    marksheet = None
+    subject_marks = []
+    error_message = None
+    searched = False
+
+    if session_id and class_id and roll_no:
+        searched = True
+        try:
+            # Query the marksheet using the session, class, and roll number
+            marksheet = MarkSheet.objects.select_related(
+                'student', 'student_class', 'academic_session', 'exam'
+            ).prefetch_related(
+                'subject_marks__subject'
+            ).filter(
+                academic_session_id=session_id,
+                student_class_id=class_id,
+                student__roll_number=roll_no
+            ).first()
+
+            if marksheet:
+                subject_marks = marksheet.subject_marks.all()
+            else:
+                error_message = "No result found matching the provided details."
+
+        except ValueError:
+            error_message = "Invalid input details provided."
+
+    context = {
+        'sessions': sessions,
+        'classes': classes,
+        'selected_session': session_id,
+        'selected_class': class_id,
+        'selected_roll': roll_no,
+        'marksheet': marksheet,
+        'subject_marks': subject_marks,
+        'error_message': error_message,
+        'searched': searched,
+    }
+    return render(request, 'student-result.html', context)

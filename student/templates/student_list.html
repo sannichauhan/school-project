@@ -45,8 +45,9 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Roll No</th>
                                         <th>Photo</th>
-                                        <th>Name</th>
+                                        <th>Name</th>                                        
                                         <th>Gender</th>
                                         <th>Class</th>
                                         <th>Date of Birth</th>
@@ -60,6 +61,7 @@
                                     {% for student in students %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
+                                    <td>{{ student.roll_number }}</td>
                                     <td class="student_photo">
                                         {% if student.student_photo %}
                                             <img
@@ -71,8 +73,8 @@
                                         {% else %}
                                             <img src="/media/teachers/student2.png" alt="teacher" width="50" height="50">
                                         {% endif %}
-                                    </td>
-                                    <td>{{ student.name }}</td>
+                                    </td>                                    
+                                    <td>{{ student.name }}</td>                                    
                                     <td>{{ student.gender }}</td>
                                     <td>{{ student.current_class }}</td>
                                     <td>{{ student.date_of_birth|date:"d/m/Y" }}</td>
