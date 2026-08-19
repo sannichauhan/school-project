@@ -120,6 +120,7 @@ class Student(models.Model):
     ]
 
     # Identity & Basic Info
+    roll_number = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
@@ -135,7 +136,6 @@ class Student(models.Model):
     admission_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='students')
     current_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='current_students', null=True, blank=True)
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True, blank=True)
-    roll_number = models.IntegerField(default=0)
     
     # Family Info
     father_name = models.CharField(max_length=100)
