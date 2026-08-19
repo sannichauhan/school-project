@@ -115,7 +115,7 @@ def take_attendance(request):
     if class_id:
         selected_class = StudentClass.objects.get(id=class_id)
         students = Student.objects.filter(
-            admission_class=selected_class
+            current_class=selected_class
         )
 
     if request.method == 'POST':
