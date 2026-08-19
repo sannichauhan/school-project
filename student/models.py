@@ -174,7 +174,7 @@ class Student(models.Model):
             if last_student and last_student.roll_number:
                 self.roll_number = last_student.roll_number + 1
             else:
-                self.roll_number = 1001
+                self.roll_number = 1
 
         super().save(*args, **kwargs)
         

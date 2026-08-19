@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Search Result</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 768px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-main);
+    }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-search {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .btn-search:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .badge-pass {
+      background-color: var(--success-bg);
+      color: var(--success);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .badge-fail {
+      background-color: var(--danger-bg);
+      color: var(--danger);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .alert-error {
+      background-color: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-item span {
+      display: block;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .backToHome {
+      display: block;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .backToHome a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="backToHome">
+    <a href="{% url 'homepage' %}">&larr; Back to home</a>
+  </div>
+
+  <!-- Search Form Card -->
+  <div class="card">
+    <h1>Search Student Result</h1>
+    <form method="GET" action="">
+      <div class="search-grid">
+        
+        <div class="form-group">
+          <label for="session">Academic Session</label>
+          <select id="session" name="session" required>
+            <option value="">Select Session</option>
+            {% for session in sessions %}
+              <option value="{{ session.id }}" {% if selected_session == session.id|stringformat:"s" %}selected{% endif %}>
+                {{ session.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="classSelect">Class</label>
+          <select id="classSelect" name="class" required>
+            <option value="">Select Class</option>
+            {% for cls in classes %}
+              <option value="{{ cls.id }}" {% if selected_class == cls.id|stringformat:"s" %}selected{% endif %}>
+                {{ cls.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="rollNo">Roll Number</label>
+          <input 
+            type="number" 
+            id="rollNo" 
+            name="roll_no" 
+            placeholder="e.g. 1042" 
+            value="{{ selected_roll|default:'' }}" 
+            required 
+          />
+        </div>
+
+      </div>
+      <button type="submit" class="btn-search">View Result</button>
+    </form>
+  </div>
+
+  <!-- Error Alert -->
+  {% if error_message %}
+    <div class="alert-error">
+      {{ error_message }}
+    </div>
+  {% endif %}
+
+  <!-- Dynamic Result Card -->
+  {% if marksheet %}
+  <div class="card" id="resultCard">
+    <div class="result-header">
+      <div>
+        <h2>{{ marksheet.student.name }}</h2>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">{{ marksheet.exam.name }}</p>
+      </div>
+      {% if marksheet.result_status == "Pass" %}
+        <span class="badge-pass">PASSED</span>
+      {% else %}
+        <span class="badge-fail">FAILED</span>
+      {% endif %}
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Roll Number</span>
+        <span class="info-value">{{ marksheet.student.roll_number }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Class</span>
+        <span class="info-value">{{ marksheet.student_class.name }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Session</span>
+        <span class="info-value">{{ marksheet.academic_session.name }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Percentage</span>
+        <span class="info-value">{{ marksheet.calculate_percentage }}%</span>
+      </div>
+    </div>
+
+    <h3>Subject Marks</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Max Marks</th>
+          <th>Obtained</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mark in subject_marks %}
+        <tr>
+          <td>{{ mark.subject.name }}</td>
+          <td>{{ mark.max_total }}</td>
+          <td>{{ mark.obtained_total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight: bold; background-color: var(--bg);">
+          <td>Total / Overall Grade</td>
+          <td>{{ marksheet.total_max_marks }}</td>
+          <td>{{ marksheet.total_obtained_marks }} (Grade: {{ marksheet.calculate_grade }})</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+
+</body>
+</html>
