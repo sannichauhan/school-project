@@ -1,6 +1,6 @@
 from django import forms
 from django.apps import apps
-from .models import TransferCertificate, Attendance, AdmitCard
+from .models import TransferCertificate, Attendance, AdmitCard, StudentClass, AcademicSession, Exam
 
 
 class TransferCertificateForm(forms.ModelForm):
@@ -65,3 +65,62 @@ class AdmitCardForm(forms.ModelForm):
             'exam_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional remarks...'}),
         }
+
+
+class BulkAdmitCardForm(forms.Form):
+
+    session = forms.ModelChoiceField(
+        queryset=AcademicSession.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'form-control'}
+        ),
+        label="Academic Session"
+    )
+
+    exam_type = forms.ModelChoiceField(
+        queryset=Exam.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'form-control'}
+        ),
+        label="Exam Type"
+    )
+
+    student_class = forms.ModelChoiceField(
+        queryset=StudentClass.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'form-control'}
+        ),
+        label="Select Class"
+    )
+
+    exam_start_date = forms.DateField(
+        widget=forms.DateInput(
+            attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }
+        ),
+        label="Exam Start Date"
+    )
+
+    exam_end_date = forms.DateField(
+        widget=forms.DateInput(
+            attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }
+        ),
+        label="Exam End Date"
+    )
+
+    remarks = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Optional remarks...'
+            }
+        ),
+        label="Remarks"
+    )

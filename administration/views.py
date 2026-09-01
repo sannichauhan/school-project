@@ -9,6 +9,9 @@ from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
 
+from .models import Student, AdmitCard
+from .forms import AdmitCardForm, BulkAdmitCardForm
+
 @login_required
 def administration(request):
     return HttpResponse("Hello")  
@@ -259,4 +262,88 @@ def id_cards_view(request):
         'students' : students
     }
     return render(request, 'id-card.html', context)
+
+
+def bulk_generate_admit_card(request):
+
+    if request.method == 'POST':
+
+        form = BulkAdmitCardForm(request.POST)
+
+        if form.is_valid():
+
+            session = form.cleaned_data['session']
+            exam_type = form.cleaned_data['exam_type']
+            student_class = form.cleaned_data['student_class']
+            exam_start_date = form.cleaned_data['exam_start_date']
+            exam_end_date = form.cleaned_data['exam_end_date']
+            remarks = form.cleaned_data['remarks']
+
+            # Class ke students
+            students = Student.objects.filter(
+                admission_class=student_class
+            )
+
+            created_count = 0
+            skipped_count = 0
+
+            for student in students:
+
+                # Check duplicate
+                already_exists = AdmitCard.objects.filter(
+                    student=student,
+                    session=session,
+                    exam_type=exam_type
+                ).exists()
+
+                if already_exists:
+                    skipped_count += 1
+                    continue
+
+                try:
+
+                    AdmitCard.objects.create(
+                        student=student,
+                        session=session,
+                        exam_type=exam_type,
+                        exam_start_date=exam_start_date,
+                        exam_end_date=exam_end_date,
+                        remarks=remarks
+                    )
+
+                    created_count += 1
+
+                except IntegrityError:
+                    skipped_count += 1
+
+            messages.success(
+                request,
+                f"{created_count} Admit Cards generated successfully."
+            )
+
+            if skipped_count > 0:
+                messages.warning(
+                    request,
+                    f"{skipped_count} Admit Cards already existed and were skipped."
+                )
+
+            return redirect('admit-card')
+
+    else:
+        form = BulkAdmitCardForm()
+
+    context = {
+        'form': form,
+        'page_title': 'Bulk Generate Admit Cards',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Bulk Generate Admit Cards', 'url': ''},
+        ]
+    }
+
+    return render(
+        request,
+        'bulk_generate_admit_card.html',
+        context
+    )
 

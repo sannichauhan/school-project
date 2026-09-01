@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from .views import admit_card_view, create_tc_view, tc_list_view, tc_detail_view, take_attendance, attendance_report, create_admit_card_view, id_cards_view
+from .views import admit_card_view, create_tc_view, tc_list_view, tc_detail_view, take_attendance, attendance_report, create_admit_card_view, id_cards_view, bulk_generate_admit_card
 
 
 urlpatterns = [
@@ -8,6 +8,7 @@ urlpatterns = [
     path("chaining/", include("smart_selects.urls")),
     path('admit-card/', admit_card_view, name='admit-card'),
     path('admit-card-generate/', create_admit_card_view, name='admit-card-generate'),
+    path('bulk-admit-card/', bulk_generate_admit_card, name='bulk-admit-card'),
     path('transfer-certificate/create/', create_tc_view, name='tc-create'),
     path('transfer-certificate/list/', tc_list_view, name='tc-list'),
     path('transfer-certificate/<int:pk>/', tc_detail_view, name='tc-detail'),
