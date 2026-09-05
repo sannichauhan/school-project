@@ -6347,4 +6347,12 @@ ul {
   .studentRegister .card-body {
     padding: 15px;
   }
+  .dataTables_wrapper .dataTables_paginate span a.paginate_button {
+    padding: 1px 10px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+  .dataTables_wrapper .dataTables_paginate span .paginate_button.current {
+    padding: 1px 10px;
+  }
 }
