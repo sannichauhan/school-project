@@ -6220,7 +6220,7 @@ ul {
   object-fit: cover;
 }
 .student_photo img {
-  height: 50px;
+  height: auto;
   border-radius: 50%;
   width: 50px;
   object-fit: cover;
