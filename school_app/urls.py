@@ -28,6 +28,7 @@ urlpatterns = [
     path("administration/", include("administration.urls")),
     path("", include("frontend.urls")),
     path("students/fee/", include("fee.urls")),
+    path("exam/", include("exam.urls")),
 
 ]
 if settings.DEBUG:

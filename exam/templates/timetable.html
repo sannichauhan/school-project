@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ timetable.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; background-color: white; }
+            .shadow-lg { box-shadow: none; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8 flex justify-center">
+
+    <div class="bg-white border-2 border-gray-400 p-6 md:p-8 w-full max-w-5xl shadow-lg rounded-sm text-center font-sans">
+        
+        <!-- Print Button -->
+        <div class="no-print text-right mb-4">
+            <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                🖨️ Print Time Table
+            </button>
+        </div>
+
+        <!-- Header Section -->
+        <div class="flex items-center justify-between border-b-2 border-gray-300 pb-4 mb-4">
+            <div class="w-20 h-20 flex items-center justify-center">
+                {% if timetable.logo %}
+                    <img src="{{ timetable.logo.url }}" alt="Logo" class="max-h-full max-w-full object-contain">
+                {% else %}
+                    <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-500 font-bold border">
+                        LOGO
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-center px-2">
+                <h1 class="text-xl md:text-2xl font-black tracking-wide uppercase text-gray-800">
+                    {{ timetable.school_name }}
+                </h1>
+                <h2 class="text-base md:text-lg font-semibold underline mt-1 text-gray-700">
+                    {{ timetable.title }}
+                </h2>
+                <!-- Header timing section -->
+                <p class="text-sm md:text-base font-bold mt-1 text-gray-800">
+                    {{ timetable.formatted_timing }}
+                </p>
+            </div>
+
+            <div class="w-20 h-20 flex items-center justify-center">
+                {% if timetable.logo %}
+                    <img src="{{ timetable.logo.url }}" alt="Logo" class="max-h-full max-w-full object-contain">
+                {% else %}
+                    <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-500 font-bold border">
+                        LOGO
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dynamic Table Section -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse border border-gray-400 text-sm">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-400 px-3 py-2 w-28">Date</th>
+                        <th class="border border-gray-400 px-3 py-2 w-28">Day</th>
+                        <th class="border border-gray-400 px-3 py-2" colspan="{{ class_groups|length }}">
+                            Classes and Examination Subject
+                        </th>
+                    </tr>
+                    <tr class="bg-gray-50 text-xs font-bold">
+                        <th class="border border-gray-400 px-2 py-2"></th>
+                        <th class="border border-gray-400 px-2 py-2"></th>
+                        
+                        <!-- Dynamic Columns (Classes) -->
+                        {% for cg in class_groups %}
+                            <th class="border border-gray-400 px-1 py-1 h-16">{{ cg.formatted_name|default:cg.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic Rows (Dates & Subjects) -->
+                    {% for row in table_rows %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="border border-gray-400 px-1 py-1 font-medium whitespace-nowrap">
+                            {{ row.date|date:"d-m-Y" }}
+                        </td>
+                        <td class="border border-gray-400 px-1 py-1 font-medium">
+                            {{ row.day_name }}
+                        </td>
+
+                        <!-- Dynamic Subjects per Class -->
+                        {% for sub in row.subjects %}
+                        <td class="border border-gray-400 px-1 py-1 align-top whitespace-pre-line">
+                            {{ sub }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-4 text-gray-500">No examination schedules added yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Dynamic Notice Section -->
+        {% if timetable.notice_text %}
+        <div class="mt-6 text-left text-xs text-gray-800 leading-relaxed italic border-t border-gray-300 pt-3">
+            <p><span class="font-bold underline not-italic">नोट:</span> {{ timetable.notice_text }}</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 text-right font-bold text-gray-800 pr-4">
+            प्रधानाचार्य
+        </div>
+    </div>
+
+</body>
+</html>

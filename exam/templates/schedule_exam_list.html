@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Schedules List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">📚 Exam Time-Tables List</h1>
+                <p class="text-xs md:text-sm text-slate-500 mt-1">सभी आयोजित एवं आगामी परीक्षाओं की समय-सारणी सूची</p>
+            </div>
+            <a href="{% url 'new_exam' %}" class="bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition shadow-sm">
+                + Create New Exam
+            </a>
+        </div>
+
+        <!-- Exam Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in exam_list %}
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                
+                <div class="p-6 space-y-4">
+                    <!-- School Name & Status Badge -->
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
+                            {{ item.timetable.school_name }}
+                        </span>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full border {{ item.status_color }}">
+                            {{ item.status }}
+                        </span>
+                    </div>
+
+                    <!-- Exam Title -->
+                    <h2 class="text-lg font-bold text-slate-800 leading-snug">
+                        {{ item.timetable.title }}
+                    </h2>
+
+                    <!-- Exam Details Info -->
+                    <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">🕒 Timing:</span>
+                            <span class="font-semibold text-slate-700">{{ item.timetable.formatted_timing }}</span>
+                        </div>
+
+                        {% if item.start_date %}
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">📅 Date Range:</span>
+                            <span class="font-semibold text-slate-700">
+                                {{ item.start_date|date:"d M Y" }} - {{ item.end_date|date:"d M Y" }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">📝 Exam Duration:</span>
+                            <span class="font-semibold text-slate-700">{{ item.total_days }} Days</span>
+                        </div>
+                        {% else %}
+                        <div class="text-amber-600 font-medium italic">
+                            कोई शेड्यूल नहीं जोड़ा गया।
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Footer Action Button -->
+                <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
+                    <span class="text-xs text-slate-400">ID: #{{ item.timetable.id }}</span>
+                    <a href="{% url 'timetable_detail_by_id' pk=item.timetable.id %}" target="_blank" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                        View TimeTable ➔
+                    </a>
+                </div>
+
+            </div>
+            {% empty %}
+            <!-- Empty State -->
+            <div class="col-span-full bg-white p-12 text-center rounded-xl border border-slate-200">
+                <p class="text-slate-500 text-sm">अभी तक कोई टाइम टेबल नहीं बनाया गया है।</p>
+                <a href="{% url 'admin_quick_add' %}" class="mt-3 inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                    + नया टाइम टेबल बनाएँ
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+</html>
