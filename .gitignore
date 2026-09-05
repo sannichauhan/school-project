@@ -13,7 +13,6 @@ __pycache__/
 *.pyc
 *.sqlite3
 db.sqlite3
-media/
 staticfiles/
 .env
 env/
