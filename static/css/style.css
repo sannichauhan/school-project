@@ -1782,13 +1782,7 @@ ul {
   margin-left: -1rem;
 }
 
-@media only screen and (max-width: 767px) {
-  .nav-bar-header-one {
-    display: block;
-    text-align: center;
-    min-width: 20rem;
-  }
-}
+
 
 .nav-bar-header-one .header-logo {
   padding-left: 10px;
@@ -6335,4 +6329,22 @@ ul {
   width: 140px;
   height: 140px;
   object-fit: cover;
+}
+
+@media only screen and (max-width: 767px) {
+  .nav-bar-header-one {
+    display: block;
+    text-align: center;
+    min-width: 30%;
+    background: #fff;
+  }
+  .sidebar-menu-one .mobile-sidebar-header .header-logo a {
+    padding: 6px 15px;
+  }
+  .sidebar-menu-one .mobile-sidebar-header .header-logo {
+    text-align: left;
+  }
+  .studentRegister .card-body {
+    padding: 15px;
+  }
 }
