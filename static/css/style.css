@@ -6330,6 +6330,11 @@ ul {
   height: 140px;
   object-fit: cover;
 }
+.basicsFont {
+  font-size: 18px;
+  line-height: 30px;
+  font-weight: 700;
+}
 
 @media only screen and (max-width: 767px) {
   .nav-bar-header-one {

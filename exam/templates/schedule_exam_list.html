@@ -1,94 +1,128 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Schedules List</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
 
-    <div class="max-w-6xl mx-auto space-y-6">
+{% extends 'base4.html' %} 
+{% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+ <!-- Header Menu Area Start Here -->
+ {% include "tags/header.html" %}
+ <!-- Header Menu Area End Here -->
+ 
+ <!-- Page Area Start Here -->
+ <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+        <!-- Breadcubs Area Start Here -->
+        {% include "tags/breadcrumb.html" %}
+        <!-- Breadcubs Area End Here -->
+
+        <div class="card height-auto">
+            <div class="card-body">
+                <div class="heading-layout1">
+                    <div class="item-title">
+                        <h3>Exam List and Academic Session</h3>
+                    </div>
+                </div>
+
+                <div class="my-2 my-md-4">
 
         <!-- Page Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">📚 Exam Time-Tables List</h1>
-                <p class="text-xs md:text-sm text-slate-500 mt-1">सभी आयोजित एवं आगामी परीक्षाओं की समय-सारणी सूची</p>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4 border d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <h1 class="h4 fw-bold text-dark mb-1">📚 Exam Time-Tables List</h1>
+                    <p class="text-muted small mb-0">सभी आयोजित एवं आगामी परीक्षाओं की समय-सारणी सूची</p>
+                </div>
+                <a href="{% url 'new_exam' %}" class="btn btn-primary btn-sm fw-semibold px-3 py-2">
+                    <i class="bi bi-plus-lg me-1"></i> Create New Exam
+                </a>
             </div>
-            <a href="{% url 'new_exam' %}" class="bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition shadow-sm">
-                + Create New Exam
-            </a>
         </div>
 
         <!-- Exam Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="row g-4">
             {% for item in exam_list %}
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-                
-                <div class="p-6 space-y-4">
-                    <!-- School Name & Status Badge -->
-                    <div class="flex justify-between items-start gap-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
-                            {{ item.timetable.school_name }}
-                        </span>
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full border {{ item.status_color }}">
-                            {{ item.status }}
-                        </span>
-                    </div>
-
-                    <!-- Exam Title -->
-                    <h2 class="text-lg font-bold text-slate-800 leading-snug">
-                        {{ item.timetable.title }}
-                    </h2>
-
-                    <!-- Exam Details Info -->
-                    <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">🕒 Timing:</span>
-                            <span class="font-semibold text-slate-700">{{ item.timetable.formatted_timing }}</span>
-                        </div>
-
-                        {% if item.start_date %}
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">📅 Date Range:</span>
-                            <span class="font-semibold text-slate-700">
-                                {{ item.start_date|date:"d M Y" }} - {{ item.end_date|date:"d M Y" }}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 overflow-hidden d-flex flex-column justify-content-between">
+                    
+                    <div class="card-body p-4">
+                        <!-- School Name & Status Badge -->
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                            <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase px-2.5 py-1.5 rounded">
+                                {{ item.timetable.school_name }}
+                            </span>
+                            <span class="badge border fw-bold px-2.5 py-1.5 rounded-pill {{ item.status_color }}">
+                                {{ item.status }}
                             </span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">📝 Exam Duration:</span>
-                            <span class="font-semibold text-slate-700">{{ item.total_days }} Days</span>
+
+                        <!-- Exam Title -->
+                        <h2 class="h5 fw-bold text-dark mb-3 lh-sm">
+                            {{ item.timetable.title }}
+                        </h2>
+
+                        <!-- Exam Details Info -->
+                        <div class="border-top pt-3 small text-secondary d-flex flex-column gap-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted"><i class="bi bi-clock me-1"></i>Timing:</span>
+                                <span class="fw-semibold text-dark">{{ item.timetable.formatted_timing }}</span>
+                            </div>
+
+                            {% if item.start_date %}
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted"><i class="bi bi-calendar-event me-1"></i>Date Range:</span>
+                                <span class="fw-semibold text-dark">
+                                    {{ item.start_date|date:"d M Y" }} - {{ item.end_date|date:"d M Y" }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted"><i class="bi bi-journal-text me-1"></i>Exam Duration:</span>
+                                <span class="fw-semibold text-dark">{{ item.total_days }} Days</span>
+                            </div>
+                            {% else %}
+                            <div class="text-warning fw-medium fst-italic">
+                                कोई शेड्यूल नहीं जोड़ा गया।
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="text-amber-600 font-medium italic">
-                            कोई शेड्यूल नहीं जोड़ा गया।
-                        </div>
-                        {% endif %}
                     </div>
-                </div>
 
-                <!-- Footer Action Button -->
-                <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
-                    <span class="text-xs text-slate-400">ID: #{{ item.timetable.id }}</span>
-                    <a href="{% url 'timetable_detail_by_id' pk=item.timetable.id %}" target="_blank" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                        View TimeTable ➔
-                    </a>
-                </div>
+                    <!-- Footer Action Button -->
+                    <div class="card-footer bg-light border-top-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">ID: #{{ item.timetable.id }}</span>
+                        <a href="{% url 'timetable_detail_by_id' pk=item.timetable.id %}" target="_blank" class="small fw-bold text-primary text-decoration-none d-flex align-items-center gap-1">
+                            View TimeTable <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
 
+                </div>
             </div>
             {% empty %}
             <!-- Empty State -->
-            <div class="col-span-full bg-white p-12 text-center rounded-xl border border-slate-200">
-                <p class="text-slate-500 text-sm">अभी तक कोई टाइम टेबल नहीं बनाया गया है।</p>
-                <a href="{% url 'admin_quick_add' %}" class="mt-3 inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-semibold">
-                    + नया टाइम टेबल बनाएँ
-                </a>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-5 text-center">
+                    <div class="card-body">
+                        <p class="text-muted mb-3">अभी तक कोई टाइम टेबल नहीं बनाया गया है।</p>
+                        <a href="{% url 'admin_quick_add' %}" class="btn btn-primary btn-sm fw-semibold">
+                            + नया टाइम टेबल बनाएँ
+                        </a>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
 
     </div>
+                
+            </div>
+        </div>
+        
+        <!-- Footer Area Start Here -->
+        {% include "tags/footer.html" %}
+        <!-- Footer Area End Here -->
+    </div>
+</div>
+<!-- Page Area End Here -->
+</div>
+{% endblock content %}
 
-</body>
-</html>

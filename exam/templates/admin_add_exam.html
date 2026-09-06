@@ -1,145 +1,175 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Exam TimeTable Creator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-100 p-4 md:p-8 font-sans">
+{% extends 'base4.html' %} 
+{% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+ <!-- Header Menu Area Start Here -->
+ {% include "tags/header.html" %}
+ <!-- Header Menu Area End Here -->
+ 
+ <!-- Page Area Start Here -->
+ <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+        <!-- Breadcubs Area Start Here -->
+        {% include "tags/breadcrumb.html" %}
+        <!-- Breadcubs Area End Here -->
 
-    <div class="max-w-6xl mx-auto space-y-6">
-
+        <div class="card height-auto">
+            <div class="card-body">
+                <div class="heading-layout1">
+                    <div class="item-title">
+                        <h3>Create Exam Schedule</h3>
+                    </div>
+                </div>               
+               
         <!-- Header -->
-        <div class="bg-white p-6 rounded-lg shadow-sm border flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">⚡ 1-Click Exam TimeTable Creator</h1>
-                <p class="text-xs text-slate-500">सभी क्लासेस, तारीखें और विषय एक साथ भरें और 1-क्लिक में पूरा टाइम टेबल बनाएँ।</p>
+        <div class="shadow-sm border mb-4">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h1 class="basicsFont mb-1">⚡ 1-Click Exam TimeTable Creator</h1>
+                    <p class="text-muted mb-0 small">सभी क्लासेस, तारीखें और विषय एक साथ भरें और 1-क्लिक में पूरा टाइम टेबल बनाएँ।</p>
+                </div>
+                {% if time_tables.exists %}
+                <a href="" target="_blank" class="btn btn-primary  fw-semibold">
+                    <i class="bi bi-eye me-1"></i> View Existing TimeTable
+                </a>
+                {% endif %}
             </div>
-            {% if time_tables.exists %}
-            <a href="{% url 'timetable_detail' %}" target="_blank" class="bg-indigo-600 text-white px-4 py-2 rounded text-xs font-semibold hover:bg-indigo-700">
-                👁️ View Existing TimeTable
-            </a>
-            {% endif %}
         </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="p-3 text-sm text-green-800 bg-green-100 rounded border border-green-200">
+                <div class="alert alert-success border-success text-success-emphasis py-2 px-3 small mb-4" role="alert">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
 
         <!-- MAIN 1-CLICK FORM -->
-        <form method="POST" action="" class="space-y-6">
+        <form method="POST" action="" class="d-flex flex-column gap-4">
             {% csrf_token %}
             <input type="hidden" name="action" value="one_click_save">
 
             <!-- 1. Exam Basic Details -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
-                <h2 class="text-md font-bold text-slate-700 border-b pb-2">1. Basic Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">School Name</label>
-                        <input type="text" name="school_name" placeholder="e.g. NAV CHETANA PUBLIC SCHOOL" value="" required class="w-full border rounded p-2 text-sm border-slate-300">
+            <div class="mb-4 shadow-sm border">
+                <div class="card-body">
+                    <h2 class="basicsFont mb-3">1. Basic Details</h2>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-secondary fw-semibold fs-7 mb-1">School Name</label>
+                            <input type="text" name="school_name" placeholder="e.g. NAV CHETANA PUBLIC SCHOOL" value="" required class="form-control form-control-sm">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-secondary fw-semibold fs-7 mb-1">Exam Title</label>
+                            <input type="text" name="title" placeholder="e.g. Test : (Time-Table) 2026-27" value="" required class="form-control form-control-sm">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-secondary fw-semibold fs-7 mb-1">Start Time</label>
+                            <input type="time" name="start_time" placeholder="ex. 08:15" value="" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-secondary fw-semibold fs-7 mb-1">End Time</label>
+                            <input type="time" name="end_time" placeholder="ex. 13:45" value="" class="form-control form-control-sm">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Exam Title</label>
-                        <input type="text" name="title" placeholder="e.g. Test : (Time-Table) 2026-27" value="" required class="w-full border rounded p-2 text-sm border-slate-300">
+                        <label class="form-label text-secondary fw-semibold fs-7 mb-1">Notice / Instructions (Footer)</label>
+                        <textarea name="notice_text" rows="2" class="form-control form-control-sm">नोट: अभिभावक गण को सूचित किया जाता है कि अपने पाल्य को समयसारणी के अनुसार टेस्ट परीक्षा के लिए आवश्यक सामग्री के साथ भेजें तथा इसके साथ ही पाल्य का प्रथम और द्वितीय क़िस्त तक बकाया शुल्क परीक्षा से पूर्व जमा कर पाल्य का प्रवेश पत्र प्राप्त कर लें जिससे परीक्षा में किसी समस्या का सामना न करना पड़े।</textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Start Time</label>
-                        <input type="time" name="start_time" placeholder="ex. 08:15" value="" class="w-full border rounded p-2 text-sm border-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">End Time</label>
-                        <input type="time" name="end_time" placeholder="ex. 13:45" value="" class="w-full border rounded p-2 text-sm border-slate-300">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Notice / Instructions (Footer)</label>
-                    <textarea name="notice_text" rows="2" class="w-full border rounded p-2 text-sm border-slate-300">नोट: अभिभावक गण को सूचित किया जाता है कि अपने पाल्य को समयसारणी के अनुसार टेस्ट परीक्षा के लिए आवश्यक सामग्री के साथ भेजें तथा इसके साथ ही पाल्य का प्रथम और द्वितीय क़िस्त तक बकाया शुल्क परीक्षा से पूर्व जमा कर पाल्य का प्रवेश पत्र प्राप्त कर लें जिससे परीक्षा में किसी समस्या का सामना न करना पड़े।</textarea>
                 </div>
             </div>
 
             <!-- 2. Define Classes/Columns -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border space-y-3">
-                <h2 class="text-md font-bold text-slate-700 border-b pb-2">2. Define Classes / Columns</h2>
-                <p class="text-xs text-slate-500">परीक्षा की टेबल के लिए क्लासेस के नाम लिखें (जैसे: Class LKG/UKG, Class 1-5, Class 6-8):</p>
-                
-                <div id="classContainer" class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <input type="text" name="class_names[]" value="Class LKG/UKG" placeholder="Class Name" required class="border rounded p-2 text-xs border-slate-300">
-                    <input type="text" name="class_names[]" value="Class 1-5" placeholder="Class Name" required class="border rounded p-2 text-xs border-slate-300">
-                    <input type="text" name="class_names[]" value="Class 6-8" placeholder="Class Name" class="border rounded p-2 text-xs border-slate-300">
-                    <input type="text" name="class_names[]" value="Class 9-10" placeholder="Class Name" class="border rounded p-2 text-xs border-slate-300">
-                    <input type="text" name="class_names[]" value="Class 11-12" placeholder="Class Name" class="border rounded p-2 text-xs border-slate-300">
+            <div class="mb-4 shadow-sm border">
+                <div class="card-body">
+                    <h2 class="basicsFont mb-2">2. Define Classes / Columns</h2>
+                    <p class="text-muted small mb-3">परीक्षा की टेबल के लिए क्लासेस के नाम लिखें (जैसे: Class LKG/UKG, Class 1-5, Class 6-8):</p>
+                    
+                    <div id="classContainer" class="row row-cols-2 row-cols-md-5 g-2">
+                        <div class="col"><input type="text" name="class_names[]" value="Class LKG/UKG" placeholder="Class Name" required class="form-control form-control-sm"></div>
+                        <div class="col"><input type="text" name="class_names[]" value="Class 1-5" placeholder="Class Name" required class="form-control form-control-sm"></div>
+                        <div class="col"><input type="text" name="class_names[]" value="Class 6-8" placeholder="Class Name" class="form-control form-control-sm"></div>
+                        <div class="col"><input type="text" name="class_names[]" value="Class 9-10" placeholder="Class Name" class="form-control form-control-sm"></div>
+                        <div class="col"><input type="text" name="class_names[]" value="Class 11-12" placeholder="Class Name" class="form-control form-control-sm"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- 3. Dynamic Date & Subject Grid -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h2 class="text-md font-bold text-slate-700">3. Add Exam Dates & Subjects</h2>
-                    <button type="button" onclick="addDateRow()" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-indigo-700">
-                        + Add Date Row
-                    </button>
-                </div>
+            <div class="mb-4 shadow-sm border">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center  pb-2 mb-3">
+                        <h2 class="basicsFont mb-0">3. Add Exam Dates & Subjects</h2>
+                        <button type="button" onclick="addDateRow()" class="btn btn-primary  fw-semibold">
+                            + Add Date Row
+                        </button>
+                    </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse border border-slate-300 text-xs" id="scheduleTable">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700">
-                                <th class="border border-slate-300 p-2 w-36">Exam Date</th>
-                                <th class="border border-slate-300 p-2">LKG/UKG</th>
-                                <th class="border border-slate-300 p-2">1-5</th>
-                                <th class="border border-slate-300 p-2">6-8</th>
-                                <th class="border border-slate-300 p-2">9-10</th>
-                                <th class="border border-slate-300 p-2">11-12</th>
-                                <th class="border border-slate-300 p-2 w-10">Del</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Default Row 0 -->
-                            <tr>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="date" name="exam_date[]" required class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="text" name="subject_row_0_col_0" placeholder="e.g. Hindi, English" class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="text" name="subject_row_0_col_1" placeholder="e.g. Maths" class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="text" name="subject_row_0_col_2" placeholder="e.g. Science" class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="text" name="subject_row_0_col_3" placeholder="e.g. SST" class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2">
-                                    <input type="text" name="subject_row_0_col_4" placeholder="e.g. Physics" class="w-full border p-1 rounded text-xs">
-                                </td>
-                                <td class="border border-slate-300 p-2 text-center">
-                                    <button type="button" onclick="removeRow(this)" class="text-red-500 font-bold hover:underline">✕</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle small mb-0" id="scheduleTable">
+                            <thead>
+                                <tr class="table-light text-secondary">
+                                    <th style="width: 170px;">Exam Date</th>
+                                    <th>LKG/UKG</th>
+                                    <th>1-5</th>
+                                    <th>6-8</th>
+                                    <th>9-10</th>
+                                    <th>11-12</th>
+                                    <th style="width: 50px;" class="text-center">Del</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Default Row 0 -->
+                                <tr>
+                                    <td class="p-2">
+                                        <input type="date" name="exam_date[]" required class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="text" name="subject_row_0_col_0" placeholder="e.g. Hindi, English" class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="text" name="subject_row_0_col_1" placeholder="e.g. Maths" class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="text" name="subject_row_0_col_2" placeholder="e.g. Science" class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="text" name="subject_row_0_col_3" placeholder="e.g. SST" class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2">
+                                        <input type="text" name="subject_row_0_col_4" placeholder="e.g. Physics" class="form-control form-control-sm">
+                                    </td>
+                                    <td class="p-2 text-center">
+                                        <button type="button" onclick="removeRow(this)" class="btn btn-link text-danger p-0 fw-bold text-decoration-none">✕</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- SAVE BUTTON -->
-            <div class="text-right">
-                <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md">
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold fs-6 shadow-sm px-4">
                     🚀 Save Everything in 1-Click
                 </button>
             </div>
 
         </form>
     </div>
-
-    <!-- Script to Add Dynamic Rows -->
+</div>
+           
+        
+        <!-- Footer Area Start Here -->
+        {% include "tags/footer.html" %}
+        <!-- Footer Area End Here -->
+    </div>
+</div>
+<!-- Page Area End Here -->
+</div>
+<!-- Script to Add Dynamic Rows -->
     <script>
         let rowCount = 1;
 
@@ -148,20 +178,20 @@
             const newRow = document.createElement('tr');
 
             let rowHtml = `
-                <td class="border border-slate-300 p-2">
-                    <input type="date" name="exam_date[]" required class="w-full border p-1 rounded text-xs">
+                <td class="p-2">
+                    <input type="date" name="exam_date[]" required class="form-control form-control-sm">
                 </td>`;
 
             for (let col = 0; col < 5; col++) {
                 rowHtml += `
-                <td class="border border-slate-300 p-2">
-                    <input type="text" name="subject_row_${rowCount}_col_${col}" placeholder="e.g. Subject" class="w-full border p-1 rounded text-xs">
+                <td class="p-2">
+                    <input type="text" name="subject_row_${rowCount}_col_${col}" placeholder="e.g. Subject" class="form-control form-control-sm">
                 </td>`;
             }
 
             rowHtml += `
-                <td class="border border-slate-300 p-2 text-center">
-                    <button type="button" onclick="removeRow(this)" class="text-red-500 font-bold hover:underline">✕</button>
+                <td class="p-2 text-center">
+                    <button type="button" onclick="removeRow(this)" class="btn btn-link text-danger p-0 fw-bold text-decoration-none">✕</button>
                 </td>`;
 
             newRow.innerHTML = rowHtml;
@@ -178,5 +208,6 @@
             }
         }
     </script>
-</body>
-</html>
+{% endblock content %}
+
+

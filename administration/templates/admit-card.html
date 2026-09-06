@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admit Card - NCPS</title>
     <style>
+
         @page {
             size: A4 landscape;
             margin: 3mm 5mm;
@@ -16,6 +18,15 @@
             gap: 15px;
             max-width: 100%;
             margin: auto;
+        }
+        .posRelImg{
+            position:relative;
+        }
+        .posRelImg img {
+            position: absolute;
+            top: -49px;
+            left: 40px;
+            width: 140px;
         }
 
         body {
@@ -50,21 +61,23 @@
             align-items: center;
             justify-content: center;
             border-bottom: 2px solid #000;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
         }
         .logo-placeholder {
-            width: 50px;
-            height: 50px;
+            width: 78px;
+            height: auto;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 0px;
+            padding: 0;
+            margin-top: -5px;
         }
         .logo-placeholder img {
-            width: 50px;
-            height: 50px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 50%;
         }
@@ -72,23 +85,25 @@
             text-align: center;
         }
         .header-text h1 {
-            font-size: 20px;
+            font-size: 40px;
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1;
         }
         .header-text p {
-            font-size: 13px;
-            margin: 3px 0 0 0;
+            font-size: 24px;
+            margin: 0px;
             font-weight: bold;
             color: #333;
+            line-height: 1;
         }
 
         /* Sub-Header Title */
         .exam-title {
             text-align: center;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 18px;
             margin-bottom: 15px;
             letter-spacing: .5px;
             text-transform: uppercase;
@@ -218,6 +233,16 @@
             gap: 20px;
         }
 
+        .admitHeader {
+            display: flex;
+            position: absolute;
+            top: -10px;
+        }
+        .posRel {
+            position: relative;
+            height: 58px;
+        }
+
         @media print{
             .no-print{ display:none; }
             body{ margin:0; background-color: #fff; }
@@ -237,14 +262,19 @@
         <div class="admit-card-container">
             <div class="card-border">        
                 
-                <div class="header">
-                    <div class="logo-placeholder">
+                <div class="header posRel">
+                    <div class="admitHeader">
+                        <div class="logo-placeholder">
                        <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
                     </div>
                     <div class="header-text">
                         <h1>{{admit_card.student.choose_school}}</h1>
                         <p>CHHAHUN, KUSHINAGAR, 274303 </p>
                     </div>
+                    <div class="logo-placeholder">
+                       <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
+                    </div>
+                </div>
                 </div>
 
                 <div class="exam-title">
@@ -288,20 +318,23 @@
                         </table>
                     </div>
 
-                    {% comment %} <div class="timetable-col">
+                   <div class="timetable-col">
+
+                   
+
                         <div class="timetable-title">Examination Timetable</div>
                         <table class="timetable-table">
-                            <thead>
+                           <thead>
                                 <tr>
                                     <th style="width: 60%;">Subject Name</th>
                                     <th style="width: 40%;">Date</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for schedule in admit_card.schedules %}
+                                {% for item in exam %}
                                 <tr>
-                                    <td>{{ schedule.subject.name }}</td>
-                                    <td>{{ schedule.date|date:"d/m/y" }}</td>
+                                    <td>{{ item.subject_name }} </td>
+                                    <td>{{ item.exam_date.date|date:"d/m/y" }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
@@ -310,7 +343,7 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                    </div> {% endcomment %}
+                    </div> 
 
                     <div class="photo-sig-col">
                         <div class="photo-box">
@@ -327,7 +360,10 @@
 
                 <div class="footer-sign">
                     <div class="controller-sign-line">Class Teacher</div>
-                    <div class="controller-sign-line">Principal</div>
+                    <div class="controller-sign-line posRelImg">
+                        <img src="{% static 'img/principal-singaturgre.png' %}" alt="Principal Signature">
+                        Principal
+                    </div>
                 </div>
 
             </div>
