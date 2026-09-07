@@ -146,7 +146,7 @@
 
         /* Column 2: Timetable (Subject first, then Date) */
         .timetable-col {
-            width: 40%;
+            width: 45%;
         }
         .timetable-title {
             font-size: 12px;
@@ -319,30 +319,39 @@
                     </div>
 
                    <div class="timetable-col">
-
-                   
-
-                        <div class="timetable-title">Examination Timetable</div>
-                        <table class="timetable-table">
-                           <thead>
-                                <tr>
-                                    <th style="width: 60%;">Subject Name</th>
-                                    <th style="width: 40%;">Date</th>
+                        
+                       <table class="timetable-table border">
+                            {% comment %} <thead>
+                                <tr class="table-group-divider fw-bold small">
+                                    <th class="p-1"></th>
+                                    {% for cg in class_groups %}
+                                        <th class="p-1 align-middle {% if cg == card.matched_group %}table-primary fw-bold{% endif %}" style="height: 60px;">
+                                            {{ cg.formatted_name|default:cg.name }}
+                                        </th>
+                                    {% endfor %}
                                 </tr>
-                            </thead>
+                            </thead> {% endcomment %}
                             <tbody>
-                                {% for item in exam %}
-                                <tr>
-                                    <td>{{ item.subject_name }} </td>
-                                    <td>{{ item.exam_date.date|date:"d/m/y" }}</td>
-                                </tr>
+                                {% for row in table_rows %}
+                                    <tr>
+                                        <td class="p-1 fw-medium text-nowrap">
+                                            {{ row.date|date:"d-m-Y" }}
+                                        </td>
+                                        {% for sub in row.subjects %}
+                                            <td class="p-1 align-top cell-pre-line">
+                                                {{ sub|linebreaksbr }}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
                                 {% empty %}
-                                <tr>
-                                    <td colspan="2" style="text-align: center; color: #666; font-size: 11px;">No schedule available.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="{{ class_groups|length|add:1 }}" class="text-center py-4 text-muted">
+                                            No examination schedules added yet.
+                                        </td>
+                                    </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
+                        </table>  
                     </div> 
 
                     <div class="photo-sig-col">

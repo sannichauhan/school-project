@@ -8,44 +8,65 @@ from .models import AdmitCard, TransferCertificate, Attendance, ExamSlot, ExamSc
 from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
-
 from .models import Student, AdmitCard
+from exam.models import TimeTable, ClassGroup
 from .forms import AdmitCardForm, BulkAdmitCardForm
 
 @login_required
 def administration(request):
     return HttpResponse("Hello")  
-     
+
 @login_required
 def admit_card_view(request):
+  class_id = request.GET.get('class_id')
 
-    class_id = request.GET.get("class_id")
+  admit_cards = AdmitCard.objects.select_related(
+      'student', 'student__admission_class', 'session', 'exam_type'
+  )
 
-    admit_cards = AdmitCard.objects.select_related(
-        'student',
-        'student__admission_class',
-        'session',
-        'exam_type'
-    )
+  if class_id:
+    admit_cards = admit_cards.filter(student__admission_class_id=class_id)
 
-    if class_id:
-        admit_cards = admit_cards.filter(
-            student__admission_class_id=class_id
-        )
+  admit_cards = admit_cards.order_by(
+      'student__admission_class__name', 'student__name'
+  )
 
-    admit_cards = admit_cards.order_by(
-        'student__admission_class__name',
-        'student__name'
-    )
-    
+  # --- Timetable & Class Groups Context Data ---
+  # TimeTable fetch karein (Latest active timetable)
+  timetable = TimeTable.objects.last()
 
-    return render(
-        request,
-        'admit-card.html',
-        {
-            'admit_cards': admit_cards
-        }
-    )
+  table_rows = []
+  class_groups = []
+
+  if timetable:
+    class_groups = timetable.class_groups.all().order_by('order')
+    exam_dates = timetable.dates.all().order_by('date')
+
+    for ed in exam_dates:
+      row_subjects = []
+      for cg in class_groups:
+        subject_obj = ed.subjects.filter(class_group=cg).first()
+        if subject_obj and subject_obj.subject_name:
+          formatted_subject = subject_obj.subject_name.replace(',', '\n')
+        else:
+          formatted_subject = ''
+        row_subjects.append(formatted_subject)
+
+      table_rows.append({
+          'date': ed.date,
+          'day_name': ed.day_name,
+          'subjects': row_subjects,
+      })
+
+  # Complete Context Dictionary
+  context = {
+      'admit_cards': admit_cards,
+      'timetable': timetable,
+      'class_groups': class_groups,
+      'table_rows': table_rows,
+  }
+
+  return render(request, 'admit-card.html', context)
 
 
 
@@ -209,7 +230,7 @@ def create_admit_card_view(request):
 
         context = {
             'form': form,
-            'page_title': 'Generate New Admit Card',            
+            'page_title': 'Generate New Admit Card', 
             'breadcrumbs': [
                 {'name': 'Home', 'url': '/'},
                 {'name': 'Generate New Admit Card', 'url': ''},
