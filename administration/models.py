@@ -208,6 +208,80 @@ class Attendance(models.Model):
         return f"{self.student.name} - {self.attendance_date} - {self.get_status_display()}"
 
 
+class ExamSlot(models.Model):
 
-    
+    SHIFT_CHOICES = [
+        ('I', 'I Shift (8:45 AM - 09:55 AM)'),
+        ('II', 'II Shift (11:10 AM - 12:20 PM)'),
+        ('III', 'III Shift (12:30 PM - 1:40 PM)'),
+    ]
+
+    date = models.DateField()
+
+    shift = models.CharField(
+        max_length=3,
+        choices=SHIFT_CHOICES
+    )
+
+
+    class Meta:
+        ordering = ['date',  'shift']
+
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=['date', 'shift'],
+        #         name='exam_slot_date_shift_unique'
+        #     )
+        # ]
+
+    def __str__(self):
+        return f"{self.date} - Shift {self.shift}"
+
+
+class ExamSchedule(models.Model):
+
+    student_class = models.ForeignKey(
+        StudentClass,
+        on_delete=models.CASCADE,
+        related_name='exam_schedules',
+        null=True,
+        blank=True
+    )
+
+    slot = models.ForeignKey(
+        ExamSlot,
+        on_delete=models.CASCADE,
+        related_name='schedules'
+    )
+
+    subject = models.CharField(
+        max_length=100,
+        default='',
+        blank=True
+    )
+
+    class Meta:
+        ordering = [
+            'slot__date',
+            'slot__shift',
+            'student_class'
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slot', 'student_class'],
+                name='exam_schedule_slot_class_unique'
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.student_class} - "
+            f"{self.subject} - "
+            f"{self.slot.date} "
+            f"(Shift {self.slot.shift})"
+        )
+
+
+ 
     

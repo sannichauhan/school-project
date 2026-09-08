@@ -3,6 +3,8 @@ from django.utils.html import format_html
 from .models import (
     AdmitCard,
     TransferCertificate,
+    ExamSlot, 
+    ExamSchedule,
     Attendance
 )
 
@@ -49,3 +51,16 @@ class AttendanceAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = 'attendance_date'
+
+
+class ExamScheduleInline(admin.TabularInline):
+    model = ExamSchedule
+    extra = 1  
+    
+
+@admin.register(ExamSlot)
+class ExamSlotAdmin(admin.ModelAdmin):
+    list_display = ('date', 'shift')
+    list_filter = ('date', 'shift')
+    inlines = [ExamScheduleInline]
+

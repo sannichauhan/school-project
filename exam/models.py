@@ -92,3 +92,5 @@ class ExamSubject(models.Model):
 
     def __str__(self):
         return f"{self.exam_date.date} - {self.class_group.name}: {self.subject_name}"
+
+

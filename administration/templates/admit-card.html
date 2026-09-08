@@ -22,6 +22,13 @@
         .posRelImg{
             position:relative;
         }
+        .timetable-col p {
+            padding: 0PX;
+            margin: 0px 0px 10px 0px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
         .posRelImg img {
             position: absolute;
             top: -49px;
@@ -317,41 +324,65 @@
                             </tr>
                         </table>
                     </div>
+                    
+                   <div class="timetable-col">                        
+                    <p>Exam Time 8:15 AM To 1:45 PM</p>
+<table class="table table-bordered timetable-table">
 
-                   <div class="timetable-col">
-                        
-                       <table class="timetable-table border">
-                            {% comment %} <thead>
-                                <tr class="table-group-divider fw-bold small">
-                                    <th class="p-1"></th>
-                                    {% for cg in class_groups %}
-                                        <th class="p-1 align-middle {% if cg == card.matched_group %}table-primary fw-bold{% endif %}" style="height: 60px;">
-                                            {{ cg.formatted_name|default:cg.name }}
-                                        </th>
-                                    {% endfor %}
-                                </tr>
-                            </thead> {% endcomment %}
-                            <tbody>
-                                {% for row in table_rows %}
-                                    <tr>
-                                        <td class="p-1 fw-medium text-nowrap">
-                                            {{ row.date|date:"d-m-Y" }}
-                                        </td>
-                                        {% for sub in row.subjects %}
-                                            <td class="p-1 align-top cell-pre-line">
-                                                {{ sub|linebreaksbr }}
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="{{ class_groups|length|add:1 }}" class="text-center py-4 text-muted">
-                                            No examination schedules added yet.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>  
+    {% comment %} <thead>
+        <tr>
+            <th>Date</th>
+
+            {% for shift in active_shifts %}
+                <th>
+                    {% if shift == 'I' %}
+                        1st shift
+                    {% elif shift == 'II' %}
+                        2nd shift
+                    {% elif shift == 'III' %}
+                        3rd shift
+                    {% else %}
+                        {{ shift }} shift
+                    {% endif %}
+                </th>
+            {% endfor %}
+
+        </tr>
+    </thead> {% endcomment %}
+
+    <tbody>
+
+        {% for row in timetable_rows %}
+
+        <tr>
+
+            <td>
+                {{ row.date|date:"d-m-Y" }}
+            </td>
+
+            {% for subject in row.shifts %}
+                <td>
+                    {{ subject }}
+                </td>
+            {% endfor %}
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="10" class="text-center">
+                No Exam Schedule Found
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
                     </div> 
 
                     <div class="photo-sig-col">
