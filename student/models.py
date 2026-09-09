@@ -110,7 +110,7 @@ class Student(models.Model):
     ]
     SCHOOL_CHOICES = [
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
-        ('KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
+        ('K. D. G. NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
     FEE_TYPE_CHOICES = [
         ('THRICE','Thrice'), ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), 
