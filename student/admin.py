@@ -107,7 +107,7 @@ class FeeLedgerInline(admin.TabularInline):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name','roll_number', 'admission_class','current_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
-    list_filter = ('admission_class', 'gender', 'religion')
+    list_filter = ('current_class', 'gender', 'religion')
     search_fields = ('name', 'adhaar_number', 'contact_number')
     actions = ['bulk_promote_to_next_class']
     inlines = [FeeLedgerInline]
