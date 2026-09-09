@@ -204,7 +204,7 @@ def add_class_view(request, class_id=None):
     
     
 ### View students
-@login_required
+
 # def student_list_view(request):
 #     students = Student.objects.all()
 #     context = {
@@ -217,9 +217,8 @@ def add_class_view(request, class_id=None):
 #     }
 #     return render(request, 'student_list.html', context)
 
-
+@login_required
 def student_list_view(request):
-    # Sirf Name aur Class parameters le rahe hain
     name_query = request.GET.get('name', '').strip()
     class_query = request.GET.get('class_name', '').strip()
 
@@ -228,18 +227,15 @@ def student_list_view(request):
         'current_class', 'admission_class', 'section', 'permanent_address'
     ).all()
 
-    # Name Search (Student Name ya Father Name me match karega)
+    # Name Search (Student Name ya Father Name)
     if name_query:
         students = students.filter(
             Q(name__icontains=name_query) | Q(father_name__icontains=name_query)
         )
 
-    # Class Name Search (Current class ya Admission class dono check karega)
+    # Sirf Current Class ke name par filter karega
     if class_query:
-        students = students.filter(
-            Q(current_class__name__icontains=class_query) | 
-            Q(admission_class__name__icontains=class_query)
-        )
+        students = students.filter(current_class__name__icontains=class_query)
 
     context = {
         'page_title': 'All Students',
