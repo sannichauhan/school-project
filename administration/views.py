@@ -307,7 +307,7 @@ def bulk_generate_admit_card(request):
 
             # Class ke students
             students = Student.objects.filter(
-                admission_class=student_class
+                current_class=student_class
             )
 
             created_count = 0
