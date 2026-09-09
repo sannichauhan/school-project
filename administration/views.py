@@ -24,18 +24,18 @@ def admit_card_view(request):
 
     admit_cards = AdmitCard.objects.select_related(
         'student',
-        'student__admission_class',
+        'student__current_class',
         'session',
         'exam_type'
     )
 
     if class_id:
         admit_cards = admit_cards.filter(
-            student__admission_class_id=class_id
+            student__current_class_id=class_id
         )
 
     admit_cards = admit_cards.order_by(
-        'student__admission_class__name',
+        'student__current_class__name',
         'student__name'
     )
 
