@@ -6335,7 +6335,9 @@ ul {
   line-height: 30px;
   font-weight: 700;
 }
-
+table.allStudentList tbody tr td{
+  text-transform: uppercase;
+}
 @media only screen and (max-width: 767px) {
   .nav-bar-header-one {
     display: block;
