@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from .views import export_students_by_class
 
 from teacher import views
 from .views import (
@@ -44,4 +45,5 @@ urlpatterns = [
     path('promote/<int:class_id>/<int:session_id>/<int:from_session_id>/', promote_students, name='promote_student'),
     path('promote/', promote_students, name='promote_student_base'),
     path('academic-history/<int:student_id>/', student_history_view, name='student_history'),
+    path('export-students/', export_students_by_class, name='export_students_by_class'),
 ]
