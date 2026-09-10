@@ -865,10 +865,10 @@ def export_students_by_class(request):
         return HttpResponse("Please select a class first.", status=400)
 
     # Validate class existence
-    student_class = get_object_or_404(StudentClass, id=class_id)
+    current_class = get_object_or_404(StudentClass, id=class_id)
     
     # Query optimized with select_related for exact foreign keys in Student model
-    students = Student.objects.filter(current_class=student_class).select_related(
+    students = Student.objects.filter(current_class=current_class).select_related(
         'current_class', 
         'section', 
         'permanent_address'
@@ -876,7 +876,7 @@ def export_students_by_class(request):
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = f"Class_{student_class.name}"
+    ws.title = f"Class_{current_class.name}"
 
     # Headers matching the fields defined in your Student model
     headers = [
@@ -938,7 +938,7 @@ def export_students_by_class(request):
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename="Students_{student_class.name}.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="Students_{current_class.name}.xlsx"'
     
     wb.save(response)
     return response
