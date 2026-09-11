@@ -23,6 +23,16 @@ def admit_card_view(request):
     class_id = request.GET.get('class_id')
     roll_number = request.GET.get('roll_number')
 
+    classes = StudentClass.objects.all().order_by('name')
+    students = Student.objects.none()
+
+    if class_id:
+        students = (
+            Student.objects
+            .filter(current_class_id=class_id)
+            .order_by('roll_number', 'name')
+        )
+        
     # --------------------------------
     # Admit Cards
     # --------------------------------
@@ -128,8 +138,11 @@ def admit_card_view(request):
         'admit_cards': admit_cards,
         'timetable_rows': timetable_rows,
         'active_shifts': active_shifts,
+        'classes': classes,
+        'students': students,
         'class_id': class_id,
         'roll_number': roll_number,
+        
     }
 
     return render(

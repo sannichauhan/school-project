@@ -19,6 +19,12 @@
             max-width: 100%;
             margin: auto;
         }
+        .classRoll .row {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0px;
+            justify-content: center;
+        }
         .details-table td.value {
             text-transform: uppercase;
         }
@@ -266,6 +272,63 @@
             <a href="{% url 'bulk-admit-card' %}" style="text-decoration:none; padding:10px 20px; background:#6c757d; color:white; border-radius:5px;">Back</a>
             <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Print / Save PDF</button>
         </div>
+    <div class="classRoll no-print">
+        <form method="GET" class="mb-4">
+
+            <div class="row">
+
+                <!-- CLASS -->
+                <div class="col-md-4">
+                    <label><strong>Select Class</strong></label>
+
+                    <select name="class_id"
+                            class="form-control"
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Class --</option>
+
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}"
+                                {% if class_id|stringformat:"s" == cls.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- ROLL NUMBER -->
+                <div class="col-md-4">
+                    <label><strong>Select Roll Number</strong></label>
+
+                    <select name="roll_number"
+                            class="form-control"
+                            {% if not class_id %}disabled{% endif %}
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Roll Number --</option>
+
+                        {% for student in students %}
+                            <option value="{{ student.roll_number }}"
+                                {% if roll_number|stringformat:"s" == student.roll_number|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ student.roll_number }} - {{ student.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
 
         <div class="page">
         {% for admit_card in admit_cards %}
