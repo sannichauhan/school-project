@@ -21,6 +21,11 @@ def administration(request):
 def admit_card_view(request):
 
     class_id = request.GET.get('class_id')
+    roll_number = request.GET.get('roll_number')
+
+    # --------------------------------
+    # Admit Cards
+    # --------------------------------
 
     admit_cards = AdmitCard.objects.select_related(
         'student',
@@ -29,58 +34,78 @@ def admit_card_view(request):
         'exam_type'
     )
 
+    # Class filter
     if class_id:
         admit_cards = admit_cards.filter(
             student__current_class_id=class_id
         )
 
+    # Roll Number filter
+    if roll_number:
+        admit_cards = admit_cards.filter(
+            student__roll_number=roll_number
+        )
+
     admit_cards = admit_cards.order_by(
         'student__current_class__name',
+        'student__roll_number',
         'student__name'
     )
 
     # --------------------------------
-    # Class timetable
+    # Class Timetable
     # --------------------------------
 
-    schedules = (
-        ExamSchedule.objects
-        .filter(student_class_id=class_id)
-        .select_related('slot')
-        .order_by(
-            'slot__date',
-            'slot__shift'
-        )
-    )
-
-    # Date wise data
     timetable_data = defaultdict(dict)
-
-    # Kaun-kaun se shifts available hain
     active_shifts = []
 
     shift_order = ['I', 'II', 'III']
 
-    for schedule in schedules:
+    if class_id:
 
-        date = schedule.slot.date
-        shift = schedule.slot.shift
+        schedules = (
+            ExamSchedule.objects
+            .filter(student_class_id=class_id)
+            .select_related('slot')
+            .order_by(
+                'slot__date',
+                'slot__shift'
+            )
+        )
 
-        timetable_data[date][shift] = schedule.subject
+        # --------------------------------
+        # Date wise timetable data
+        # --------------------------------
 
-        if shift not in active_shifts:
-            active_shifts.append(shift)
+        for schedule in schedules:
 
-    # Shift ko I, II, III order me rakhen
+            date = schedule.slot.date
+            shift = schedule.slot.shift
+
+            timetable_data[date][shift] = schedule.subject
+
+            if shift not in active_shifts:
+                active_shifts.append(shift)
+
+    # --------------------------------
+    # Shift order: I → II → III
+    # --------------------------------
+
     active_shifts = [
-        shift for shift in shift_order
+        shift
+        for shift in shift_order
         if shift in active_shifts
     ]
 
-    # Template ke liye list
+    # --------------------------------
+    # Template timetable rows
+    # --------------------------------
+
     timetable_rows = []
 
-    for date, shifts in timetable_data.items():
+    for date in sorted(timetable_data.keys()):
+
+        shifts = timetable_data[date]
 
         row = {
             "date": date,
@@ -88,16 +113,23 @@ def admit_card_view(request):
         }
 
         for shift in active_shifts:
+
             row["shifts"].append(
                 shifts.get(shift, "")
             )
 
         timetable_rows.append(row)
 
+    # --------------------------------
+    # Context
+    # --------------------------------
+
     context = {
         'admit_cards': admit_cards,
         'timetable_rows': timetable_rows,
         'active_shifts': active_shifts,
+        'class_id': class_id,
+        'roll_number': roll_number,
     }
 
     return render(
