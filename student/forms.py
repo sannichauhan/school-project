@@ -41,6 +41,7 @@ class StudentAllInOneForm(forms.ModelForm):
             'gender': forms.Select(attrs={'class': 'select2'}),
             'religion': forms.Select(attrs={'class': 'select2'}),
             'category': forms.Select(attrs={'class': 'select2'}),
+            'medium': forms.Select(attrs={'class': 'select2'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control'}),
             'mother_name': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control'}),

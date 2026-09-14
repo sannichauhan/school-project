@@ -112,6 +112,10 @@ class Student(models.Model):
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
         ('K. D. G. NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
+    MEDIUM_CHOICES = [
+        ('HINDI', 'Hindi Medium'),
+        ('ENGLISH', 'English Medium'),
+    ]
     FEE_TYPE_CHOICES = [
         ('THRICE','Thrice'), ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), 
     ]
@@ -125,8 +129,8 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
     religion = models.CharField(max_length=20, choices=RELIGION_CHOICES)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
-    
+    medium = models.CharField(max_length=20, choices=MEDIUM_CHOICES,default='HINDI')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)    
     adhaar_number = models.CharField(
         max_length=12, unique=True, blank=True, null=True,
         validators=[RegexValidator(regex=r'^\d{12}$', message="Aadhaar must be 12 digits")]
