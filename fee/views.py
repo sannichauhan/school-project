@@ -4,6 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+
+from fee.services import create_fee_schedule_for_student
 from .models import FeeLedger, Transaction
 from student.models import Student
 from django.db.models import Sum, Max
@@ -249,3 +251,23 @@ def collect_fee_multiple_ledgers(request):
 
     messages.error(request, "Invalid request method.")
     return redirect('student_fee_dashboard', student_id=request.user.id)  # Adjust as needed
+
+
+def update_fee_plan(request, student_id):
+    if request.method == "POST":
+        student = get_object_or_404(Student, id=student_id)
+        
+        has_paid = FeeLedger.objects.filter(student=student, academic_year=student.current_session, paid_amount__gt=0).exists()
+        if has_paid:
+            messages.error(request, "Cannot change transport plan once payments have started.")
+            return student_fee_dashboard(request, student_id)
+
+        new_plan = request.POST.get('fee_type')
+        if new_plan in ['QUARTERLY', 'HALF_YEARLY', 'YEARLY', 'THRICE']:
+            
+            FeeLedger.objects.filter(student=student, status='PENDING', academic_year=student.current_session).delete()
+            student.fee_type = new_plan
+            student.save()
+            
+            messages.success(request, f"Transport plan updated to {student.get_transport_installment_type_display()}.")
+    return student_fee_dashboard(request, student_id)

@@ -54,7 +54,10 @@ def calculate_clean_installment(total_fee, total_installment=3, standard_install
             
         return tuple(array_installments)
     array_installments.append(distribution)
-    rest_installments = (total_fee - distribution) / (total_installment - 1)
+    if total_installment == 1:
+        rest_installments = 0
+    else:
+        rest_installments = (total_fee - distribution) / (total_installment - 1)
     for i in range(total_installment - 1):
         array_installments.append(rest_installments)
         

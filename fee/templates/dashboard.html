@@ -4,9 +4,19 @@
 <style>
    .card {
       background-color: #fff;
-      height:auto;
+      height: auto;
    }
-   /* Floating actions styling for smooth user experience */
+   /* Fix dropdown clipping issue */
+   select.custom-select-sm {
+      height: calc(1.8125rem + 8px) !important;
+      padding-top: 0.25rem !important;
+      padding-bottom: 0.25rem !important;
+      font-size: 0.875rem !important;
+      line-height: 1.5 !important;
+      border-radius: 20px;
+      cursor: pointer;
+   }
+   /* Floating actions styling */
    .bulk-pay-container {
       transition: all 0.3s ease-in-out;
       opacity: 0;
@@ -50,14 +60,22 @@
                         Class: {{ student.current_class.name }} | 
                         Section: {{ student.section.name }}
                     </p>
-                    <div class="mb-2">
-                        <span class="badge badge-purple p-2 text-wrap h6 font-weight-bold rounded-pill mr-2">Plan: {{ student.get_fee_type_display }}</span>
+                    <div class="d-flex align-items-center flex-wrap my-2">
+                    
+
                         {% if student.conveyance_facility %}
-                            <span class="badge badge-info p-2 text-wrap h6 font-weight-bold rounded-pill">Transport: {{ student.transport_route.route_name }}</span>
+                            <span class="badge badge-info px-3 py-2 text-wrap font-weight-bold rounded-pill mb-2 mb-md-0">
+                                Transport: {{ student.transport_route.route_name }}
+                            </span>
                         {% else %}
-                            <span class="badge badge-secondary p-2 text-wrap h6 font-weight-bold rounded-pill">No Transport</span>
+                            <span class="badge badge-secondary px-3 py-2 text-wrap font-weight-bold rounded-pill mb-2 mb-md-0">
+                                No Transport
+                            </span>
                         {% endif %}
                     </div>
+                    {% if total_paid > 0 %}
+                        <small class="text-muted italic"><i class="fa fa-info-circle"></i> Installment plan cannot be changed once fees are partially/fully paid.</small>
+                    {% endif %}
                 </div>
                 
                 <div class="d-flex mt-3 mt-md-0">
@@ -84,9 +102,27 @@
         </div>
 
         <div class="mb-5">
-            <h2 class="h3 font-weight-bold text-secondary mb-3">
-                📂 Academic Fee Schedule
-            </h2>
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3">
+                <!-- Section Heading -->
+                <h2 class="h3 font-weight-bold text-secondary mb-2 mb-sm-0">
+                    📂 Academic Fee Schedule
+                </h2>
+
+                <!-- Fee Plan Dropdown Form -->
+                <form action="{% url 'update_fee_plan' student.id %}" method="POST" class="d-inline-flex align-items-center">
+                    {% csrf_token %}
+                    <label for="fee_type" class="mr-2 mb-0 font-weight-bold text-dark text-nowrap">Fee Plan:</label>
+                    <div class="input-group input-group-sm" style="width: auto;">
+                        <select name="fee_type" id="fee_type" class="custom-select font-weight-bold border-primary text-primary" style="font-size: 14px; height: 30px" onchange="this.form.submit()" {% if total_paid > 0 %}disabled{% endif %}>
+                            <option value="QUARTERLY" {% if student.fee_type == 'QUARTERLY' %}selected{% endif %}>Quarterly</option>
+                            <option value="HALF_YEARLY" {% if student.fee_type == 'HALF_YEARLY' %}selected{% endif %}>Half Yearly</option>
+                            <option value="YEARLY" {% if student.fee_type == 'YEARLY' %}selected{% endif %}>Yearly</option>
+                            <option value="THRICE" {% if student.fee_type == 'THRICE' %}selected{% endif %}>Thrice</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
             <div class="card shadow-sm border border-light overflow-hidden">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0 text-left">

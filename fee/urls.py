@@ -8,4 +8,5 @@ urlpatterns = [
     path('receipt/<str:receipt_no>/', views.fee_receipt_detail, name='fee_receipt_detail'),
     path('checkout/', views.checkout_fee_page, name='checkout_fee_page'),
     path('collect-multiple/', views.collect_fee_multiple_ledgers, name='collect_multiple_fees'),
+    path('update-fees-plan/<int:student_id>', views.update_fee_plan, name="update_fee_plan")
 ]
