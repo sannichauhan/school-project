@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from fee.models import FeeLedger
 from fee.services import promote_student_with_ledger
-from .models import Section, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
+from .models import Section, Medium, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .forms import AcademicSessionForm
 
 # --- Inlines for a better UI ---
@@ -201,3 +201,7 @@ def perform_promotion(modeladmin, request, queryset):
 class StudentEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'from_class', 'to_class', 'academic_year', 'is_active')
     actions = [perform_promotion]
+
+@admin.register(Medium)
+class MediumStudent(admin.ModelAdmin):
+    list_display = ('medium_name','created_at')

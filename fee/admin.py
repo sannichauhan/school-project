@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import FeeHead, BaseFeeStructure, StudentFeeAllocation, FeeLedger, Transaction
-from student.models import TransportRoute
+from student.models import TransportRoute, Medium
 
 @admin.register(FeeHead)
 class FeeHeadAdmin(admin.ModelAdmin):
@@ -14,7 +14,7 @@ class TransportRouteAdmin(admin.ModelAdmin):
 
 @admin.register(BaseFeeStructure)
 class BaseFeeStructureAdmin(admin.ModelAdmin): 
-    list_display = ('academic_year', 'standard', 'fee_head', 'total_amount')
+    list_display = ('academic_year', 'standard', 'medium', 'fee_head', 'total_amount')
     list_filter = ('academic_year',)
 
 @admin.register(StudentFeeAllocation)

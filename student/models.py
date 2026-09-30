@@ -97,7 +97,13 @@ class TransportRoute(models.Model):
 
     def __str__(self):
         return self.route_name
+
+class Medium(models.Model):
+    medium_name = models.CharField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
     
+    def __str__(self):
+        return self.medium_name
 
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
@@ -129,7 +135,7 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
     religion = models.CharField(max_length=20, choices=RELIGION_CHOICES)
-    medium = models.CharField(max_length=20, choices=MEDIUM_CHOICES,default='HINDI')
+    medium = models.ForeignKey(Medium, on_delete=models.CASCADE, null=True, default=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)    
     adhaar_number = models.CharField(
         max_length=12, unique=True, blank=True, null=True,

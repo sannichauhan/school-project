@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from student.models import Student, AcademicSession, StudentClass, StudentEnrollment, TransportRoute
+from student.models import Student, AcademicSession, StudentClass, StudentEnrollment, TransportRoute, Medium
+from datetime import timezone
     
 
 class FeeHead(models.Model):
@@ -10,10 +11,11 @@ class FeeHead(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 class BaseFeeStructure(models.Model):
     academic_year = models.ForeignKey(AcademicSession, on_delete=models.CASCADE)
     standard = models.ForeignKey(StudentClass, on_delete=models.CASCADE, related_name='fees', null=True, blank=True)
+    medium = models.ForeignKey(Medium, null=True, blank=True, on_delete=models.CASCADE, related_name="fee_medium")
     fee_head = models.ForeignKey(FeeHead, on_delete=models.CASCADE)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -21,6 +23,7 @@ class BaseFeeStructure(models.Model):
         return f"{self.standard.name} - {self.fee_head.name}"
 
 class StudentFeeAllocation(models.Model):
+    BaseFeeStructure.objects.filter()
     FEE_TYPE_CHOICES = [
         ('QUARTERLY', 'Quarterly'),
         ('HALF_YEARLY', 'Half Yearly'),
@@ -86,3 +89,4 @@ class Transaction(models.Model):
     payment_date = models.DateTimeField(auto_now_add=True)
     collected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     receipt_no = models.CharField(max_length=50, blank=True, null=True)
+    

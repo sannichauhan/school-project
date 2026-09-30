@@ -96,6 +96,8 @@ def create_fee_schedule_for_student(student, academic_year):
     #     current_enrollment.save()
 
     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
+    if student.medium:
+        base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class, medium=student.medium)
     total_academic_fee = sum(fee.total_amount for fee in base_fees)
     
     
