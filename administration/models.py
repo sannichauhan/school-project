@@ -151,7 +151,7 @@ class TransferCertificate(models.Model):
 
         school_codes = {
             'NAV CHETANA PUBLIC SCHOOL': '09591001109',
-            'KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S': '09591001108',
+            'K. D. G. NAV CHETANA PUBLIC J.H.S': '09591001108',
         }
 
         return school_codes.get(school, '')
@@ -209,37 +209,79 @@ class Attendance(models.Model):
 
 
 class ExamSlot(models.Model):
+
     SHIFT_CHOICES = [
-        ('I', 'I Shift (8:45 AM - 11:55 AM)'),
-        ('II', 'II Shift (12:15 PM - 2:45 PM)'),
+        ('I', 'I Shift (8:45 AM - 09:55 AM)'),
+        ('II', 'II Shift (11:10 AM - 12:20 PM)'),
+        ('III', 'III Shift (12:30 PM - 1:40 PM)'),
     ]
-    
+
     date = models.DateField()
-    day = models.CharField(max_length=20)  # e.g., Wednesday, Thursday
-    shift = models.CharField(max_length=2, choices=SHIFT_CHOICES)
+
+    shift = models.CharField(
+        max_length=3,
+        choices=SHIFT_CHOICES
+    )
+
 
     class Meta:
-        ordering = ['date', 'shift']
-        unique_together = ('date', 'shift')
+        ordering = ['date',  'shift']
+
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=['date', 'shift'],
+        #         name='exam_slot_date_shift_unique'
+        #     )
+        # ]
 
     def __str__(self):
-        return f"{self.date} ({self.day}) - Shift {self.shift}"
+        return f"{self.date} - Shift {self.shift}"
 
 
 class ExamSchedule(models.Model):
-    CLASS_CATEGORY_CHOICES = [
-        ('NUR_UKG', 'Nursery/U.K.G.'),
-        ('I_VIII', '1st to VIIIth'),
-    ]
 
-    slot = models.ForeignKey(ExamSlot, on_delete=models.CASCADE, related_name='schedules')
-    class_category = models.CharField(max_length=10, choices=CLASS_CATEGORY_CHOICES)
-    subject = models.CharField(max_length=100, default="Study", help_text="Enter subject name or 'Study'/'Holiday'")
+    student_class = models.ForeignKey(
+        StudentClass,
+        on_delete=models.CASCADE,
+        related_name='exam_schedules',
+        null=True,
+        blank=True
+    )
+
+    slot = models.ForeignKey(
+        ExamSlot,
+        on_delete=models.CASCADE,
+        related_name='schedules'
+    )
+
+    subject = models.CharField(
+        max_length=100,
+        default='',
+        blank=True
+    )
 
     class Meta:
-        unique_together = ('slot', 'class_category')
+        ordering = [
+            'slot__date',
+            'slot__shift',
+            'student_class'
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slot', 'student_class'],
+                name='exam_schedule_slot_class_unique'
+            )
+        ]
 
     def __str__(self):
-        return f"{self.class_category} - {self.subject} on {self.slot.date}"
-    
+        return (
+            f"{self.student_class} - "
+            f"{self.subject} - "
+            f"{self.slot.date} "
+            f"(Shift {self.slot.shift})"
+        )
+
+
+ 
     

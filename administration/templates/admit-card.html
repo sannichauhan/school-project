@@ -19,8 +19,24 @@
             max-width: 100%;
             margin: auto;
         }
+        .classRoll .row {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0px;
+            justify-content: center;
+        }
+        .details-table td.value {
+            text-transform: uppercase;
+        }
         .posRelImg{
             position:relative;
+        }
+        .timetable-col p {
+            padding: 0PX;
+            margin: 0px 0px 10px 0px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
         }
         .posRelImg img {
             position: absolute;
@@ -256,6 +272,63 @@
             <a href="{% url 'bulk-admit-card' %}" style="text-decoration:none; padding:10px 20px; background:#6c757d; color:white; border-radius:5px;">Back</a>
             <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Print / Save PDF</button>
         </div>
+    <div class="classRoll no-print">
+        <form method="GET" class="mb-4">
+
+            <div class="row">
+
+                <!-- CLASS -->
+                <div class="col-md-4">
+                    <label><strong>Select Class</strong></label>
+
+                    <select name="class_id"
+                            class="form-control"
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Class --</option>
+
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}"
+                                {% if class_id|stringformat:"s" == cls.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- ROLL NUMBER -->
+                <div class="col-md-4">
+                    <label><strong>Select Roll Number</strong></label>
+
+                    <select name="roll_number"
+                            class="form-control"
+                            {% if not class_id %}disabled{% endif %}
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Roll Number --</option>
+
+                        {% for student in students %}
+                            <option value="{{ student.roll_number }}"
+                                {% if roll_number|stringformat:"s" == student.roll_number|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ student.roll_number }} - {{ student.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
 
         <div class="page">
         {% for admit_card in admit_cards %}
@@ -303,7 +376,7 @@
                             <tr>
                                 <td class="label">Class</td>
                                 <td class="separator">:</td>
-                                <td class="value">{{ admit_card.student.admission_class.name }}</td>
+                                <td class="value">{{ admit_card.student.current_class.name }}</td>
                             </tr>
                             <tr>
                                 <td class="label">Roll Number</td>
@@ -317,41 +390,65 @@
                             </tr>
                         </table>
                     </div>
+                    
+                   <div class="timetable-col">                        
+                    <p>Exam Time 8:15 AM To 1:45 PM</p>
+<table class="table table-bordered timetable-table">
 
-                   <div class="timetable-col">
-                        
-                       <table class="timetable-table border">
-                            {% comment %} <thead>
-                                <tr class="table-group-divider fw-bold small">
-                                    <th class="p-1"></th>
-                                    {% for cg in class_groups %}
-                                        <th class="p-1 align-middle {% if cg == card.matched_group %}table-primary fw-bold{% endif %}" style="height: 60px;">
-                                            {{ cg.formatted_name|default:cg.name }}
-                                        </th>
-                                    {% endfor %}
-                                </tr>
-                            </thead> {% endcomment %}
-                            <tbody>
-                                {% for row in table_rows %}
-                                    <tr>
-                                        <td class="p-1 fw-medium text-nowrap">
-                                            {{ row.date|date:"d-m-Y" }}
-                                        </td>
-                                        {% for sub in row.subjects %}
-                                            <td class="p-1 align-top cell-pre-line">
-                                                {{ sub|linebreaksbr }}
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="{{ class_groups|length|add:1 }}" class="text-center py-4 text-muted">
-                                            No examination schedules added yet.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>  
+    {% comment %} <thead>
+        <tr>
+            <th>Date</th>
+
+            {% for shift in active_shifts %}
+                <th>
+                    {% if shift == 'I' %}
+                        1st shift
+                    {% elif shift == 'II' %}
+                        2nd shift
+                    {% elif shift == 'III' %}
+                        3rd shift
+                    {% else %}
+                        {{ shift }} shift
+                    {% endif %}
+                </th>
+            {% endfor %}
+
+        </tr>
+    </thead> {% endcomment %}
+
+    <tbody>
+
+        {% for row in timetable_rows %}
+
+        <tr>
+
+            <td>
+                {{ row.date|date:"d-m-Y" }}
+            </td>
+
+            {% for subject in row.shifts %}
+                <td>
+                    {{ subject }}
+                </td>
+            {% endfor %}
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="10" class="text-center">
+                No Exam Schedule Found
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
                     </div> 
 
                     <div class="photo-sig-col">

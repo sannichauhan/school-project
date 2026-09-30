@@ -3,9 +3,9 @@ from django.utils.html import format_html
 from .models import (
     AdmitCard,
     TransferCertificate,
-    Attendance,
     ExamSlot, 
-    ExamSchedule
+    ExamSchedule,
+    Attendance
 )
 
 # Register your models here.
@@ -53,16 +53,14 @@ class AttendanceAdmin(admin.ModelAdmin):
     date_hierarchy = 'attendance_date'
 
 
-
-
-
 class ExamScheduleInline(admin.TabularInline):
     model = ExamSchedule
-    extra = 2  # Pre-populates rows for both class categories automatically
-    max_num = 2
+    extra = 1  
+    
 
 @admin.register(ExamSlot)
 class ExamSlotAdmin(admin.ModelAdmin):
-    list_display = ('date', 'day', 'shift')
+    list_display = ('date', 'shift')
     list_filter = ('date', 'shift')
     inlines = [ExamScheduleInline]
+

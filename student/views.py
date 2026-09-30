@@ -1,5 +1,9 @@
 from multiprocessing import context
-
+import openpyxl
+from django.http import HttpResponse, Http404
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from django.contrib import messages
@@ -204,12 +208,44 @@ def add_class_view(request, class_id=None):
     
     
 ### View students
+
+# def student_list_view(request):
+#     students = Student.objects.all()
+#     context = {
+#         'page_title': 'All Students',
+#         'students': students,
+#         'breadcrumbs': [
+#             {'name': 'Home', 'url': '/'},
+#             {'name': 'Students', 'url': ''},
+#         ]
+#     }
+#     return render(request, 'student_list.html', context)
+
 @login_required
 def student_list_view(request):
-    students = Student.objects.all()
+    name_query = request.GET.get('name', '').strip()
+    class_query = request.GET.get('class_name', '').strip()
+
+    # QuerySet optimization
+    students = Student.objects.select_related(
+        'current_class', 'admission_class', 'section', 'permanent_address'
+    ).all()
+
+    # Name Search (Student Name ya Father Name)
+    if name_query:
+        students = students.filter(
+            Q(name__icontains=name_query) | Q(father_name__icontains=name_query)
+        )
+
+    # Sirf Current Class ke name par filter karega
+    if class_query:
+        students = students.filter(current_class__name__icontains=class_query)
+
     context = {
         'page_title': 'All Students',
         'students': students,
+        'search_name': name_query,
+        'search_class': class_query,
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
             {'name': 'Students', 'url': ''},
@@ -821,3 +857,88 @@ def student_history_view(request, student_id):
         'student': student,
         'enrollments': enrollments
     })
+
+def export_students_by_class(request):
+    class_id = request.GET.get('class_id')
+    
+    if not class_id:
+        return HttpResponse("Please select a class first.", status=400)
+
+    # Validate class existence
+    current_class = get_object_or_404(StudentClass, id=class_id)
+    
+    # Query optimized with select_related for exact foreign keys in Student model
+    students = Student.objects.filter(current_class=current_class).select_related(
+        'current_class', 
+        'section', 
+        'permanent_address'
+    )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Class_{current_class.name}"
+
+    # Headers matching the fields defined in your Student model
+    headers = [
+        "#",          
+        "Name", 
+        "Gender", 
+        "Class", 
+        "Roll Number",
+        "Date of Birth",
+        "Religion",
+        "Category",
+        "Father Name", 
+        "Father Occupation",
+        "Mother Name",
+        "Mother Occupation", 
+        "Contact Number", 
+        "Aadhaar Number",
+        "Academic Session",
+        "School Name", 
+        "Last Institution",
+        "Student Photo",
+        "Conveyance Facility",
+        "PEN Number",
+        "Transport Route", 
+        "Address"
+    ]
+    ws.append(headers)
+
+    for index, student in enumerate(students, start=1):
+        # Format permanent address string safely
+        addr = student.permanent_address
+        address_str = str(addr) if addr else ""
+
+        ws.append([
+            index,            
+            student.name,
+            student.gender,
+            student.current_class.name if student.current_class else '',
+            student.roll_number,
+            student.date_of_birth.strftime('%d/%m/%Y') if student.date_of_birth else '',
+            student.religion,
+            student.category,
+            student.father_name,            
+            student.father_occupation,       
+            student.mother_name, 
+            student.mother_occupation,      
+            student.contact_number,
+            student.adhaar_number or '', 
+            str(student.session),
+            student.choose_school,
+            student.last_institution,
+            str(student.student_photo),
+            student.conveyance_facility,
+            student.pen_number or '',
+            str(student.transport_route) if student.transport_route else "",
+            address_str,
+        ])
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="Students_{current_class.name}.xlsx"'
+    
+    wb.save(response)
+    return response
