@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admit Card - NCPS</title>
     <style>
+
         @page {
             size: A4 landscape;
             margin: 3mm 5mm;
@@ -16,6 +18,31 @@
             gap: 15px;
             max-width: 100%;
             margin: auto;
+        }
+        .classRoll .row {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0px;
+            justify-content: center;
+        }
+        .details-table td.value {
+            text-transform: uppercase;
+        }
+        .posRelImg{
+            position:relative;
+        }
+        .timetable-col p {
+            padding: 0PX;
+            margin: 0px 0px 10px 0px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .posRelImg img {
+            position: absolute;
+            top: -49px;
+            left: 40px;
+            width: 140px;
         }
 
         body {
@@ -50,21 +77,23 @@
             align-items: center;
             justify-content: center;
             border-bottom: 2px solid #000;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
         }
         .logo-placeholder {
-            width: 50px;
-            height: 50px;
+            width: 78px;
+            height: auto;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 0px;
+            padding: 0;
+            margin-top: -5px;
         }
         .logo-placeholder img {
-            width: 50px;
-            height: 50px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 50%;
         }
@@ -72,23 +101,25 @@
             text-align: center;
         }
         .header-text h1 {
-            font-size: 20px;
+            font-size: 40px;
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1;
         }
         .header-text p {
-            font-size: 13px;
-            margin: 3px 0 0 0;
+            font-size: 24px;
+            margin: 0px;
             font-weight: bold;
             color: #333;
+            line-height: 1;
         }
 
         /* Sub-Header Title */
         .exam-title {
             text-align: center;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 18px;
             margin-bottom: 15px;
             letter-spacing: .5px;
             text-transform: uppercase;
@@ -131,7 +162,7 @@
 
         /* Column 2: Timetable (Subject first, then Date) */
         .timetable-col {
-            width: 40%;
+            width: 45%;
         }
         .timetable-title {
             font-size: 12px;
@@ -218,6 +249,16 @@
             gap: 20px;
         }
 
+        .admitHeader {
+            display: flex;
+            position: absolute;
+            top: -10px;
+        }
+        .posRel {
+            position: relative;
+            height: 58px;
+        }
+
         @media print{
             .no-print{ display:none; }
             body{ margin:0; background-color: #fff; }
@@ -228,23 +269,85 @@
 <body>
     <div style="width: 100%; max-width: 1140px;">
         <div class="toolbar no-print">
-            <a href="{% url 'admit-card-generate' %}" style="text-decoration:none; padding:10px 20px; background:#6c757d; color:white; border-radius:5px;">Back</a>
+            <a href="{% url 'bulk-admit-card' %}" style="text-decoration:none; padding:10px 20px; background:#6c757d; color:white; border-radius:5px;">Back</a>
             <button onclick="window.print()" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">Print / Save PDF</button>
         </div>
+    <div class="classRoll no-print">
+        <form method="GET" class="mb-4">
+
+            <div class="row">
+
+                <!-- CLASS -->
+                <div class="col-md-4">
+                    <label><strong>Select Class</strong></label>
+
+                    <select name="class_id"
+                            class="form-control"
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Class --</option>
+
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}"
+                                {% if class_id|stringformat:"s" == cls.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- ROLL NUMBER -->
+                <div class="col-md-4">
+                    <label><strong>Select Roll Number</strong></label>
+
+                    <select name="roll_number"
+                            class="form-control"
+                            {% if not class_id %}disabled{% endif %}
+                            onchange="this.form.submit()">
+
+                        <option value="">-- Select Roll Number --</option>
+
+                        {% for student in students %}
+                            <option value="{{ student.roll_number }}"
+                                {% if roll_number|stringformat:"s" == student.roll_number|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ student.roll_number }} - {{ student.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+            </div>
+
+        </form>
+    </div>
 
         <div class="page">
         {% for admit_card in admit_cards %}
         <div class="admit-card-container">
             <div class="card-border">        
                 
-                <div class="header">
-                    <div class="logo-placeholder">
+                <div class="header posRel">
+                    <div class="admitHeader">
+                        <div class="logo-placeholder">
                        <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
                     </div>
                     <div class="header-text">
                         <h1>{{admit_card.student.choose_school}}</h1>
                         <p>CHHAHUN, KUSHINAGAR, 274303 </p>
                     </div>
+                    <div class="logo-placeholder">
+                       <img src="/static/img/ncps-logo.jpeg" alt="logo"> 
+                    </div>
+                </div>
                 </div>
 
                 <div class="exam-title">
@@ -273,7 +376,7 @@
                             <tr>
                                 <td class="label">Class</td>
                                 <td class="separator">:</td>
-                                <td class="value">{{ admit_card.student.admission_class.name }}</td>
+                                <td class="value">{{ admit_card.student.current_class.name }}</td>
                             </tr>
                             <tr>
                                 <td class="label">Roll Number</td>
@@ -287,30 +390,66 @@
                             </tr>
                         </table>
                     </div>
+                    
+                   <div class="timetable-col">                        
+                    <p>Exam Time 8:15 AM To 1:45 PM</p>
+<table class="table table-bordered timetable-table">
 
-                    {% comment %} <div class="timetable-col">
-                        <div class="timetable-title">Examination Timetable</div>
-                        <table class="timetable-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 60%;">Subject Name</th>
-                                    <th style="width: 40%;">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for schedule in admit_card.schedules %}
-                                <tr>
-                                    <td>{{ schedule.subject.name }}</td>
-                                    <td>{{ schedule.date|date:"d/m/y" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="2" style="text-align: center; color: #666; font-size: 11px;">No schedule available.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div> {% endcomment %}
+    {% comment %} <thead>
+        <tr>
+            <th>Date</th>
+
+            {% for shift in active_shifts %}
+                <th>
+                    {% if shift == 'I' %}
+                        1st shift
+                    {% elif shift == 'II' %}
+                        2nd shift
+                    {% elif shift == 'III' %}
+                        3rd shift
+                    {% else %}
+                        {{ shift }} shift
+                    {% endif %}
+                </th>
+            {% endfor %}
+
+        </tr>
+    </thead> {% endcomment %}
+
+    <tbody>
+
+        {% for row in timetable_rows %}
+
+        <tr>
+
+            <td>
+                {{ row.date|date:"d-m-Y" }}
+            </td>
+
+            {% for subject in row.shifts %}
+                <td>
+                    {{ subject }}
+                </td>
+            {% endfor %}
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="10" class="text-center">
+                No Exam Schedule Found
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+                    </div> 
 
                     <div class="photo-sig-col">
                         <div class="photo-box">
@@ -327,7 +466,10 @@
 
                 <div class="footer-sign">
                     <div class="controller-sign-line">Class Teacher</div>
-                    <div class="controller-sign-line">Principal</div>
+                    <div class="controller-sign-line posRelImg">
+                        <img src="{% static 'img/principal-singaturgre.png' %}" alt="Principal Signature">
+                        Principal
+                    </div>
                 </div>
 
             </div>

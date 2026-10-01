@@ -1,0 +1,157 @@
+{% extends 'base4.html' %} 
+{% block content %}
+ <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0 !important; background-color: white !important; }
+            .shadow, .shadow-lg { box-shadow: none !important; }
+            .container-wrapper { border: 2px solid #6c757d !important; max-width: 100% !important; }
+        }
+        .logo-box {
+            width: 80px;
+            height: 80px;
+        }
+        .cell-pre-line {
+            white-space: pre-line;
+        }
+    </style>
+<div id="wrapper" class="wrapper bg-ash">
+ <!-- Header Menu Area Start Here -->
+ {% include "tags/header.html" %}
+ <!-- Header Menu Area End Here -->
+
+ <!-- Page Area Start Here -->
+ <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+        <!-- Breadcubs Area Start Here -->
+        {% include "tags/breadcrumb.html" %}
+        <!-- Breadcubs Area End Here -->
+
+        <div class="card height-auto">
+            <div class="card-body">
+                <div class="heading-layout1">
+                    <div class="item-title">
+                        <h3>Exam List and Academic Session</h3>
+                    </div>
+                </div>
+
+                <div class="container-wrapper bg-white  p-4 p-md-5 shadow rounded-1 text-center">
+        
+        <!-- Print Button -->
+        <div class="no-print text-end mb-3">
+            <button onclick="window.print()" class="btn btn-primary btn-sm fw-semibold">
+                <i class="bi bi-printer me-1"></i> Print Time Table
+            </button>
+        </div>
+
+        <!-- Header Section -->
+        <div class="d-flex align-items-center justify-content-between border-bottom border-2 border-secondary-subtle pb-3 mb-3">
+            <div class="logo-box d-flex align-items-center justify-content-center">
+                
+                {% if timetable.logo %}
+                    <img src="{{ timetable.logo.url }}" alt="Logo" class="img-fluid mh-100 mw-100 object-fit-contain">
+                {% else %}
+                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold small" style="width: 64px; height: 64px;">
+                        LOGO
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-center px-2">
+                <h1 class="h4 h3-md fw-black text-uppercase text-dark mb-1">
+                    {{ timetable.school_name }}
+                </h1>
+                <h2 class="h6 h5-md fw-semibold text-decoration-underline text-secondary mb-1">
+                    {{ timetable.title }}
+                </h2>
+                <!-- Header timing section -->
+                <p class="small fs-6-md fw-bold text-dark mb-0">
+                    {{ timetable.formatted_timing }}
+                </p>
+            </div>
+
+            <div class="logo-box d-flex align-items-center justify-content-center">
+                {% if timetable.logo %}
+                    <img src="{{ timetable.logo.url }}" alt="Logo" class="img-fluid mh-100 mw-100 object-fit-contain">
+                {% else %}
+                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-secondary fw-bold small" style="width: 64px; height: 64px;">
+                        LOGO
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dynamic Table Section -->
+        <div class="table-responsive">
+            <table class="table table-bordered border-secondary align-middle small mb-0">
+                <thead>
+                    <tr class="table-light">
+                        <th class="p-2" style="width: 110px;">Date</th>
+                        <th class="p-2" style="width: 110px;">Day</th>
+                        <th class="p-2" colspan="{{ class_groups|length }}">
+                            Classes and Examination Subject
+                        </th>
+                    </tr>
+                    <tr class="table-group-divider fw-bold small">
+                        <th class="p-1"></th>
+                        <th class="p-1"></th>
+                        
+                        <!-- Dynamic Columns (Classes) -->
+                        {% for cg in class_groups %}
+                            <th class="p-1 align-middle" style="height: 60px;">{{ cg.formatted_name|default:cg.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic Rows (Dates & Subjects) -->
+                    {% for row in table_rows %}
+                    <tr>
+                        <td class="p-1 fw-medium text-nowrap">
+                            {{ row.date|date:"d-m-Y" }}
+                        </td>
+                        <td class="p-1 fw-medium">
+                            {{ row.day_name }}
+                        </td>
+
+                        <!-- Dynamic Subjects per Class -->
+                        {% for sub in row.subjects %}
+                        <td class="p-1 align-top cell-pre-line">
+                            {{ sub }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-4 text-muted">No examination schedules added yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Dynamic Notice Section -->
+        {% if timetable.notice_text %}
+        <div class="mt-4 text-start small text-dark border-top border-secondary-subtle pt-3 fst-italic">
+            <p class="mb-0"><span class="fw-bold text-decoration-underline fst-normal">नोट:</span> {{ timetable.notice_text }}</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-5 text-end fw-bold text-dark pe-3">
+            प्रधानाचार्य
+        </div>
+    </div>
+                
+            </div>
+        </div>
+        
+        <!-- Footer Area Start Here -->
+        {% include "tags/footer.html" %}
+        <!-- Footer Area End Here -->
+    </div>
+</div>
+<!-- Page Area End Here -->
+</div>
+{% endblock content %}

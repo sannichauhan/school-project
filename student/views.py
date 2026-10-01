@@ -1,5 +1,9 @@
 from multiprocessing import context
-
+import openpyxl
+from django.http import HttpResponse, Http404
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from django.contrib import messages
@@ -51,12 +55,16 @@ class StudentViewSet(viewsets.ModelViewSet):
                 "written": mark.written_marks
             }
             
-        
+        mark_sheet_list = MarkSheet.objects.filter(studen=student)
+        mark_sheet = None
+        if mark_sheet_list:
+            mark_sheet = mark_sheet_list.first()
         # 3. Construct the final object
         report_data = {
             "student_name": student.name,
             "admission_class": student.admission_class.name,
-            "subjects": list(subject_map.values())
+            "subjects": list(subject_map.values()),
+            "mark_sheet": mark_sheet,
         }
         
         serializer = StudentReportCardSerializer(report_data)
@@ -164,18 +172,27 @@ def student_registration_view(request):
 ### Adding new class
 
 @login_required
-def add_class_view(request):
+def add_class_view(request, class_id=None):
+    if class_id:
+        student_class = get_object_or_404(StudentClass, id=class_id)
+    else:
+        student_class = None
     if request.method == 'POST':
-        form = StudentClassForm(request.POST)        
+        form = StudentClassForm(request.POST, instance=student_class)        
         if form.is_valid():
             form.save()
-            return redirect("class-list") # Redirect to a list of all classes
+            return redirect("class-list")
     
     else:
-        form = StudentClassForm()
+        if class_id:
+            # If class_id is provided, fetch the existing class for editing
+            class_instance = get_object_or_404(StudentClass, id=class_id)
+            form = StudentClassForm(instance=class_instance)
+        else:
+            form = StudentClassForm()
     
     # Fetch all classes to show them on the same page
-    all_classes = StudentClass.objects.all().order_by('name')
+    all_classes = StudentClass.objects.all().order_by('serial')
 
     context = {
         'form': form,
@@ -191,12 +208,44 @@ def add_class_view(request):
     
     
 ### View students
+
+# def student_list_view(request):
+#     students = Student.objects.all()
+#     context = {
+#         'page_title': 'All Students',
+#         'students': students,
+#         'breadcrumbs': [
+#             {'name': 'Home', 'url': '/'},
+#             {'name': 'Students', 'url': ''},
+#         ]
+#     }
+#     return render(request, 'student_list.html', context)
+
 @login_required
 def student_list_view(request):
-    students = Student.objects.all()
+    name_query = request.GET.get('name', '').strip()
+    class_query = request.GET.get('class_name', '').strip()
+
+    # QuerySet optimization
+    students = Student.objects.select_related(
+        'current_class', 'admission_class', 'section', 'permanent_address'
+    ).all()
+
+    # Name Search (Student Name ya Father Name)
+    if name_query:
+        students = students.filter(
+            Q(name__icontains=name_query) | Q(father_name__icontains=name_query)
+        )
+
+    # Sirf Current Class ke name par filter karega
+    if class_query:
+        students = students.filter(current_class__name__icontains=class_query)
+
     context = {
         'page_title': 'All Students',
         'students': students,
+        'search_name': name_query,
+        'search_class': class_query,
         'breadcrumbs': [
             {'name': 'Home', 'url': '/'},
             {'name': 'Students', 'url': ''},
@@ -744,7 +793,7 @@ def test_report_card_view(request, pk):
     return render(request, 'test_report_card.html', context)
 
 @login_required
-def promote_students(request, class_id=None, session_id=None):
+def promote_students(request, class_id=None, session_id=None, from_session_id=None):
 
     from .servicesOLd import bulk_promote_students_with_ledger
     if request.method == 'POST':
@@ -753,11 +802,18 @@ def promote_students(request, class_id=None, session_id=None):
         target_session_id = request.POST.get('target_session_id')
         
         target_class = get_object_or_404(StudentClass, id=from_class_id)
+        if target_session_id is None or target_session_id == '' or target_session_id == '0':
+            messages.error(request, "Target session must be selected.")
+            return redirect(request.path)
         target_session = get_object_or_404(AcademicSession, id=target_session_id)
 
         promoted_count = 0
 
         try:
+            
+            if target_session.start_date <= AcademicSession.objects.get(id=from_session_id).start_date:
+                messages.error(request, "Target session must be after the 'from' session.")
+                return redirect(request.path)
             with transaction.atomic():
                 created = bulk_promote_students_with_ledger(
                     academic_year_id=target_session.id,
@@ -776,13 +832,113 @@ def promote_students(request, class_id=None, session_id=None):
             messages.error(request, f"An error occurred during promotion: {str(e)}")
             return redirect(request.path)
     else:
+        from_session = AcademicSession.objects.filter(id=from_session_id).first()
         context = {
         'page_title': 'Bulk Student Promotion',
         'all_classes': StudentClass.objects.all(),
-        'all_sessions': AcademicSession.objects.all(),
-        'students': Student.objects.filter(current_class_id=class_id) if class_id and session_id else [],
+        'session_promot_from': AcademicSession.objects.all(),
+        'all_sessions': AcademicSession.objects.filter(is_active=True, start_date__gt=from_session.start_date) if from_session else AcademicSession.objects.filter(is_active=True),
+        'students': Student.objects.filter(current_class_id=class_id, session_id=from_session_id) if class_id and from_session_id else [],
         'selected_class': StudentClass.objects.filter(id=class_id).first() if class_id else StudentClass.objects.first(),
-        'selected_session': AcademicSession.objects.filter(id=session_id).first() if session_id else AcademicSession.objects.first(),
+        'selected_session': AcademicSession.objects.filter(id=session_id, is_active=True).first() if session_id else AcademicSession.objects.filter(is_active=True).first(),
+        'selected_from_session': from_session,
     }
     return render(request, 'promote_student.html', context)
         
+def student_history_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+    
+    # We flip the default model ordering to show oldest -> newest (chronological history)
+    enrollments = student.enrollments.all().select_related(
+        'from_class', 'to_class', 'academic_year'
+    ).order_by('academic_year__start_date', 'enrollment_date')
+    
+    return render(request, 'student_history.html', {
+        'student': student,
+        'enrollments': enrollments
+    })
+
+def export_students_by_class(request):
+    class_id = request.GET.get('class_id')
+    
+    if not class_id:
+        return HttpResponse("Please select a class first.", status=400)
+
+    # Validate class existence
+    current_class = get_object_or_404(StudentClass, id=class_id)
+    
+    # Query optimized with select_related for exact foreign keys in Student model
+    students = Student.objects.filter(current_class=current_class).select_related(
+        'current_class', 
+        'section', 
+        'permanent_address'
+    )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Class_{current_class.name}"
+
+    # Headers matching the fields defined in your Student model
+    headers = [
+        "#",          
+        "Name", 
+        "Gender", 
+        "Class", 
+        "Roll Number",
+        "Date of Birth",
+        "Religion",
+        "Category",
+        "Father Name", 
+        "Father Occupation",
+        "Mother Name",
+        "Mother Occupation", 
+        "Contact Number", 
+        "Aadhaar Number",
+        "Academic Session",
+        "School Name", 
+        "Last Institution",
+        "Student Photo",
+        "Conveyance Facility",
+        "PEN Number",
+        "Transport Route", 
+        "Address"
+    ]
+    ws.append(headers)
+
+    for index, student in enumerate(students, start=1):
+        # Format permanent address string safely
+        addr = student.permanent_address
+        address_str = str(addr) if addr else ""
+
+        ws.append([
+            index,            
+            student.name,
+            student.gender,
+            student.current_class.name if student.current_class else '',
+            student.roll_number,
+            student.date_of_birth.strftime('%d/%m/%Y') if student.date_of_birth else '',
+            student.religion,
+            student.category,
+            student.father_name,            
+            student.father_occupation,       
+            student.mother_name, 
+            student.mother_occupation,      
+            student.contact_number,
+            student.adhaar_number or '', 
+            str(student.session),
+            student.choose_school,
+            student.last_institution,
+            str(student.student_photo),
+            student.conveyance_facility,
+            student.pen_number or '',
+            str(student.transport_route) if student.transport_route else "",
+            address_str,
+        ])
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="Students_{current_class.name}.xlsx"'
+    
+    wb.save(response)
+    return response

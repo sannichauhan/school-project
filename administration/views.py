@@ -8,40 +8,147 @@ from .models import AdmitCard, TransferCertificate, Attendance, ExamSlot, ExamSc
 from .forms import TransferCertificateForm, AdmitCardForm
 from student.models import StudentClass, Student
 from django.db import IntegrityError
+from .models import Student, AdmitCard
+from exam.models import TimeTable
+from .forms import AdmitCardForm, BulkAdmitCardForm
+
 
 @login_required
 def administration(request):
     return HttpResponse("Hello")  
-     
+
 @login_required
 def admit_card_view(request):
 
-    class_id = request.GET.get("class_id")
+    class_id = request.GET.get('class_id')
+    roll_number = request.GET.get('roll_number')
+
+    classes = StudentClass.objects.all().order_by('name')
+    students = Student.objects.none()
+
+    if class_id:
+        students = (
+            Student.objects
+            .filter(current_class_id=class_id)
+            .order_by('roll_number', 'name')
+        )
+        
+    # --------------------------------
+    # Admit Cards
+    # --------------------------------
 
     admit_cards = AdmitCard.objects.select_related(
         'student',
-        'student__admission_class',
+        'student__current_class',
         'session',
         'exam_type'
     )
 
+    # Class filter
     if class_id:
         admit_cards = admit_cards.filter(
-            student__admission_class_id=class_id
+            student__current_class_id=class_id
+        )
+
+    # Roll Number filter
+    if roll_number:
+        admit_cards = admit_cards.filter(
+            student__roll_number=roll_number
         )
 
     admit_cards = admit_cards.order_by(
-        'student__admission_class__name',
+        'student__current_class__name',
+        'student__roll_number',
         'student__name'
     )
-    
+
+    # --------------------------------
+    # Class Timetable
+    # --------------------------------
+
+    timetable_data = defaultdict(dict)
+    active_shifts = []
+
+    shift_order = ['I', 'II', 'III']
+
+    if class_id:
+
+        schedules = (
+            ExamSchedule.objects
+            .filter(student_class_id=class_id)
+            .select_related('slot')
+            .order_by(
+                'slot__date',
+                'slot__shift'
+            )
+        )
+
+        # --------------------------------
+        # Date wise timetable data
+        # --------------------------------
+
+        for schedule in schedules:
+
+            date = schedule.slot.date
+            shift = schedule.slot.shift
+
+            timetable_data[date][shift] = schedule.subject
+
+            if shift not in active_shifts:
+                active_shifts.append(shift)
+
+    # --------------------------------
+    # Shift order: I → II → III
+    # --------------------------------
+
+    active_shifts = [
+        shift
+        for shift in shift_order
+        if shift in active_shifts
+    ]
+
+    # --------------------------------
+    # Template timetable rows
+    # --------------------------------
+
+    timetable_rows = []
+
+    for date in sorted(timetable_data.keys()):
+
+        shifts = timetable_data[date]
+
+        row = {
+            "date": date,
+            "shifts": []
+        }
+
+        for shift in active_shifts:
+
+            row["shifts"].append(
+                shifts.get(shift, "")
+            )
+
+        timetable_rows.append(row)
+
+    # --------------------------------
+    # Context
+    # --------------------------------
+
+    context = {
+        'admit_cards': admit_cards,
+        'timetable_rows': timetable_rows,
+        'active_shifts': active_shifts,
+        'classes': classes,
+        'students': students,
+        'class_id': class_id,
+        'roll_number': roll_number,
+        
+    }
 
     return render(
         request,
         'admit-card.html',
-        {
-            'admit_cards': admit_cards
-        }
+        context
     )
 
 
@@ -115,7 +222,7 @@ def take_attendance(request):
     if class_id:
         selected_class = StudentClass.objects.get(id=class_id)
         students = Student.objects.filter(
-            admission_class=selected_class
+            current_class=selected_class
         )
 
     if request.method == 'POST':
@@ -206,7 +313,7 @@ def create_admit_card_view(request):
 
         context = {
             'form': form,
-            'page_title': 'Generate New Admit Card',            
+            'page_title': 'Generate New Admit Card', 
             'breadcrumbs': [
                 {'name': 'Home', 'url': '/'},
                 {'name': 'Generate New Admit Card', 'url': ''},
@@ -217,39 +324,6 @@ def create_admit_card_view(request):
 
 
 
-@login_required
-def exam_timetable_view(request):
-    slots = ExamSlot.objects.prefetch_related('schedules').all()
-    
-    # Process and structure data to match the image grid
-    matrix = defaultdict(lambda: {
-        'NUR_UKG': {'I': 'Study', 'II': 'Study'},
-        'I_VIII':  {'I': 'Study', 'II': 'Study'}
-    })
-    
-    # Track days mapped to dates securely
-    date_to_day = {}
-
-    for slot in slots:
-        date_str = slot.date.strftime('%d-%m-%Y')
-        date_to_day[date_str] = slot.day
-        
-        for sched in slot.schedules.all():
-            matrix[date_str][sched.class_category][slot.shift] = sched.subject
-
-    # Flatten data structure for easy template looping
-    timetable_data = []
-    for date_str, categories in sorted(matrix.items(), key=lambda x: x[0]):
-        timetable_data.append({
-            'date': date_str,
-            'day': date_to_day[date_str],
-            'nursery_shift_1': categories['NUR_UKG'].get('I', 'Study'),
-            'nursery_shift_2': categories['NUR_UKG'].get('II', 'Study'),
-            'primary_shift_1': categories['I_VIII'].get('I', 'Study'),
-            'primary_shift_2': categories['I_VIII'].get('II', 'Study'),
-        })
-
-    return render(request, 'exam-schedule.html', {'timetable': timetable_data})
 
 
 @login_required
@@ -260,3 +334,249 @@ def id_cards_view(request):
     }
     return render(request, 'id-card.html', context)
 
+
+def bulk_generate_admit_card(request):
+
+    if request.method == 'POST':
+
+        form = BulkAdmitCardForm(request.POST)
+
+        if form.is_valid():
+
+            session = form.cleaned_data['session']
+            exam_type = form.cleaned_data['exam_type']
+            student_class = form.cleaned_data['student_class']
+            exam_start_date = form.cleaned_data['exam_start_date']
+            exam_end_date = form.cleaned_data['exam_end_date']
+            remarks = form.cleaned_data['remarks']
+
+            # Class ke students
+            students = Student.objects.filter(
+                current_class=student_class
+            )
+
+            created_count = 0
+            skipped_count = 0
+
+            for student in students:
+
+                # Check duplicate
+                already_exists = AdmitCard.objects.filter(
+                    student=student,
+                    session=session,
+                    exam_type=exam_type
+                ).exists()
+
+                if already_exists:
+                    skipped_count += 1
+                    continue
+
+                try:
+
+                    AdmitCard.objects.create(
+                        student=student,
+                        session=session,
+                        exam_type=exam_type,
+                        exam_start_date=exam_start_date,
+                        exam_end_date=exam_end_date,
+                        remarks=remarks
+                    )
+
+                    created_count += 1
+
+                except IntegrityError:
+                    skipped_count += 1
+
+            messages.success(
+                request,
+                f"{created_count} Admit Cards generated successfully."
+            )
+
+            if skipped_count > 0:
+                messages.warning(
+                    request,
+                    f"{skipped_count} Admit Cards already existed and were skipped."
+                )
+
+            return redirect('admit-card')
+
+    else:
+        form = BulkAdmitCardForm()
+
+    context = {
+        'form': form,
+        'page_title': 'Bulk Generate Admit Cards',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Bulk Generate Admit Cards', 'url': ''},
+        ]
+    }
+
+    return render(
+        request,
+        'bulk_generate_admit_card.html',
+        context
+    )
+
+
+
+
+# =========================================================
+# EXAM TIMETABLE DISPLAY
+# =========================================================
+@login_required
+def exam_timetable_view(request):
+
+    classes = StudentClass.objects.all().order_by('id')
+
+    slots = (
+        ExamSlot.objects
+        .prefetch_related('schedules__student_class')
+        .order_by('date', 'shift')
+    )
+
+    # -----------------------------------------
+    # CLASS WISE DATA
+    # -----------------------------------------
+
+    class_wise_data = defaultdict(lambda: defaultdict(dict))
+
+    for slot in slots:
+
+        date = slot.date
+        shift = slot.shift
+
+        for schedule in slot.schedules.all():
+
+            if schedule.student_class:
+
+                class_id = schedule.student_class.id
+
+                class_wise_data[class_id][date][shift] = (
+                    schedule.subject
+                )
+
+    timetable = []
+
+    shift_order = ['I', 'II', 'III']
+
+    # -----------------------------------------
+    # CLASS WISE TIMETABLE
+    # -----------------------------------------
+
+    for cls in classes:
+
+        dates = []
+
+        # -------------------------------------
+        # FIND ACTIVE SHIFTS FOR THIS CLASS
+        # -------------------------------------
+
+        active_shifts = []
+
+        for shift in shift_order:
+
+            for date in class_wise_data[cls.id]:
+
+                subject = class_wise_data[
+                    cls.id
+                ][date].get(shift, '')
+
+                if subject:
+                    active_shifts.append(shift)
+                    break
+
+        # -------------------------------------
+        # CREATE DATE ROWS
+        # -------------------------------------
+
+        for date in sorted(
+            class_wise_data[cls.id].keys()
+        ):
+
+            shifts = []
+
+            for shift in active_shifts:
+
+                shifts.append(
+                    class_wise_data[
+                        cls.id
+                    ][date].get(shift, '')
+                )
+
+            dates.append({
+                'date': date,
+                'day': date.strftime('%A'),
+                'shifts': shifts,
+            })
+
+        timetable.append({
+            'class_id': cls.id,
+            'class_name': str(cls),
+            'dates': dates,
+            'active_shifts': active_shifts,
+        })
+
+    return render(
+        request,
+        'exam-schedule.html',
+        {
+            'timetable': timetable,
+            'classes': classes,
+        }
+    )
+
+
+# =========================================================
+# SAVE EXAM SCHEDULE
+# =========================================================
+
+def save_exam_schedule(request):
+
+    if request.method == 'POST':
+
+        date = request.POST.get('date')
+        shift = request.POST.get('shift')
+        student_class_id = request.POST.get('student_class')
+        subject = request.POST.get('subject', '').strip()
+
+        # -----------------------------------------
+        # VALIDATION
+        # -----------------------------------------
+
+        if not date or not shift or not student_class_id:
+            return redirect('exam_timetable')
+
+        student_class = get_object_or_404(
+            StudentClass,
+            id=student_class_id
+        )
+
+        # -----------------------------------------
+        # GET EXISTING SLOT OR CREATE NEW SLOT
+        #
+        # Same Date + Shift = SAME ExamSlot
+        # -----------------------------------------
+
+        slot, created = ExamSlot.objects.get_or_create(
+            date=date,
+            shift=shift
+        )
+
+        # -----------------------------------------
+        # CREATE / UPDATE CLASS SCHEDULE
+        #
+        # Same slot + same class = one record
+        # -----------------------------------------
+
+        ExamSchedule.objects.update_or_create(
+            slot=slot,
+            student_class=student_class,
+            defaults={
+                'subject': subject
+            }
+        )
+
+        return redirect('exam_timetable')
+
+    return redirect('exam_timetable')

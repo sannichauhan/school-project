@@ -8,6 +8,7 @@ from .models import BaseFeeStructure, FeeLedger, FeeInstallmentStructure
 from student.models import Student, AcademicSession, StudentEnrollment
 from django.db import transaction
 from django.db.models.signals import post_save
+from django.db.models import Sum, F
 
 def calculate_transport_fee(student: Student, academic_year):
     if student.conveyance_facility and student.transport_route:
@@ -26,25 +27,79 @@ def calculate_transport_fee(student: Student, academic_year):
                 total_amount=transport_inst_amount,
                 due_date=academic_year.start_date + timedelta(days=t_intervals[j])
             )
+            
+def calculate_clean_installment(total_fee, total_installment=3, standard_installment=2500):
+    array_installments = []
+    
+    distribution = total_fee - (standard_installment * (total_installment - 1))
+    if distribution < standard_installment:
+        if total_fee <= standard_installment:
+            array_installments.append(total_fee)
+            for _ in range(total_installment - 1):
+                array_installments.append(0.0)
+            return tuple(array_installments)
+        
+        distribution = standard_installment
+        array_installments.append(distribution)
+        
+        remaining_fee = total_fee - distribution
+        rest_installments = remaining_fee / (total_installment - 1)
+        if distribution < rest_installments:
+            distribution = total_fee / total_installment + 100
+            array_installments = [distribution]
+            rest_installments = (total_fee - distribution) / (total_installment - 1)
+            
+        for _ in range(total_installment - 1):
+            array_installments.append(rest_installments)
+            
+        return tuple(array_installments)
+    array_installments.append(distribution)
+    if total_installment == 1:
+        rest_installments = 0
+    else:
+        rest_installments = (total_fee - distribution) / (total_installment - 1)
+    for i in range(total_installment - 1):
+        array_installments.append(rest_installments)
+        
+    return tuple(array_installments)
+
 def create_fee_schedule_for_student(student, academic_year):
-    """
-    Kee bhi student ke liye specified Academic Year ka poora bill table ready karna.
-    """
+
     transport = student.ledgers.filter(category='TRANSPORT')
     # Purane schedules ko duplicate hone se rokne ke liye safety check
-    if FeeLedger.objects.filter(student=student, academic_year=academic_year).exists() and transport:
+    if FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists() and transport:
         return
-    elif student.conveyance_facility and FeeLedger.objects.filter(student=student, academic_year=academic_year).exists():
+    elif student.conveyance_facility and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
         calculate_transport_fee(student, academic_year)
         return
+    elif not student.conveyance_facility  and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
+        return
 
-
-    # 1. Fetch custom installment structure for this specific class
+    # current_enrollment = StudentEnrollment.objects.filter(
+    #         student=student,
+    #         academic_year__start_date__lt=academic_year.start_date
+    #     ).order_by('-academic_year').first()
     
-    installments = FeeInstallmentStructure.objects.filter(
-        academic_year=academic_year,
-        standard=student.current_class
-    ).order_by('installment_number')
+    # previous_dues = 0.00
+    
+    # if current_enrollment:
+    #     old_session = current_enrollment.academic_year
+    #     unpaid_ledgers = FeeLedger.objects.filter(
+    #         student=student,
+    #         academic_year=old_session,
+    #         status__in=['PENDING', 'PARTIALLY_PAID']
+    #     )
+    #     for ledger in unpaid_ledgers:
+    #         previous_dues += float(ledger.remaining_amount)
+        
+    #     current_enrollment.is_active = False
+    #     current_enrollment.save()
+
+    base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
+    if student.medium:
+        base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class, medium=student.medium)
+    total_academic_fee = sum(fee.total_amount for fee in base_fees)
+    
     
 
     total_academic_fee = 0
@@ -74,9 +129,19 @@ def create_fee_schedule_for_student(student, academic_year):
             intervals = [0, 120, 240]
         else: # QUARTERLY
             intervals = [0, 90, 180, 270]
-
+        
+        admission_class = student.admission_class
+        current_class = student.current_class
+        if admission_class and current_class and admission_class.serial < current_class.serial:
+            promotional_discount = current_class.promotional_discount or 0.0
+            total_academic_fee_after_discount = (total_academic_fee - promotional_discount)
+            
+            installments = calculate_clean_installment(total_academic_fee_after_discount, len(intervals))
+        else:
+            
+            installments = calculate_clean_installment(total_academic_fee, len(intervals))
+        
         inst_count = len(intervals)
-        academic_inst_amount = Decimal(total_academic_fee) / inst_count
 
         for i in range(inst_count):
             FeeLedger.objects.create(
@@ -85,7 +150,7 @@ def create_fee_schedule_for_student(student, academic_year):
                 installment_number=i + 1,
                 category='ACADEMIC',
                 description=f"Academic Fee - Installment {i + 1} ({student.get_fee_type_display()})",
-                total_amount=academic_inst_amount,
+                total_amount=installments[i],
                 due_date=academic_year.start_date + timedelta(days=intervals[i])
             )
 
@@ -105,7 +170,7 @@ def promote_student_with_ledger(student, target_class, new_session):
         current_enrollment = StudentEnrollment.objects.filter(
             student=student, 
             is_active=True,
-            to_class__serial__lte=target_class.serial
+            academic_year__lte=new_session
         ).first()
         fee.signals.pre_save.disconnect(auto_ledger_for_promoted_student, sender=StudentEnrollment)
         previous_dues = 0.00
@@ -135,9 +200,38 @@ def promote_student_with_ledger(student, target_class, new_session):
                 due_date=datetime.datetime.now(),
                 status='PENDING'
             )
+        create_fee_schedule_for_student(student, new_session)
         fee.signals.pre_save.connect(auto_ledger_for_promoted_student, sender=StudentEnrollment)
         # return new_enrollment
         
+def create_ledger_for_student(student, new_academic_year, old_academic_year=None):
+    total_due = get_student_due(student)
+    deactivate_old_ledgers(student, old_academic_year)
+    create_fee_schedule_for_student(student, new_academic_year)
+    if total_due > 0:
+        FeeLedger.objects.create(   
+                student=student,
+                academic_year=new_academic_year,
+                installment_number=0,
+                category='ACADEMIC',
+                description=f"Carried Forward Dues",
+                total_amount=total_due,
+                due_date=datetime.datetime.now(),
+                status='PENDING'
+            )
+def deactivate_old_ledgers(student, old_session):
+    FeeLedger.objects.filter(student=student, academic_year=old_session).update(status='INACTIVE')
+    
+def get_student_due(student):
+    total_due = FeeLedger.objects.filter(
+        student=student,
+        status__in=['PENDING', 'PARTIALLY_PAID'],
+    ).aggregate(
+        total=Sum(F('total_amount') - F('paid_amount'))
+    )['total'] or 0
+
+    return total_due
+
 def brand_new_enrollment(student, target_class, new_session):
     """
     Creates a new enrollment for the student in the target class and session.
@@ -150,4 +244,7 @@ def brand_new_enrollment(student, target_class, new_session):
         is_active=True,
         status='ACTIVE'
     )
+    # create_ledger_for_student(student, new_session)
     return new_enrollment
+
+    

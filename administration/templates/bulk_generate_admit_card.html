@@ -1,0 +1,120 @@
+{% extends 'base4.html' %} 
+
+{% block content %}
+    <div id="wrapper" class="wrapper bg-ash">
+        {% include "tags/header.html" %}
+        
+        <div class="dashboard-page-one">
+            {% include "tags/sidebar.html" %}
+            
+            <div class="dashboard-content-one">
+                {% include "tags/breadcrumb.html" %}
+
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>{{page_title}}</h3>
+                            </div>
+                        </div>
+
+                        <div>
+
+            {% if messages %}
+                {% for message in messages %}
+
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Academic Session</label>
+                        {{ form.session }}
+                        {% if form.session.errors %}
+                            <div class="text-danger">
+                                {{ form.session.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+                        <label>Exam Type</label>
+                        {{ form.exam_type }}
+                        {% if form.exam_type.errors %}
+                            <div class="text-danger">
+                                {{ form.exam_type.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+                        <label>Select Class</label>
+                        {{ form.student_class }}
+                        {% if form.student_class.errors %}
+                            <div class="text-danger">
+                                {{ form.student_class.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="col-md-3 mb-3">
+                        <label>Exam Start Date</label>
+                        {{ form.exam_start_date }}
+                    </div>
+
+
+                    <div class="col-md-3 mb-3">
+                        <label>Exam End Date</label>
+                        {{ form.exam_end_date }}
+                    </div>
+
+
+                    <div class="col-md-12 mb-3">
+                        <label>Remarks</label>
+                        {{ form.remarks }}
+                    </div>
+
+                </div>
+
+
+                <div class="mt-3">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg"
+                        onclick="return confirm('Are you sure you want to generate Admit Cards for all students of this class?');">
+
+                        <i class="fa fa-id-card"></i>
+                        Generate Bulk Admit Cards
+
+                    </button>
+
+                    
+
+                </div>
+
+            </form>
+
+        </div>
+
+                        
+                    </div>
+                </div>
+                {% include "tags/footer.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+

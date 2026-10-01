@@ -30,8 +30,9 @@ class StudentAllInOneForm(forms.ModelForm):
     class Meta:
         model = Student
         # We exclude the address fields because we handle them as separate form instances
-        exclude = ['permanent_address', 'local_address', 'created_at', 'roll_number', 'section']
+        exclude = ['permanent_address', 'local_address', 'created_at', 'section']
         widgets = {
+            'roll_number': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_class': forms.Select(attrs={'class': 'select2'}),
             'current_class': forms.Select(attrs={'class': 'select2'}),
@@ -40,6 +41,7 @@ class StudentAllInOneForm(forms.ModelForm):
             'gender': forms.Select(attrs={'class': 'select2'}),
             'religion': forms.Select(attrs={'class': 'select2'}),
             'category': forms.Select(attrs={'class': 'select2'}),
+            'medium': forms.Select(attrs={'class': 'select2'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control'}),
             'mother_name': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control'}),
@@ -60,13 +62,36 @@ class StudentAllInOneForm(forms.ModelForm):
 class StudentClassForm(forms.ModelForm):
     class Meta:
         model = StudentClass
-        fields = ['name']
+        fields = ['name', 'serial', 'promotional_discount']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'e.g. Class 10, Nursery, Grade 1'
             }),
+            'serial': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. 1, 2, 3'
+            }),
+            'promotional_discount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g. 10, 20, 30'
+            }),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # We inject a display:block style to force it to a new line safely
+        if 'promotional_discount' in self.fields:
+            self.fields['promotional_discount'].help_text = (
+                '<small style="display: block; margin-top: 4px; color: #6c757d;">'
+                'Flat discount applied to students promoted INTO this class.'
+                '</small>'
+            )
+        if 'serial' in self.fields:
+            self.fields['serial'].help_text = (
+                '<small style="display: block; margin-top: 4px; color: #6c757d;">'
+                'For ordering classes in the admin interface.'
+                '</small>'
+            )
         
 class SectionForm(forms.ModelForm):
     class Meta:

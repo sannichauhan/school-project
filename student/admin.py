@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from fee.models import FeeLedger
 from fee.services import promote_student_with_ledger
-from .models import Section, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
+from .models import Section, Medium, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .forms import AcademicSessionForm
 
 # --- Inlines for a better UI ---
@@ -106,8 +106,8 @@ class FeeLedgerInline(admin.TabularInline):
     
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name','roll_number', 'admission_class', 'contact_number', 'gender', 'created_at', 'current_class', 'current_session')
-    list_filter = ('admission_class', 'gender', 'religion')
+    list_display = ('name','roll_number', 'admission_class','current_class', 'medium', 'contact_number', 'gender', 'created_at', 'current_session')
+    list_filter = ('current_class', 'gender', 'religion')
     search_fields = ('name', 'adhaar_number', 'contact_number')
     actions = ['bulk_promote_to_next_class']
     inlines = [FeeLedgerInline]
@@ -143,7 +143,7 @@ class StudentAdmin(admin.ModelAdmin):
             'fields': ('name', 'student_photo', 'date_of_birth', 'gender', 'religion', 'category', 'adhaar_number', 'pen_number')
         }),
         ('Academic & Contact', {
-            'fields': ('admission_class','section', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility','transport_route')
+            'fields': ('admission_class', 'current_class', 'section', 'contact_number', 'father_name', 'mother_name', 'last_institution', 'session', 'choose_school', 'conveyance_facility','transport_route')
         }),
         ('Addresses', {
             'fields': ('permanent_address', 'local_address')
@@ -201,3 +201,7 @@ def perform_promotion(modeladmin, request, queryset):
 class StudentEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'from_class', 'to_class', 'academic_year', 'is_active')
     actions = [perform_promotion]
+
+@admin.register(Medium)
+class MediumStudent(admin.ModelAdmin):
+    list_display = ('medium_name','created_at')

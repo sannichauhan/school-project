@@ -1782,13 +1782,7 @@ ul {
   margin-left: -1rem;
 }
 
-@media only screen and (max-width: 767px) {
-  .nav-bar-header-one {
-    display: block;
-    text-align: center;
-    min-width: 20rem;
-  }
-}
+
 
 .nav-bar-header-one .header-logo {
   padding-left: 10px;
@@ -6226,7 +6220,7 @@ ul {
   object-fit: cover;
 }
 .student_photo img {
-  height: 50px;
+  height: auto;
   border-radius: 50%;
   width: 50px;
   object-fit: cover;
@@ -6335,4 +6329,37 @@ ul {
   width: 140px;
   height: 140px;
   object-fit: cover;
+}
+.basicsFont {
+  font-size: 18px;
+  line-height: 30px;
+  font-weight: 700;
+}
+table.allStudentList tbody tr td{
+  text-transform: uppercase;
+}
+@media only screen and (max-width: 767px) {
+  .nav-bar-header-one {
+    display: block;
+    text-align: center;
+    min-width: 30%;
+    background: #fff;
+  }
+  .sidebar-menu-one .mobile-sidebar-header .header-logo a {
+    padding: 6px 15px;
+  }
+  .sidebar-menu-one .mobile-sidebar-header .header-logo {
+    text-align: left;
+  }
+  .studentRegister .card-body {
+    padding: 15px;
+  }
+  .dataTables_wrapper .dataTables_paginate span a.paginate_button {
+    padding: 1px 10px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+  .dataTables_wrapper .dataTables_paginate span .paginate_button.current {
+    padding: 1px 10px;
+  }
 }

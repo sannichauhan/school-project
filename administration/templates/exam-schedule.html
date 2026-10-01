@@ -20,54 +20,86 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <thead class="table-secondary">
-                <tr>
-                    <th rowspan="3" style="width: 5%;">S.N.</th>
-                    <th rowspan="3" style="width: 12%;">Date</th>
-                    <th rowspan="3" style="width: 12%;">Day</th>
-                    <th colspan="2" class="text-center">Nursery/U.K.G.</th>
-                    <th colspan="2" class="text-center">I<sup>st</sup> to VIII<sup>th</sup></th>
-                </tr>
-                <tr>
-                    <th colspan="2" class="text-center text-primary py-1">Subject</th>
-                    <th colspan="2" class="text-center text-primary py-1">Subject</th>
-                </tr>
-                <tr>
-                    <th>I Shift <div class="shift-time">8:45AM-11:55AM</div></th>
-                    <th>II Shift <div class="shift-time">12:15PM-2:45PM</div></th>
-                    <th>I Shift <div class="shift-time">8:45AM-11:55AM</div></th>
-                    <th>II Shift <div class="shift-time">12:15PM-2:45PM</div></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in timetable %}
-                <tr>
-                    <td>{{ forloop.counter }}.</td>
-                    <td><strong>{{ row.date }}</strong></td>
-                    <td>{{ row.day }}</td>
-                    
-                    <td class="{% if row.nursery_shift_1 == 'Study' %}study-text{% endif %}">
-                        {{ row.nursery_shift_1 }}
-                    </td>
-                    <td class="{% if row.nursery_shift_2 == 'Study' %}study-text{% endif %}">
-                        {{ row.nursery_shift_2 }}
-                    </td>
-                    
-                    <td class="{% if row.primary_shift_1 == 'Study' %}study-text{% endif %}">
-                        {{ row.primary_shift_1 }}
-                    </td>
-                    <td class="{% if row.primary_shift_2 == 'Study' %}study-text{% endif %}">
-                        {{ row.primary_shift_2 }}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">No examination schedule records found.</td>
-                </tr>
+        {% for class_data in timetable %}
+
+<div class="class-timetable">
+
+    <h4 class="mb-3">
+        Class: {{ class_data.class_name }}
+    </h4>
+
+    <table class="table table-bordered">
+
+        <thead>
+            <tr>
+
+                <th>S.No.</th>
+
+                <th>Date</th>
+
+                <th>Day</th>
+
+                {% for shift in class_data.active_shifts %}
+
+                    <th>
+                        Shift {{ shift }}
+                    </th>
+
                 {% endfor %}
-            </tbody>
-        </table>
+
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for row in class_data.dates %}
+
+                <tr>
+
+                    <td>
+                        {{ forloop.counter }}
+                    </td>
+
+                    <td>
+                        {{ row.date|date:"d-m-Y" }}
+                    </td>
+
+                    <td>
+                        {{ row.day }}
+                    </td>
+
+                    {% for subject in row.shifts %}
+
+                        <td
+                            class="{% if subject == 'Study' %}study-text{% endif %}"
+                        >
+                            {{ subject }}
+                        </td>
+
+                    {% endfor %}
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td
+                        colspan="100%"
+                        class="text-center"
+                    >
+                        No schedule found.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endfor %}
     </div>
 
     <div class="mt-4 p-3 border rounded bg-light">

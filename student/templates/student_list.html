@@ -23,32 +23,33 @@
                                 <h3>{{page_title}}</h3>
                             </div>
                         </div>
-                        <form class="mg-b-20">
+                        <form method="GET" action="" class="mg-b-20">
                             <div class="row gutters-8">
-                                <div class="col-3-xxxl col-xl-3 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Roll ..." class="form-control">
+                                <div class="col-5-xxxl col-xl-6 col-lg-6 col-12 form-group">
+                                    <input type="text" name="class_name" placeholder="Search by Class ..." value="{{ search_class }}" class="form-control">
                                 </div>
-                                <div class="col-4-xxxl col-xl-4 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Name ..." class="form-control">
+                                <div class="col-5-xxxl col-xl-6 col-lg-6 col-12 form-group">
+                                    <input type="text" name="name" placeholder="Search by Name ..." value="{{ search_name }}" class="form-control">
                                 </div>
-                                <div class="col-4-xxxl col-xl-3 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Class ..." class="form-control">
-                                </div>
-                                <div class="col-1-xxxl col-xl-2 col-lg-3 col-12 form-group">
+                               
+                                <div class="col-2-xxxl col-xl-2 col-lg-3 col-12 form-group">
                                     <button type="submit" class="fw-btn-fill btn-gradient-yellow">SEARCH</button>
                                 </div>
                             </div>
                         </form>
+
+                        
                         
                         <div class="table-responsive">
-                            <table class="table display data-table text-nowrap">
+                            <table class="table display data-table text-nowrap allStudentList">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
+                                        <th>#</th>                                        
                                         <th>Photo</th>
-                                        <th>Name</th>
+                                        <th>Name</th>                                        
                                         <th>Gender</th>
                                         <th>Class</th>
+                                        <th>Roll Number</th>
                                         <th>Date of Birth</th>
                                         <th>Father' Name</th>                                        
                                         <th>Contact Number</th>
@@ -59,7 +60,7 @@
                                 <tbody>
                                     {% for student in students %}
                                 <tr>
-                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ forloop.counter }}</td>                                    
                                     <td class="student_photo">
                                         {% if student.student_photo %}
                                             <img
@@ -71,10 +72,11 @@
                                         {% else %}
                                             <img src="/media/teachers/student2.png" alt="teacher" width="50" height="50">
                                         {% endif %}
-                                    </td>
-                                    <td>{{ student.name }}</td>
+                                    </td>                                    
+                                    <td>{{ student.name }}</td>                                    
                                     <td>{{ student.gender }}</td>
-                                    <td>{{ student.admission_class }}</td>
+                                    <td>{{ student.current_class }}</td>
+                                    <td>{{ student.roll_number }}</td>
                                     <td>{{ student.date_of_birth|date:"d/m/Y" }}</td>
                                     <td>{{ student.father_name }}</td>                                    
                                     <td>{{ student.contact_number }}</td>
@@ -84,7 +86,7 @@
                                             <a href="{% url 'student-details' student.pk %}" class="btn btn-sm btn-info">Details</a>
                                             <a href="{% url 'student-update' student.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                             <a href="{% url 'student_fee_dashboard' student.pk %}" class="btn btn-sm btn-warning">Fee</a>
-                                            <a class="bi bi-clock fs-3 text-warning"></a>
+                                            <a href="{% url 'student_history' student.pk %}" class="bi bi-clock fs-3 text-warning"></a>
                                         {% endif %}
                                     </td>
                                 </tr>

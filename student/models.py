@@ -22,15 +22,49 @@ class AcademicSession(models.Model):
     
     class  Meta:
         unique_together = ("start_date", "end_date")
+        
+    # --- COMPARISON METHODS ---
+
+    def __lt__(self, other):
+        """Checks if this session happens BEFORE another session."""
+        if not isinstance(other, AcademicSession):
+            return NotImplemented
+        return self.start_date < other.start_date
+
+    def __gt__(self, other):
+        """Checks if this session happens AFTER another session."""
+        if not isinstance(other, AcademicSession):
+            return NotImplemented
+        return self.start_date > other.start_date
+
+    @property
+    def duration_in_days(self):
+        """Calculates the total days in this academic session."""
+        if self.start_date and self.end_date:
+            return (self.end_date - self.start_date).days
+        return 0
+
+    def clean(self):
+        """Prevents bad data where end date is before start date."""
+        super().clean()
+        if self.start_date and self.end_date and self.start_date >= self.end_date:
+            raise ValidationError("The session end date must be after the start date.")
 
 class StudentClass(models.Model):
     """Represents a grade level/class (e.g., Grade 1, Nursery A)"""
     name = models.CharField(max_length=50)
     serial = models.PositiveIntegerField(default=0, help_text="For ordering classes in the admin interface")
+    promotional_discount = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00, 
+        help_text="Flat discount applied to students promoted INTO this class."
+    )
 
     class Meta:
         verbose_name = "Class"
         verbose_name_plural = "Classes"
+        ordering = ['serial']
 
     def __str__(self):
         return f"{self.name}".strip()
@@ -63,7 +97,13 @@ class TransportRoute(models.Model):
 
     def __str__(self):
         return self.route_name
+
+class Medium(models.Model):
+    medium_name = models.CharField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
     
+    def __str__(self):
+        return self.medium_name
 
 class Student(models.Model):
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')]
@@ -76,22 +116,23 @@ class Student(models.Model):
     ]
     SCHOOL_CHOICES = [
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
-        ('KAUSHALYA DEVI GIRLS NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
+        ('K. D. G. NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
     FEE_TYPE_CHOICES = [
-        ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), ('THRICE','Thrice'),
+        ('THRICE','Thrice'), ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), 
     ]
     TRANSPORT_INSTALLMENT_CHOICES = [
         ('1_INSTALLMENT', 'Single Installment'), ('2_INSTALLMENT', 'Two Installments'),
     ]
 
     # Identity & Basic Info
+    roll_number = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
     religion = models.CharField(max_length=20, choices=RELIGION_CHOICES)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)
-    
+    medium = models.ForeignKey(Medium, on_delete=models.CASCADE, null=True, default=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, null=True, blank=True)    
     adhaar_number = models.CharField(
         max_length=12, unique=True, blank=True, null=True,
         validators=[RegexValidator(regex=r'^\d{12}$', message="Aadhaar must be 12 digits")]
@@ -101,7 +142,6 @@ class Student(models.Model):
     admission_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='students')
     current_class = models.ForeignKey('StudentClass', on_delete=models.PROTECT, related_name='current_students', null=True, blank=True)
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True, blank=True)
-    roll_number = models.IntegerField(default=0)
     
     # Family Info
     father_name = models.CharField(max_length=100)
@@ -124,7 +164,7 @@ class Student(models.Model):
     student_photo = models.ImageField(upload_to='students/', blank=True, null=True)
     conveyance_facility = models.BooleanField(default=False)
 
-    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='QUARTERLY')
+    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='THRICE')
     transport_route = models.ForeignKey('TransportRoute', on_delete=models.SET_NULL, null=True, blank=True)
     transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
 
@@ -140,7 +180,7 @@ class Student(models.Model):
             if last_student and last_student.roll_number:
                 self.roll_number = last_student.roll_number + 1
             else:
-                self.roll_number = 1001
+                self.roll_number = 1
 
         super().save(*args, **kwargs)
         

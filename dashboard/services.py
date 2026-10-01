@@ -23,13 +23,12 @@ def get_current_academic_total_fees_and_due():
         return 0, 0
 
     # 1. Calculate total scheduled fees
-    total_fees = FeeLedger.objects.filter(academic_year=active_session).aggregate(
+    total_fees = FeeLedger.objects.aggregate(
         total=Sum('total_amount')
     )['total'] or 0
     
     # 2. Calculate remaining due by subtracting paid_amount from total_amount dynamically
     total_due = FeeLedger.objects.filter(
-        academic_year=active_session, 
         status__in=['PENDING', 'PARTIALLY_PAID']
     ).aggregate(
         total=Sum(F('total_amount') - F('paid_amount'))

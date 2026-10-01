@@ -37,7 +37,7 @@ def bulk_promote_students_with_ledger(academic_year_id, from_class_id=None, stud
 
             previous_dues = 0.00
             current_enrollment = StudentEnrollment.objects.filter(
-                student=student, is_active=True
+                student=student, is_active=True, academic_year__start_date__lt=target_session.start_date
             ).first()
 
             if current_enrollment:
@@ -99,9 +99,9 @@ def bulk_promote_students_with_ledger(academic_year_id, from_class_id=None, stud
         if ledgers_to_create:
             FeeLedger.objects.bulk_create(ledgers_to_create)
 
-        # from fee.signals import auto_ledger_for_promoted_student
-        # for enrollment in enrollments_to_create:
-        #     # Signal function ko manually call kar rahe hain bypass/bulk ke baad aur recursion ka dar bhi nahi hai
-        #     auto_ledger_for_promoted_student(sender=StudentEnrollment, instance=enrollment, created=True)
+        from fee.signals import auto_ledger_for_promoted_student
+        for enrollment in enrollments_to_create:
+            # Signal function ko manually call kar rahe hain bypass/bulk ke baad aur recursion ka dar bhi nahi hai
+            auto_ledger_for_promoted_student(sender=StudentEnrollment, instance=enrollment, created=True)
 
     return len(enrollments_to_create)

@@ -1,0 +1,128 @@
+{% extends 'base2.html' %} {% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+{% endblock %} 
+{% block content %}
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Header Menu Area Start Here -->
+  {% include "tags/header.html" %}
+  <!-- Header Menu Area End Here -->
+
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+    <!-- Sidebar Area Start Here -->
+    {% include "tags/sidebar.html" %}
+    <!-- Sidebar Area End Here -->
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      {% include "tags/breadcrumb.html" %}
+
+      <div class="max-w bg-white p-6 rounded-lg shadow-md">
+        <!-- Header Profile Card -->
+        <div class="border-b border-gray-200 pb-4 mb-6">
+          <h1 class="text-2xl font-bold text-gray-900">
+            {{ student.get_full_name }}
+          </h1>
+          <p class="text-xxl text-gray-700 font-semibold mb-4">Student ID: #{{ student.id }} {{ student.name }}</p>
+          <div class="mt-2 flex gap-4 text-xxl">
+            <span
+              ><strong>Current Class:</strong> {{ student.current_class|default:"None" }}</span>
+            <span
+              ><strong>Current Session:</strong> {{ student.session|default:"None" }}</span>
+          </div>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-700">
+          Academic Journey & History
+        </h2>
+
+        {% if enrollments %}
+        <!-- Timeline Container -->
+        <div class="relative border-l border-gray-200 ml-3 space-y-8">
+          {% for enrollment in enrollments %}
+          <div class="relative pl-6">
+            <!-- Timeline Node Indicator dot -->
+            <span
+              class="absolute -left-2 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 ring-4 ring-white"
+            >
+              <span class="h-2 w-2 rounded-full bg-blue-600"></span>
+            </span>
+
+            <!-- Card Body -->
+            <div
+              class="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-xs"
+            >
+              <div
+                class="flex items-center justify-between mb-1 flex-wrap gap-2"
+              >
+                <span class="text-xxl font-semibold text-gray-900">
+                  {{ enrollment.academic_year.name }}
+                </span>
+
+                <!-- Status Badges -->
+                {% if enrollment.status == 'PROMOTED' %}
+                <span
+                  class="px-2 py-0.5 text-xl font-medium bg-green-100 text-green-800 rounded-full"
+                  >Promoted</span
+                >
+                {% elif enrollment.status == 'GRADUATED' %}
+                <span
+                  class="px-2 py-0.5 text-xxl font-medium bg-blue-100 text-blue-800 rounded-full"
+                  >Graduated</span
+                >
+                {% elif enrollment.status == 'WITHDRAWN' %}
+                <span
+                  class="px-2 py-0.5 text-xxl font-medium bg-red-100 text-red-800 rounded-full"
+                  >Withdrawn</span
+                >
+                {% endif %}
+              </div>
+
+              <!-- Class Movement logic -->
+              <div class="text-xxl text-gray-600 my-2 flex items-center gap-2">
+                {% if enrollment.from_class %}
+                <span class="font-medium text-gray-700"
+                  >{{ enrollment.from_class }}</span
+                >
+                {% else %}
+                <span class="italic text-gray-400">New Admission</span>
+                {% endif %}
+
+                <span class="text-gray-400">&rarr;</span>
+
+                <span class="font-medium text-blue-700"
+                  >{{ enrollment.to_class|default:"N/A" }}</span
+                >
+              </div>
+
+              <!-- Footer Details -->
+              <div class="text-xl text-gray-400 mt-2 flex justify-between">
+                <span
+                  >Processed on: {{ enrollment.enrollment_date|date:"M d, Y" }}</span
+                >
+                {% if not enrollment.is_active %}
+                <span class="text-amber-600 font-medium"
+                  >(Archived / Inactive Record)</span
+                >
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div
+          class="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200"
+        >
+          No enrollment history found for this student.
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Footer Area Start Here -->
+      {% include "tags/footer.html" %}
+      <!-- Footer Area End Here -->
+    </div>
+  </div>
+  <!-- Page Area End Here -->
+</div>
+{% endblock content %}

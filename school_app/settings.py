@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "administration",
     "frontend",
     "fee",
+    'django.contrib.humanize',
+    "exam",
 ]
 
 REST_FRAMEWORK = {
