@@ -118,10 +118,6 @@ class Student(models.Model):
         ('NAV CHETANA PUBLIC SCHOOL', 'NCPS'),
         ('K. D. G. NAV CHETANA PUBLIC J.H.S', 'KDGNCPS'),
     ]
-    MEDIUM_CHOICES = [
-        ('HINDI', 'Hindi Medium'),
-        ('ENGLISH', 'English Medium'),
-    ]
     FEE_TYPE_CHOICES = [
         ('THRICE','Thrice'), ('QUARTERLY', 'Quarterly'), ('HALF_YEARLY', 'Half Yearly'), ('YEARLY', 'Yearly'), 
     ]
