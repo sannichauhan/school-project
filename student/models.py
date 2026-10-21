@@ -562,6 +562,45 @@ class StudentPromotionLog(models.Model):
         # यह सुनिश्चित करता है कि जब बैकएंड या स्क्रिप्ट से ऑब्जेक्ट बने, तब भी clean() वैलिडेशन चले
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class StudentDemotionLog(models.Model):
+    """Logs the explicit transaction of moving students to a lower class or previous session"""
+    student = models.ForeignKey(
+        'Student', 
+        on_delete=models.CASCADE, 
+        related_name='demotions'
+    )
+    from_session = models.ForeignKey(
+        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_from'
+    )
+    to_session = models.ForeignKey(
+        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_to'
+    )
+    from_class = models.ForeignKey(
+        'StudentClass', on_delete=models.CASCADE, related_name='demoted_from'
+    )
+    to_class = models.ForeignKey(
+        'StudentClass', on_delete=models.CASCADE, related_name='demoted_to'
+    )
+    demoted_by = models.CharField(max_length=100, blank=True, null=True) 
+    demotion_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # Shows only the student name and the class they are demoted to
+        return f"Demoted: {self.student.name} -> Class: {self.to_class}"
+        
+    def clean(self):
+        super().clean()
+        # Logical validation: Can't demote to the exact same class and session
+        if self.from_session == self.to_session and self.from_class == self.to_class:
+            raise ValidationError("Source and target class cannot be the same for a demotion.")
+
+    def save(self, *args, **kwargs):
+        # Ensures validation runs when saved via script or backend
+        self.full_clean()
+        super().save(*args, **kwargs)
+        
         
 class StudentEnrollment(models.Model):
     STATUS_CHOICES = [

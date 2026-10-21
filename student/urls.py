@@ -8,7 +8,7 @@ from .views import (
     SubjectViewSet, ExamViewSet, MarkSheetViewSet, MarksViewSet, add_class_view, student_list_view, student_registration_view,
     student_report_card_view, student_details_view, update_student_view, add_student_marks_view, all_students_marksheet_view, 
     student_promotion_view, create_subject_view, subject_list_view, exam_list_view, exam_create_view, academic_session_list, 
-    academic_session_create, all_students_test_marksheet_view, test_report_card_view, student_history_view
+    academic_session_create, all_students_test_marksheet_view, test_report_card_view, student_history_view, get_student_details
 )
 
 
@@ -46,4 +46,5 @@ urlpatterns = [
     path('promote/', promote_students, name='promote_student_base'),
     path('academic-history/<int:student_id>/', student_history_view, name='student_history'),
     path('export-students/', export_students_by_class, name='export_students_by_class'),
+    path('get-student-details/', get_student_details, name='get_student_details'),
 ]

@@ -6,6 +6,7 @@ from fee.models import FeeLedger
 from fee.services import promote_student_with_ledger
 from .models import Section, Medium, StudentClass, Address, Student, StudentEnrollment, Subject, Exam, MarkSheet, Marks, AcademicSession
 from .forms import AcademicSessionForm
+from .models import StudentPromotionLog, StudentDemotionLog
 
 # --- Inlines for a better UI ---
 
@@ -205,3 +206,47 @@ class StudentEnrollmentAdmin(admin.ModelAdmin):
 @admin.register(Medium)
 class MediumStudent(admin.ModelAdmin):
     list_display = ('medium_name','created_at')
+
+
+
+
+@admin.register(StudentDemotionLog)
+class StudentDemotionLogAdmin(admin.ModelAdmin):
+    list_display = ('get_student_name', 'get_demoted_to_class', 'demoted_by', 'demotion_date')
+    list_filter = ('to_class', 'from_session', 'to_session', 'demotion_date')
+    search_fields = ('student__name', 'demoted_by')
+    readonly_fields = ('demotion_date',)
+
+    # Load custom JavaScript into the admin page
+    class Media:
+        js = ('admin/js/autofill_demotion.js',)
+
+    @admin.display(ordering='student__name', description='Student Name')
+    def get_student_name(self, obj):
+        return obj.student.name
+
+    @admin.display(ordering='to_class', description='Demoted To Class')
+    def get_demoted_to_class(self, obj):
+        return obj.to_class
+
+    def save_model(self, request, obj, form, change):
+        # Automatically record who performed the demotion if left blank
+        if not obj.demoted_by:
+            obj.demoted_by = request.user.username or request.user.get_full_name()
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(StudentPromotionLog)
+class StudentPromotionLogAdmin(admin.ModelAdmin):
+    list_display = ('get_student_name', 'get_promoted_to_class', 'promoted_by', 'promotion_date')
+    list_filter = ('to_class', 'from_session', 'to_session', 'promotion_date')
+    search_fields = ('student__name', 'promoted_by')
+    readonly_fields = ('promotion_date',)
+
+    @admin.display(ordering='student__name', description='Student Name')
+    def get_student_name(self, obj):
+        return obj.student.name
+
+    @admin.display(ordering='to_class', description='Promoted To Class')
+    def get_promoted_to_class(self, obj):
+        return obj.to_class

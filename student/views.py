@@ -7,6 +7,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from django.contrib import messages
+from django.http import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
 
 from django.db import transaction
 from .serializers import (
@@ -942,3 +944,20 @@ def export_students_by_class(request):
     
     wb.save(response)
     return response
+
+@staff_member_required
+def get_student_details(request):
+    student_id = request.GET.get('student_id')
+    if not student_id:
+        return JsonResponse({'error': 'No student selected'}, status=400)
+    
+    try:
+        student = Student.objects.get(pk=student_id)
+        # Adjust field names below based on your Student model attributes:
+        data = {
+            'session_id': student.current_session.id if hasattr(student, 'current_session') and student.current_session else None,
+            'class_id': student.current_class.id if hasattr(student, 'current_class') and student.current_class else None,
+        }
+        return JsonResponse(data)
+    except Student.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
