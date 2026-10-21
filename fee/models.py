@@ -89,4 +89,35 @@ class Transaction(models.Model):
     payment_date = models.DateTimeField(auto_now_add=True)
     collected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     receipt_no = models.CharField(max_length=50, blank=True, null=True)
+
+
+from django.db import models
+
+class FeeInstallmentStructure(models.Model):
+    """
+    Stores installment structure for standard/class per academic year.
+    """
+    academic_year = models.ForeignKey(
+        'student.AcademicSession',  # <-- यहाँ अपनी app का नाम आगे जोड़ें (जैसे 'student.AcademicSession')
+        on_delete=models.CASCADE,
+        related_name='installment_structures'
+    )
+    standard = models.ForeignKey(
+        'student.StudentClass',     # <-- यहाँ भी अपनी app का नाम आगे जोड़ें (जैसे 'student.StudentClass')
+        on_delete=models.CASCADE,
+        related_name='installment_structures'
+    )
+    installment_number = models.PositiveIntegerField(help_text="Installment number (e.g. 1, 2, 3)")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    days_from_start = models.PositiveIntegerField(
+        default=0, 
+        help_text="Days from session start date for due date calculation"
+    )
+
+    class Meta:
+        ordering = ['academic_year', 'standard', 'installment_number']
+        unique_together = ('academic_year', 'standard', 'installment_number')
+
+    def __str__(self):
+        return f"{self.standard} - Inst {self.installment_number} ({self.amount})"
     

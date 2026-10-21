@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FeeHead, BaseFeeStructure, StudentFeeAllocation, FeeLedger, Transaction
+from .models import FeeHead, BaseFeeStructure, StudentFeeAllocation, FeeLedger, Transaction, FeeInstallmentStructure
 from student.models import TransportRoute, Medium
 
 @admin.register(FeeHead)
