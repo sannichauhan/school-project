@@ -99,7 +99,7 @@ class TransportRoute(models.Model):
         return self.route_name
 
 class Medium(models.Model):
-    medium_name = models.CharField(null=True, blank=True)
+    medium_name = models.CharField(null=True, max_length=50, unique=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     
     def __str__(self):
