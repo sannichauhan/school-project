@@ -77,7 +77,7 @@ def create_fee_schedule_for_student(student, academic_year):
 
     # current_enrollment = StudentEnrollment.objects.filter(
     #         student=student,
-    #         academic_year__start_date__lt=academic_year.start_date
+    #         academic_year_start_date_lt=academic_year.start_date
     #     ).order_by('-academic_year').first()
     
     # previous_dues = 0.00
@@ -96,30 +96,10 @@ def create_fee_schedule_for_student(student, academic_year):
     #     current_enrollment.save()
 
     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
-    if student.medium:
-        base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class, medium=student.medium)
     total_academic_fee = sum(fee.total_amount for fee in base_fees)
     
     
 
-    total_academic_fee = 0
-    if installments.exists():
-        for inst in installments:
-            FeeLedger.objects.create(
-                student=student,
-                academic_year=academic_year,
-                installment_number=inst.installment_number,
-                category='ACADEMIC',
-                description=f"Academic Fee - Installment {inst.installment_number}",
-                total_amount=inst.amount,  # <--- Equal divide nahi hoga, exact amount ayega
-                due_date=academic_year.start_date + timedelta(days=inst.days_from_start)
-            )
-    else:
-        # Fallback Option: Agar kisi class ka custom data nahi mila, toh aapka purana equal division logic
-        base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
-        total_academic_fee = sum(fee.total_amount for fee in base_fees)
-
-    
     if total_academic_fee > 0:
         if student.fee_type == 'YEARLY':
             intervals = [0]

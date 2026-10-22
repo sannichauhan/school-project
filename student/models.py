@@ -535,31 +535,32 @@ class StudentPromotionLog(models.Model):
         related_name='promotions'
     )
     from_session = models.ForeignKey(
-        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_from'
+        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_from', null=True, blank=True
     )
     to_session = models.ForeignKey(
-        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_to'
+        'AcademicSession', on_delete=models.CASCADE, related_name='promotions_to', null=True, blank=True
     )
     from_class = models.ForeignKey(
-        'StudentClass', on_delete=models.CASCADE, related_name='promoted_from'
+        'StudentClass', on_delete=models.CASCADE, related_name='promoted_from', null=True, blank=True
     )
     to_class = models.ForeignKey(
-        'StudentClass', on_delete=models.CASCADE, related_name='promoted_to'
+        'StudentClass', on_delete=models.CASCADE, related_name='promoted_to', null=True, blank=True
     )
     promoted_by = models.CharField(max_length=100, blank=True, null=True) 
     promotion_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Promoted {self.student.name} to {self.to_class} ({self.to_session})"
+        student_name = self.student.name if self.student else "Student"
+        to_class_name = self.to_class.name if self.to_class else "Class"
+        return f"Promoted {student_name} to {to_class_name}"
         
     def clean(self):
         super().clean()
-        # लॉजिकल वैलिडेशन: पुराना और नया सेशन सेम नहीं हो सकता
-        if self.from_session == self.to_session:
-            raise ValidationError("Source (From) and target (To) sessions cannot be the same.")
+        if self.from_session and self.to_session:
+            if self.from_session == self.to_session:
+                raise ValidationError("Source (From) and target (To) sessions cannot be the same.")
 
     def save(self, *args, **kwargs):
-        # यह सुनिश्चित करता है कि जब बैकएंड या स्क्रिप्ट से ऑब्जेक्ट बने, तब भी clean() वैलिडेशन चले
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -572,32 +573,32 @@ class StudentDemotionLog(models.Model):
         related_name='demotions'
     )
     from_session = models.ForeignKey(
-        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_from'
+        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_from', null=True, blank=True
     )
     to_session = models.ForeignKey(
-        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_to'
+        'AcademicSession', on_delete=models.CASCADE, related_name='demotions_to', null=True, blank=True
     )
     from_class = models.ForeignKey(
-        'StudentClass', on_delete=models.CASCADE, related_name='demoted_from'
+        'StudentClass', on_delete=models.CASCADE, related_name='demoted_from', null=True, blank=True
     )
     to_class = models.ForeignKey(
-        'StudentClass', on_delete=models.CASCADE, related_name='demoted_to'
+        'StudentClass', on_delete=models.CASCADE, related_name='demoted_to', null=True, blank=True
     )
     demoted_by = models.CharField(max_length=100, blank=True, null=True) 
     demotion_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        # Shows only the student name and the class they are demoted to
-        return f"Demoted: {self.student.name} -> Class: {self.to_class}"
+        student_name = self.student.name if self.student else "Student"
+        to_class_name = self.to_class.name if self.to_class else "Class"
+        return f"Demoted: {student_name} -> Class: {to_class_name}"
         
     def clean(self):
         super().clean()
-        # Logical validation: Can't demote to the exact same class and session
-        if self.from_session == self.to_session and self.from_class == self.to_class:
-            raise ValidationError("Source and target class cannot be the same for a demotion.")
+        if self.from_session and self.to_session and self.from_class and self.to_class:
+            if self.from_session == self.to_session and self.from_class == self.to_class:
+                raise ValidationError("Source and target class cannot be the same for a demotion.")
 
     def save(self, *args, **kwargs):
-        # Ensures validation runs when saved via script or backend
         self.full_clean()
         super().save(*args, **kwargs)
         
