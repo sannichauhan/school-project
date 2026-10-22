@@ -11,14 +11,14 @@ def update_student_on_demotion(sender, instance, created, **kwargs):
         student.session = instance.to_session
         student.save(update_fields=['current_class', 'session'])
 
-        # History / Enrollment record automatically create karein
-        StudentEnrollment.objects.get_or_create(
+        # MultipleObjectsReturned se bachne ke liye update_or_create mein unique fields dein
+        StudentEnrollment.objects.update_or_create(
             student=student,
             academic_year=instance.to_session,
+            to_class=instance.to_class,
             defaults={
                 'from_class': instance.from_class,
-                'to_class': instance.to_class,
-                'status': 'WITHDRAWN'  # ya jo bhi status aap demotion ke liye chahein
+                'status': 'WITHDRAWN'
             }
         )
 
@@ -31,13 +31,13 @@ def update_student_on_promotion(sender, instance, created, **kwargs):
         student.session = instance.to_session
         student.save(update_fields=['current_class', 'session'])
 
-        # History / Enrollment record automatically create karein
-        StudentEnrollment.objects.get_or_create(
+        # MultipleObjectsReturned سے bachne ke liye update_or_create mein unique fields dein
+        StudentEnrollment.objects.update_or_create(
             student=student,
             academic_year=instance.to_session,
+            to_class=instance.to_class,
             defaults={
                 'from_class': instance.from_class,
-                'to_class': instance.to_class,
                 'status': 'PROMOTED'
             }
         )
