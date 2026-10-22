@@ -279,13 +279,11 @@ def update_student_view(request, pk):
             request.FILES,
             instance=student
         )
-
         perm_addr_form = AddressForm(
             request.POST,
             prefix='perm',
             instance=student.permanent_address
         )
-
         local_addr_form = AddressForm(
             request.POST,
             prefix='local',
@@ -297,7 +295,6 @@ def update_student_view(request, pk):
             and perm_addr_form.is_valid()
             and local_addr_form.is_valid()
         ):
-
             permanent_address = perm_addr_form.save()
             local_address = local_addr_form.save()
 
@@ -306,41 +303,30 @@ def update_student_view(request, pk):
             student_obj.local_address = local_address
             student_obj.save()
 
-            messages.success(
-                request,
-                "Student updated successfully!"
-            )
-
+            messages.success(request, "Student updated successfully!")
             return redirect('student-list')
-
-        else:
-            print("Student Errors:", form.errors)
-            print("Perm Errors:", perm_addr_form.errors)
-            print("Local Errors:", local_addr_form.errors)
-
     else:
         form = StudentAllInOneForm(instance=student)
-
         perm_addr_form = AddressForm(
             prefix='perm',
             instance=student.permanent_address
         )
-
         local_addr_form = AddressForm(
             prefix='local',
             instance=student.local_address
         )
 
-        context = {
-            "student_form": form,
-            "perm_addr_form": perm_addr_form,
-            "local_addr_form": local_addr_form,            
-            'page_title': 'Update Student Details',
-            'breadcrumbs': [
-                {'name': 'Home', 'url': '/'},
-                {'name': 'Update Student Details', 'url': ''},
-            ]
-        }
+    # Context ab har jagah (GET, ya failed POST) ke liye available rahega
+    context = {
+        "student_form": form,
+        "perm_addr_form": perm_addr_form,
+        "local_addr_form": local_addr_form,            
+        'page_title': 'Update Student Details',
+        'breadcrumbs': [
+            {'name': 'Home', 'url': '/'},
+            {'name': 'Update Student Details', 'url': ''},
+        ]
+    }
 
     return render(request, "registration_form.html", context)
 @login_required
