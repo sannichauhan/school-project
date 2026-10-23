@@ -19,7 +19,7 @@ from .serializers import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import StudentClass, Address, Student, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession
+from .models import StudentClass, Address, Student, StudentDemotionLog, Subject, Exam, MarkSheet, Marks, AcademicSession, AcademicSession
 from .forms import StudentAllInOneForm, AddressForm, StudentClassForm, SubjectForm, ExamForm, AcademicSessionForm, StudentPromotionForm
 
 
@@ -949,3 +949,59 @@ def get_student_details(request):
         return JsonResponse(data)
     except Student.DoesNotExist:
         return JsonResponse({'error': 'Student not found'}, status=404)
+
+
+@login_required
+def student_demotion_view(request, student_id):
+    # Ek hi baar mein safely student fetch karein ya 404/error handle karein
+    student = get_object_or_404(Student, id=student_id)
+    
+    if request.method == 'POST':
+        to_class_id = request.POST.get('to_class')
+        to_session_id = request.POST.get('to_session')
+        
+        to_class = get_object_or_404(StudentClass, id=to_class_id) if to_class_id else None
+        to_session = get_object_or_404(AcademicSession, id=to_session_id) if to_session_id else None
+        
+        try:
+            # 1. Create Demotion Log
+            demotion = StudentDemotionLog.objects.create(
+                student=student,
+                from_session=student.session,
+                from_class=student.current_class,
+                to_session=to_session,
+                to_class=to_class,
+                demoted_by=request.user.username or request.user.get_full_name()
+            )
+            
+            # 2. Update Student's Current Class and Session
+            student.current_class = to_class
+            if to_session:
+                student.session = to_session
+            student.save()
+            
+            messages.success(request, f"Student {student.name} successfully demoted to {to_class.name if to_class else 'New Class'}.")
+            return redirect('student_fee_dashboard', student_id=student.id)
+            
+        except Exception as e:
+            messages.error(request, f"Error processing demotion: {str(e)}")
+
+    classes = StudentClass.objects.all()
+    sessions = AcademicSession.objects.all()
+    
+    context = {
+        'student': student,
+        'classes': classes,
+        'sessions': sessions,
+    }
+    return render(request, 'demotion_form.html', context)
+
+
+@login_required
+def demotion_logs_list_view(request):
+    """Displays history of all student demotions"""
+    logs = StudentDemotionLog.objects.select_related(
+        'student', 'from_class', 'to_class', 'from_session', 'to_session'
+    ).all().order_by('-demotion_date')
+    
+    return render(request, 'demotion_list.html', {'logs': logs})

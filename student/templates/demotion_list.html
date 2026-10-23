@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Student Demotion Logs History</h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Student Name</th>
+                            <th>From Class</th>
+                            <th>Demoted To Class</th>
+                            <th>Session Change</th>
+                            <th>Demoted By</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td><strong>{{ log.student.name }}</strong></td>
+                            <td>{{ log.from_class.name|default:"--" }}</td>
+                            <td><span class="badge bg-danger">{{ log.to_class.name|default:"--" }}</span></td>
+                            <td>{{ log.from_session }} ➔ {{ log.to_session }}</td>
+                            <td>{{ log.demoted_by }}</td>
+                            <td>{{ log.demotion_date|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No demotion records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
