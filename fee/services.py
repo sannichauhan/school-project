@@ -63,43 +63,98 @@ def calculate_clean_installment(total_fee, total_installment=3, standard_install
         
     return tuple(array_installments)
 
-def create_fee_schedule_for_student(student, academic_year):
+# def create_fee_schedule_for_student(student, academic_year):
 
-    transport = student.ledgers.filter(category='TRANSPORT')
-    # Purane schedules ko duplicate hone se rokne ke liye safety check
-    if FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists() and transport:
-        return
-    elif student.conveyance_facility and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
-        calculate_transport_fee(student, academic_year)
-        return
-    elif not student.conveyance_facility  and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
-        return
+#     transport = student.ledgers.filter(category='TRANSPORT')
+#     # Purane schedules ko duplicate hone se rokne ke liye safety check
+#     if FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists() and transport:
+#         return
+#     elif student.conveyance_facility and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
+#         calculate_transport_fee(student, academic_year)
+#         return
+#     elif not student.conveyance_facility  and FeeLedger.objects.filter(student=student, academic_year=academic_year).exclude(description__icontains='Carried Forward').exists():
+#         return
 
-    # current_enrollment = StudentEnrollment.objects.filter(
-    #         student=student,
-    #         academic_year_start_date_lt=academic_year.start_date
-    #     ).order_by('-academic_year').first()
     
-    # previous_dues = 0.00
+
+#     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
+#     total_academic_fee = sum(fee.total_amount for fee in base_fees)
     
-    # if current_enrollment:
-    #     old_session = current_enrollment.academic_year
-    #     unpaid_ledgers = FeeLedger.objects.filter(
-    #         student=student,
-    #         academic_year=old_session,
-    #         status__in=['PENDING', 'PARTIALLY_PAID']
-    #     )
-    #     for ledger in unpaid_ledgers:
-    #         previous_dues += float(ledger.remaining_amount)
+    
+
+#     if total_academic_fee > 0:
+#         if student.fee_type == 'YEARLY':
+#             intervals = [0]
+#         elif student.fee_type == 'HALF_YEARLY':
+#             intervals = [0, 180]
+#         elif student.fee_type == "THRICE":
+#             intervals = [0, 120, 240]
+#         else: # QUARTERLY
+#             intervals = [0, 90, 180, 270]
         
-    #     current_enrollment.is_active = False
-    #     current_enrollment.save()
+#         admission_class = student.admission_class
+#         current_class = student.current_class
+#         if admission_class and current_class and admission_class.serial < current_class.serial:
+#             promotional_discount = current_class.promotional_discount or 0.0
+#             total_academic_fee_after_discount = (total_academic_fee - promotional_discount)
+            
+#             installments = calculate_clean_installment(total_academic_fee_after_discount, len(intervals))
+#         else:
+            
+#             installments = calculate_clean_installment(total_academic_fee, len(intervals))
+        
+#         inst_count = len(intervals)
 
+#         for i in range(inst_count):
+#             FeeLedger.objects.create(
+#                 student=student,
+#                 academic_year=academic_year,
+#                 installment_number=i + 1,
+#                 category='ACADEMIC',
+#                 description=f"Academic Fee - Installment {i + 1} ({student.get_fee_type_display()})",
+#                 total_amount=installments[i],
+#                 due_date=academic_year.start_date + timedelta(days=intervals[i])
+#             )
+
+    
+#     calculate_transport_fee(student, academic_year)
+
+def create_fee_schedule_for_student(student, academic_year):
+    """
+    Creates or updates fee schedules for a student.
+    Academic ledgers are created once, but Transport ledgers update dynamically if route/facility changes.
+    """
+    
+    # 1. TRANSPORT FEE UPDATE LOGIC:
+    # Check karein ki transport par koi payment to nahi hua hai.
+    paid_transport_exists = FeeLedger.objects.filter(
+        student=student, 
+        academic_year=academic_year, 
+        category='TRANSPORT', 
+        paid_amount__gt=0
+    ).exists()
+
+    if not paid_transport_exists:
+        # Unpaid transport ledgers hata do taaki naya route/facility apply ho sake
+        FeeLedger.objects.filter(
+            student=student, 
+            academic_year=academic_year, 
+            category='TRANSPORT', 
+            paid_amount=0
+        ).delete()
+        
+        # Naye route ya facility ke hisaab se transport fee calculate karo
+        calculate_transport_fee(student, academic_year)
+
+    # 2. ACADEMIC FEE CHECK:
+    # Agar academic ledgers pehle se bane hain, to dobara academic fee generate mat karo
+    if FeeLedger.objects.filter(student=student, academic_year=academic_year, category='ACADEMIC').exists():
+        return
+
+    # 3. ACADEMIC FEE ALLOCATION (Agar pehle nahi bani thi)
     base_fees = BaseFeeStructure.objects.filter(academic_year=academic_year, standard=student.current_class)
     total_academic_fee = sum(fee.total_amount for fee in base_fees)
     
-    
-
     if total_academic_fee > 0:
         if student.fee_type == 'YEARLY':
             intervals = [0]
@@ -115,10 +170,8 @@ def create_fee_schedule_for_student(student, academic_year):
         if admission_class and current_class and admission_class.serial < current_class.serial:
             promotional_discount = current_class.promotional_discount or 0.0
             total_academic_fee_after_discount = (total_academic_fee - promotional_discount)
-            
             installments = calculate_clean_installment(total_academic_fee_after_discount, len(intervals))
         else:
-            
             installments = calculate_clean_installment(total_academic_fee, len(intervals))
         
         inst_count = len(intervals)
@@ -133,9 +186,6 @@ def create_fee_schedule_for_student(student, academic_year):
                 total_amount=installments[i],
                 due_date=academic_year.start_date + timedelta(days=intervals[i])
             )
-
-    # 2. Transport Fee Allocation
-    calculate_transport_fee(student, academic_year)
     
             
 def promote_student_with_ledger(student, target_class, new_session):

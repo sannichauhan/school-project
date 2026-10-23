@@ -329,6 +329,8 @@ def update_student_view(request, pk):
     }
 
     return render(request, "registration_form.html", context)
+
+    
 @login_required
 def add_student_marks_view(request):
 

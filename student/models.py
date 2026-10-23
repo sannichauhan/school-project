@@ -166,7 +166,7 @@ class Student(models.Model):
 
     fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='THRICE')
     transport_route = models.ForeignKey('TransportRoute', on_delete=models.SET_NULL, null=True, blank=True)
-    transport_installment_type = models.CharField(max_length=20, choices=TRANSPORT_INSTALLMENT_CHOICES, null=True, blank=True)
+    transport_installment_type = models.CharField(max_length=50, choices=TRANSPORT_INSTALLMENT_CHOICES, default='2_INSTALLMENT', blank=True,null=True)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
